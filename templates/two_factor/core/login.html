@@ -9,7 +9,7 @@
   <div style="flex:1;background:linear-gradient(135deg,var(--nova-bg-card) 0%,var(--nova-bg-card2) 100%);border-right:1px solid var(--nova-border);padding:60px 40px;display:flex;flex-direction:column;justify-content:center;" class="d-none d-lg-flex">
     <div style="max-width:420px;">
       <a href="{% url 'core:home' %}" style="display:flex;align-items:center;gap:12px;margin-bottom:60px;text-decoration:none;">
-        <div style="width:40px;height:40px;background:linear-gradient(135deg,#0066FF,#00D4AA);border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:900;color:#fff;font-size:18px;">N</div>
+        <img src="{% static 'images/nova_capital.png' %}" alt="Nova Capital Group" style="width:40px;height:40px;object-fit:contain;border-radius:10px;">
         <div>
           <div style="font-size:14px;font-weight:700;color:#fff;">NOVA CAPITAL GROUP</div>
           <div style="font-size:10px;color:var(--nova-text-muted);letter-spacing:2px;">INVERSIONES GLOBALES</div>
@@ -111,3 +111,4 @@ function togglePwd(id, btn) {
 }
 </script>
 {% endblock %}
+

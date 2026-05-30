@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0066FF;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#00D4AA;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="grad2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0047CC;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#00A887;stop-opacity:1" />
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <!-- Background circle -->
+  <circle cx="100" cy="100" r="95" fill="url(#grad1)" opacity="0.15"/>
+  <!-- Outer ring -->
+  <circle cx="100" cy="100" r="90" fill="none" stroke="url(#grad1)" stroke-width="2" opacity="0.4"/>
+  <!-- Main hexagon shape -->
+  <polygon points="100,18 172,58 172,138 100,178 28,138 28,58" fill="url(#grad1)" opacity="0.2"/>
+  <polygon points="100,18 172,58 172,138 100,178 28,138 28,58" fill="none" stroke="url(#grad1)" stroke-width="2.5"/>
+  <!-- Inner N letter -->
+  <text x="100" y="125" font-family="Arial Black, sans-serif" font-size="90" font-weight="900"
+        text-anchor="middle" fill="url(#grad1)" filter="url(#glow)" opacity="0.95">N</text>
+  <!-- Chart bars decoration -->
+  <rect x="38" y="130" width="8" height="20" rx="2" fill="url(#grad1)" opacity="0.7"/>
+  <rect x="50" y="118" width="8" height="32" rx="2" fill="url(#grad1)" opacity="0.8"/>
+  <rect x="62" y="108" width="8" height="42" rx="2" fill="url(#grad1)" opacity="0.9"/>
+  <!-- Right side bars -->
+  <rect x="130" y="130" width="8" height="20" rx="2" fill="url(#grad2)" opacity="0.7"/>
+  <rect x="142" y="118" width="8" height="32" rx="2" fill="url(#grad2)" opacity="0.8"/>
+  <rect x="154" y="108" width="8" height="42" rx="2" fill="url(#grad2)" opacity="0.9"/>
+  <!-- Trend line -->
+  <polyline points="38,145 62,125 90,110 130,105 162,90" fill="none" stroke="#00D4AA" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.8"/>
+  <!-- Dot on trend -->
+  <circle cx="162" cy="90" r="4" fill="#00D4AA" filter="url(#glow)"/>
+</svg>

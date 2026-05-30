@@ -1,13 +1,18 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static humanize %}
 
 {% block body %}
 <div class="nova-layout">
 
-  <!-- SIDEBAR -->
+  <!-- ═══════════════════════════════════════════
+       SIDEBAR
+  ═══════════════════════════════════════════ -->
   <aside class="nova-sidebar" id="novaSidebar">
+
+    <!-- Logo -->
     <div class="sidebar-logo">
-      <div class="logo-icon">N</div>
+      <img src="{% static 'images/nova_capital.png' %}" alt="Nova Capital Group"
+           style="width:42px;height:42px;object-fit:contain;border-radius:10px;flex-shrink:0;">
       <div class="logo-text">
         <div class="logo-name">NOVA CAPITAL</div>
         <div class="logo-sub">GROUP</div>
@@ -15,105 +20,138 @@
     </div>
 
     <nav class="sidebar-nav">
-      <div class="nav-section-label">Principal</div>
 
-      <a href="{% url 'dashboard:index' %}" class="nav-item {% if request.resolver_match.namespace == 'dashboard' %}active{% endif %}">
+      <!-- PRINCIPAL -->
+      <div class="nav-section-label">Principal</div>
+      <a href="{% url 'dashboard:index' %}" data-label="Dashboard"
+         class="nav-item {% if request.resolver_match.namespace == 'dashboard' %}active{% endif %}">
         <span class="nav-icon"><i class="bi bi-grid-1x2-fill"></i></span>
         <span>Dashboard</span>
       </a>
 
+      <!-- MERCADOS -->
       <div class="nav-section-label">Mercados</div>
-
-      <a href="{% url 'markets:overview' %}" class="nav-item {% if request.resolver_match.namespace == 'markets' %}active{% endif %}">
+      <a href="{% url 'markets:overview' %}" data-label="Mercados"
+         class="nav-item {% if request.resolver_match.namespace == 'markets' %}active{% endif %}">
         <span class="nav-icon"><i class="bi bi-bar-chart-line-fill"></i></span>
         <span>Mercados</span>
       </a>
-
-      <a href="{% url 'trading:trading' %}" class="nav-item {% if request.resolver_match.namespace == 'trading' and request.resolver_match.url_name == 'trading' %}active{% endif %}">
+      <a href="{% url 'trading:trading' %}" data-label="Trading"
+         class="nav-item {% if request.resolver_match.namespace == 'trading' and request.resolver_match.url_name == 'trading' %}active{% endif %}">
         <span class="nav-icon"><i class="bi bi-graph-up-arrow"></i></span>
         <span>Trading</span>
       </a>
-
-      <a href="{% url 'trading:watchlist' %}" class="nav-item {% if request.resolver_match.url_name == 'watchlist' %}active{% endif %}">
+      <a href="{% url 'trading:watchlist' %}" data-label="Watchlist"
+         class="nav-item {% if request.resolver_match.url_name == 'watchlist' %}active{% endif %}">
         <span class="nav-icon"><i class="bi bi-star-fill"></i></span>
         <span>Watchlist</span>
         {% if watchlist_count %}<span class="nav-badge">{{ watchlist_count }}</span>{% endif %}
       </a>
 
+      <!-- PORTAFOLIO -->
       <div class="nav-section-label">Portafolio</div>
-
-      <a href="{% url 'portfolio:portfolio' %}" class="nav-item {% if request.resolver_match.namespace == 'portfolio' %}active{% endif %}">
+      <a href="{% url 'portfolio:portfolio' %}" data-label="Portafolio"
+         class="nav-item {% if request.resolver_match.namespace == 'portfolio' %}active{% endif %}">
         <span class="nav-icon"><i class="bi bi-briefcase-fill"></i></span>
         <span>Portafolio</span>
       </a>
-
-      <a href="{% url 'trading:order_history' %}" class="nav-item {% if request.resolver_match.url_name == 'order_history' %}active{% endif %}">
+      <a href="{% url 'trading:order_history' %}" data-label="Historial"
+         class="nav-item {% if request.resolver_match.url_name == 'order_history' %}active{% endif %}">
         <span class="nav-icon"><i class="bi bi-clock-history"></i></span>
         <span>Historial</span>
       </a>
 
+      <!-- FINANZAS -->
       <div class="nav-section-label">Finanzas</div>
-
-      <a href="{% url 'finances:finances' %}" class="nav-item {% if request.resolver_match.namespace == 'finances' %}active{% endif %}">
+      <a href="{% url 'finances:finances' %}" data-label="Finanzas"
+         class="nav-item {% if request.resolver_match.namespace == 'finances' %}active{% endif %}">
         <span class="nav-icon"><i class="bi bi-wallet2"></i></span>
         <span>Finanzas</span>
         {% if pending_transactions %}<span class="nav-badge">{{ pending_transactions }}</span>{% endif %}
       </a>
 
+      <!-- INFORMACIÓN -->
       <div class="nav-section-label">Información</div>
-
-      <a href="{% url 'news:news' %}" class="nav-item {% if request.resolver_match.namespace == 'news' %}active{% endif %}">
+      <a href="{% url 'news:news' %}" data-label="Noticias"
+         class="nav-item {% if request.resolver_match.namespace == 'news' %}active{% endif %}">
         <span class="nav-icon"><i class="bi bi-newspaper"></i></span>
         <span>Noticias</span>
       </a>
 
+      <!-- CUENTA -->
       <div class="nav-section-label">Cuenta</div>
-
-      <a href="{% url 'accounts:profile' %}" class="nav-item {% if request.resolver_match.url_name == 'profile' %}active{% endif %}">
+      <a href="{% url 'accounts:profile' %}" data-label="Perfil"
+         class="nav-item {% if request.resolver_match.url_name == 'profile' %}active{% endif %}">
         <span class="nav-icon"><i class="bi bi-person-fill"></i></span>
         <span>Perfil</span>
       </a>
-
-      <a href="{% url 'accounts:security' %}" class="nav-item {% if request.resolver_match.url_name == 'security' %}active{% endif %}">
+      <a href="{% url 'accounts:security' %}" data-label="Seguridad"
+         class="nav-item {% if request.resolver_match.url_name == 'security' %}active{% endif %}">
         <span class="nav-icon"><i class="bi bi-shield-lock-fill"></i></span>
         <span>Seguridad</span>
       </a>
     </nav>
 
     <!-- Sidebar Footer -->
-    <div style="padding:16px 20px;border-top:1px solid var(--nova-border);">
-      <a href="{% url 'accounts:logout' %}" class="nav-item" style="color:var(--nova-danger);">
+    <div style="padding:12px 16px;border-top:1px solid var(--nova-border);">
+      <!-- User mini card -->
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--nova-bg-dark);border-radius:var(--nova-radius-sm);margin-bottom:8px;">
+        <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--nova-primary),var(--nova-secondary));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0;overflow:hidden;">
+          {% if user.avatar %}<img src="{{ user.avatar.url }}" style="width:100%;height:100%;object-fit:cover;">
+          {% else %}{{ user.first_name|first|upper }}{{ user.last_name|first|upper }}{% endif %}
+        </div>
+        <div class="logo-text" style="min-width:0;">
+          <div style="font-size:12px;font-weight:600;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ user.get_full_name|truncatechars:18 }}</div>
+          <div style="font-size:10px;color:var(--nova-success);font-family:var(--nova-font-mono);">${{ user.balance|floatformat:2 }}</div>
+        </div>
+      </div>
+      <a href="{% url 'accounts:logout' %}" class="nav-item" style="color:var(--nova-danger);border-radius:var(--nova-radius-sm);">
         <span class="nav-icon"><i class="bi bi-box-arrow-left"></i></span>
         <span>Cerrar Sesión</span>
       </a>
     </div>
   </aside>
 
-  <!-- MAIN CONTENT -->
+  <!-- ═══════════════════════════════════════════
+       MAIN CONTENT
+  ═══════════════════════════════════════════ -->
   <div class="nova-main" id="novaMain">
 
     <!-- TOPBAR -->
     <header class="nova-topbar">
-      <button onclick="toggleSidebar()" style="background:none;border:none;color:var(--nova-text-muted);font-size:20px;cursor:pointer;padding:4px;">
+      <button onclick="toggleSidebar()" style="background:none;border:none;color:var(--nova-text-muted);font-size:20px;cursor:pointer;padding:4px;line-height:1;">
         <i class="bi bi-list"></i>
       </button>
 
+      <!-- Search -->
       <div class="topbar-search d-none d-md-block">
         <span class="search-icon"><i class="bi bi-search"></i></span>
-        <input type="text" placeholder="Buscar activos, mercados..." id="globalSearch">
+        <input type="text" placeholder="Buscar activos, mercados..." id="globalSearch" autocomplete="off">
+        <div id="searchResults" style="display:none;position:absolute;top:calc(100% + 6px);left:0;right:0;background:var(--nova-bg-card2);border:1px solid var(--nova-border);border-radius:var(--nova-radius-sm);z-index:200;max-height:280px;overflow-y:auto;"></div>
       </div>
 
       <div class="topbar-actions">
         <!-- Live indicator -->
-        <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--nova-success);">
-          <span style="width:6px;height:6px;border-radius:50%;background:var(--nova-success);animation:pulse-dot 2s infinite;"></span>
-          <span class="d-none d-lg-inline">EN VIVO</span>
+        <div class="pulse-live d-none d-lg-flex">EN VIVO</div>
+
+        <!-- Balance chip -->
+        <div class="balance-chip d-none d-lg-flex">
+          <i class="bi bi-wallet2" style="font-size:12px;"></i>
+          ${{ user.balance|floatformat:2 }}
         </div>
 
+        <!-- Deposit quick button -->
+        <a href="{% url 'finances:deposit' %}" class="btn-nova btn-nova-success d-none d-lg-flex" style="padding:6px 14px;font-size:12px;">
+          <i class="bi bi-plus-lg"></i> Depositar
+        </a>
+
+        <!-- Notifications -->
         <div class="topbar-btn" data-bs-toggle="tooltip" title="Notificaciones">
           <i class="bi bi-bell"></i>
+          {% if pending_transactions %}<span class="badge">{{ pending_transactions }}</span>{% endif %}
         </div>
 
+        <!-- User dropdown -->
         <div class="dropdown">
           <div class="topbar-user dropdown-toggle" data-bs-toggle="dropdown" style="cursor:pointer;">
             <div class="user-avatar">
@@ -124,17 +162,28 @@
               {% endif %}
             </div>
             <div class="d-none d-md-block">
-              <div class="user-name">{{ user.get_full_name|truncatechars:20 }}</div>
+              <div class="user-name">{{ user.get_full_name|truncatechars:18 }}</div>
               <div class="user-role">{{ user.get_account_type_display }}</div>
             </div>
           </div>
-          <ul class="dropdown-menu dropdown-menu-end">
+          <ul class="dropdown-menu dropdown-menu-end" style="min-width:220px;">
+            <li>
+              <div style="padding:12px 16px;border-bottom:1px solid var(--nova-border);">
+                <div style="font-size:13px;font-weight:700;color:#fff;">{{ user.get_full_name }}</div>
+                <div style="font-size:11px;color:var(--nova-text-muted);">{{ user.email }}</div>
+                {% if user.email_verified %}
+                <div class="verified-badge" style="margin-top:6px;"><i class="bi bi-patch-check-fill"></i> Verificado</div>
+                {% endif %}
+              </div>
+            </li>
             <li><a class="dropdown-item" href="{% url 'accounts:profile' %}"><i class="bi bi-person me-2"></i>Mi Perfil</a></li>
             <li><a class="dropdown-item" href="{% url 'accounts:security' %}"><i class="bi bi-shield-lock me-2"></i>Seguridad</a></li>
+            <li><a class="dropdown-item" href="{% url 'finances:deposit' %}"><i class="bi bi-plus-circle me-2" style="color:var(--nova-success);"></i>Depositar</a></li>
             <li><hr class="dropdown-divider"></li>
             <li>
-              <div class="dropdown-item" style="font-size:11px;color:var(--nova-text-dim);">
-                Saldo: <span style="color:var(--nova-success);font-weight:700;">${{ user.balance|floatformat:2 }}</span>
+              <div style="padding:8px 16px;font-size:11px;color:var(--nova-text-dim);">
+                Saldo disponible
+                <div style="font-size:15px;font-weight:700;color:var(--nova-success);font-family:var(--nova-font-mono);">${{ user.balance|floatformat:2 }}</div>
               </div>
             </li>
             <li><hr class="dropdown-divider"></li>
@@ -144,30 +193,140 @@
       </div>
     </header>
 
+    <!-- PRICE TICKER -->
+    <div class="price-ticker-bar" id="priceTicker">
+      <div class="ticker-track" id="tickerTrack">
+        <!-- Filled by JS -->
+        <span style="font-size:12px;color:var(--nova-text-muted);padding:0 20px;">
+          <i class="bi bi-arrow-clockwise"></i> Cargando precios...
+        </span>
+      </div>
+    </div>
+
     <!-- PAGE CONTENT -->
     <main class="nova-content">
       {% block content %}{% endblock %}
     </main>
 
-  </div>
-</div>
+    <!-- FOOTER -->
+    <footer style="padding:16px 24px;border-top:1px solid var(--nova-border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <img src="{% static 'images/nova_capital.png' %}" alt="Nova Capital Group" style="width:24px;height:24px;object-fit:contain;border-radius:4px;opacity:0.8;">
+        <span style="font-size:11px;color:var(--nova-text-dim);">© 2024 Nova Capital Group · Plataforma de simulación financiera</span>
+      </div>
+      <div style="display:flex;gap:16px;">
+        <a href="{% url 'core:terms' %}" style="font-size:11px;color:var(--nova-text-dim);">Términos</a>
+        <a href="{% url 'core:privacy' %}" style="font-size:11px;color:var(--nova-text-dim);">Privacidad</a>
+        <a href="{% url 'core:contact' %}" style="font-size:11px;color:var(--nova-text-dim);">Soporte</a>
+      </div>
+    </footer>
+
+  </div><!-- /nova-main -->
+</div><!-- /nova-layout -->
 
 <!-- Mobile overlay -->
-<div id="mobileOverlay" onclick="toggleSidebar()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:999;"></div>
+<div id="mobileOverlay" onclick="closeMobileSidebar()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:999;"></div>
 
 <script>
-  // Mobile sidebar overlay
-  const origToggle = window.toggleSidebar;
-  window.toggleSidebar = function() {
-    const sidebar = document.getElementById('novaSidebar');
-    const overlay = document.getElementById('mobileOverlay');
-    if (window.innerWidth <= 768) {
-      sidebar?.classList.toggle('mobile-open');
-      overlay.style.display = sidebar?.classList.contains('mobile-open') ? 'block' : 'none';
-    } else {
-      sidebar?.classList.toggle('collapsed');
-      document.getElementById('novaMain')?.classList.toggle('expanded');
+// ── Sidebar toggle ──
+function toggleSidebar() {
+  const sidebar = document.getElementById('novaSidebar');
+  const main    = document.getElementById('novaMain');
+  const overlay = document.getElementById('mobileOverlay');
+  if (window.innerWidth <= 768) {
+    sidebar.classList.toggle('mobile-open');
+    overlay.style.display = sidebar.classList.contains('mobile-open') ? 'block' : 'none';
+  } else {
+    sidebar.classList.toggle('collapsed');
+    main.classList.toggle('expanded');
+  }
+}
+function closeMobileSidebar() {
+  document.getElementById('novaSidebar').classList.remove('mobile-open');
+  document.getElementById('mobileOverlay').style.display = 'none';
+}
+
+// ── Price Ticker ──
+function buildTicker(assets) {
+  const track = document.getElementById('tickerTrack');
+  if (!assets || !assets.length) return;
+  let html = '';
+  const items = assets.slice(0, 20);
+  // Duplicate for seamless loop
+  for (let pass = 0; pass < 2; pass++) {
+    items.forEach(a => {
+      const up = a.change_pct_24h >= 0;
+      const color = up ? 'var(--nova-success)' : 'var(--nova-danger)';
+      const arrow = up ? '▲' : '▼';
+      html += `<span class="ticker-item">
+        <span class="t-symbol">${a.symbol}</span>
+        <span class="t-price" style="font-family:var(--nova-font-mono);">$${Number(a.price).toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:4})}</span>
+        <span class="t-change" style="color:${color};font-weight:600;">${arrow} ${Math.abs(a.change_pct_24h).toFixed(2)}%</span>
+      </span>`;
+    });
+  }
+  track.innerHTML = html;
+  // Adjust animation duration based on item count
+  track.style.animationDuration = (items.length * 3) + 's';
+}
+
+// Fetch prices for ticker
+fetch('/markets/api/prices/?type=crypto')
+  .then(r => r.json())
+  .then(d => buildTicker(d.data))
+  .catch(() => {});
+
+// Auto-refresh ticker every 60s
+setInterval(() => {
+  fetch('/markets/api/prices/?type=crypto')
+    .then(r => r.json())
+    .then(d => buildTicker(d.data))
+    .catch(() => {});
+}, 60000);
+
+// ── Global Search ──
+const searchInput = document.getElementById('globalSearch');
+const searchResults = document.getElementById('searchResults');
+if (searchInput) {
+  let searchTimer;
+  searchInput.addEventListener('input', function() {
+    clearTimeout(searchTimer);
+    const q = this.value.trim();
+    if (q.length < 1) { searchResults.style.display = 'none'; return; }
+    searchTimer = setTimeout(() => {
+      fetch(`/markets/api/prices/?type=crypto`)
+        .then(r => r.json())
+        .then(d => {
+          const matches = d.data.filter(a =>
+            a.symbol.toLowerCase().includes(q.toLowerCase()) ||
+            a.name.toLowerCase().includes(q.toLowerCase())
+          ).slice(0, 6);
+          if (!matches.length) { searchResults.style.display = 'none'; return; }
+          searchResults.innerHTML = matches.map(a => {
+            const up = a.change_pct_24h >= 0;
+            return `<a href="/trading/?symbol=${a.symbol}" style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;text-decoration:none;border-bottom:1px solid var(--nova-border-light);" onmouseover="this.style.background='var(--nova-bg-hover)'" onmouseout="this.style.background=''">
+              <div style="display:flex;align-items:center;gap:10px;">
+                ${a.image_url ? `<img src="${a.image_url}" style="width:24px;height:24px;border-radius:50%;" onerror="this.style.display='none'">` : `<div style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#0066FF,#00D4AA);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;">${a.symbol[0]}</div>`}
+                <div>
+                  <div style="font-size:13px;font-weight:700;color:#fff;">${a.symbol}</div>
+                  <div style="font-size:11px;color:var(--nova-text-muted);">${a.name}</div>
+                </div>
+              </div>
+              <div style="text-align:right;">
+                <div style="font-size:12px;font-weight:700;color:#fff;font-family:var(--nova-font-mono);">$${Number(a.price).toLocaleString('en',{minimumFractionDigits:2})}</div>
+                <div style="font-size:11px;font-weight:600;color:${up?'var(--nova-success)':'var(--nova-danger)'};">${up?'▲':'▼'} ${Math.abs(a.change_pct_24h).toFixed(2)}%</div>
+              </div>
+            </a>`;
+          }).join('');
+          searchResults.style.display = 'block';
+        }).catch(() => {});
+    }, 300);
+  });
+  document.addEventListener('click', e => {
+    if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+      searchResults.style.display = 'none';
     }
-  };
+  });
+}
 </script>
 {% endblock %}

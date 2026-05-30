@@ -1,10 +1,11 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block title %}Contacto{% endblock %}
 {% block body %}
 <div style="min-height:100vh;background:var(--nova-bg-dark);padding:80px 40px;">
   <div style="max-width:700px;margin:0 auto;">
     <a href="/" style="display:flex;align-items:center;gap:10px;margin-bottom:40px;text-decoration:none;">
-      <div style="width:32px;height:32px;background:linear-gradient(135deg,#0066FF,#00D4AA);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:900;color:#fff;">N</div>
+      <img src="{% static 'images/nova_capital.png' %}" alt="Nova Capital Group" style="width:32px;height:32px;object-fit:contain;border-radius:6px;">
       <span style="font-size:13px;font-weight:700;color:#fff;">NOVA CAPITAL GROUP</span>
     </a>
     <h1 style="font-size:36px;font-weight:800;color:#fff;margin-bottom:8px;">Contáctanos</h1>
@@ -57,3 +58,5 @@
   </div>
 </div>
 {% endblock %}
+
+

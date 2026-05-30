@@ -1,222 +1,313 @@
 {% extends 'base_app.html' %}
 {% load static humanize %}
-
 {% block title %}Dashboard{% endblock %}
 
 {% block content %}
+
+<!-- PAGE HEADER -->
 <div class="page-header">
   <div>
-    <div class="page-title">Bienvenido, {{ user.first_name }} 👋</div>
-    <div class="page-subtitle">Panel de control · Actualizado en tiempo real</div>
+    <div class="page-title">
+      Bienvenido, {{ user.first_name }}
+      <span style="font-size:22px;">👋</span>
+    </div>
+    <div class="page-subtitle">
+      <span class="pulse-live">EN VIVO</span>
+      &nbsp;·&nbsp; {{ user.get_account_type_display }} &nbsp;·&nbsp;
+      {% if user.email_verified %}
+        <span class="verified-badge"><i class="bi bi-patch-check-fill"></i> Verificado</span>
+      {% else %}
+        <span style="font-size:11px;color:var(--nova-warning);"><i class="bi bi-exclamation-circle me-1"></i>Email sin verificar</span>
+      {% endif %}
+    </div>
   </div>
-  <div style="display:flex;gap:8px;">
+  <div style="display:flex;gap:8px;flex-wrap:wrap;">
     <a href="{% url 'finances:deposit' %}" class="btn-nova btn-nova-success"><i class="bi bi-plus-circle-fill"></i> Depositar</a>
     <a href="{% url 'trading:trading' %}" class="btn-nova btn-nova-primary"><i class="bi bi-graph-up-arrow"></i> Operar</a>
   </div>
 </div>
 
-<!-- STAT CARDS -->
-<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:24px;">
+<!-- ── STAT CARDS ── -->
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:16px;margin-bottom:24px;">
 
-  <div class="stat-card">
-    <div class="stat-icon" style="background:rgba(0,102,255,0.15);">💰</div>
+  <div class="stat-card blue nova-card-hover">
+    <div class="stat-icon" style="background:rgba(0,102,255,0.15);">
+      <i class="bi bi-wallet2" style="font-size:22px;color:var(--nova-primary-light);"></i>
+    </div>
     <div class="stat-label">Saldo Disponible</div>
     <div class="stat-value">${{ cash_balance|floatformat:2 }}</div>
-    <div class="stat-change positive"><i class="bi bi-wallet2"></i> USD disponible</div>
-  </div>
-
-  <div class="stat-card">
-    <div class="stat-icon" style="background:rgba(0,200,150,0.15);">📈</div>
-    <div class="stat-label">Valor del Portafolio</div>
-    <div class="stat-value">${{ portfolio_value|floatformat:2 }}</div>
-    <div class="stat-change {% if total_pnl >= 0 %}positive{% else %}negative{% endif %}">
-      <i class="bi bi-{% if total_pnl >= 0 %}arrow-up{% else %}arrow-down{% endif %}"></i>
-      {{ total_pnl_pct|floatformat:2 }}% total
+    <div class="stat-change positive">
+      <i class="bi bi-cash-stack"></i> USD · Disponible ahora
     </div>
   </div>
 
-  <div class="stat-card">
-    <div class="stat-icon" style="background:rgba({% if total_pnl >= 0 %}0,200,150{% else %}255,59,92{% endif %},0.15);">{% if total_pnl >= 0 %}📊{% else %}📉{% endif %}</div>
+  <div class="stat-card green nova-card-hover">
+    <div class="stat-icon" style="background:rgba(0,200,150,0.15);">
+      <i class="bi bi-briefcase-fill" style="font-size:22px;color:var(--nova-success);"></i>
+    </div>
+    <div class="stat-label">Valor del Portafolio</div>
+    <div class="stat-value">${{ portfolio_value|floatformat:2 }}</div>
+    <div class="stat-change {% if total_pnl >= 0 %}positive{% else %}negative{% endif %}">
+      <i class="bi bi-{% if total_pnl >= 0 %}arrow-up{% else %}arrow-down{% endif %}-circle-fill"></i>
+      {{ total_pnl_pct|floatformat:2 }}% rendimiento
+    </div>
+  </div>
+
+  <div class="stat-card {% if total_pnl >= 0 %}green{% else %}red{% endif %} nova-card-hover">
+    <div class="stat-icon" style="background:rgba({% if total_pnl >= 0 %}0,200,150{% else %}255,59,92{% endif %},0.15);">
+      <i class="bi bi-{% if total_pnl >= 0 %}graph-up-arrow{% else %}graph-down-arrow{% endif %}" style="font-size:22px;color:{% if total_pnl >= 0 %}var(--nova-success){% else %}var(--nova-danger){% endif %};"></i>
+    </div>
     <div class="stat-label">Ganancias / Pérdidas</div>
     <div class="stat-value" style="color:{% if total_pnl >= 0 %}var(--nova-success){% else %}var(--nova-danger){% endif %};">
       {% if total_pnl >= 0 %}+{% endif %}${{ total_pnl|floatformat:2 }}
     </div>
     <div class="stat-change {% if total_pnl >= 0 %}positive{% else %}negative{% endif %}">
-      <i class="bi bi-{% if total_pnl >= 0 %}trending-up{% else %}trending-down{% endif %}"></i>
-      P&L no realizado
+      <i class="bi bi-activity"></i> P&L no realizado
     </div>
   </div>
 
-  <div class="stat-card">
-    <div class="stat-icon" style="background:rgba(255,184,0,0.15);">🏦</div>
+  <div class="stat-card gold nova-card-hover">
+    <div class="stat-icon" style="background:rgba(255,184,0,0.15);">
+      <i class="bi bi-bank" style="font-size:22px;color:var(--nova-warning);"></i>
+    </div>
     <div class="stat-label">Activos Totales</div>
     <div class="stat-value">${{ total_assets|floatformat:2 }}</div>
-    <div class="stat-change positive"><i class="bi bi-briefcase-fill"></i> {{ positions_count }} posiciones</div>
+    <div class="stat-change positive">
+      <i class="bi bi-pie-chart-fill"></i> {{ positions_count }} posiciones abiertas
+    </div>
   </div>
 
 </div>
 
-<!-- MAIN GRID -->
-<div style="display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:24px;">
+<!-- ── MAIN GRID: Chart + Distribution ── -->
+<div style="display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:20px;">
 
-  <!-- Portfolio Chart -->
-  <div class="nova-card">
+  <!-- Portfolio Evolution Chart -->
+  <div class="nova-card nova-card-hover">
     <div class="nova-card-header">
-      <span class="nova-card-title"><i class="bi bi-graph-up me-2"></i>Evolución del Portafolio</span>
-      <div style="display:flex;gap:6px;">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div class="icon-circle blue"><i class="bi bi-graph-up"></i></div>
+        <span class="nova-card-title">Evolución del Portafolio</span>
+      </div>
+      <div style="display:flex;gap:4px;">
         <button class="btn-nova btn-nova-ghost" style="padding:4px 10px;font-size:11px;">7D</button>
         <button class="btn-nova btn-nova-primary" style="padding:4px 10px;font-size:11px;">30D</button>
         <button class="btn-nova btn-nova-ghost" style="padding:4px 10px;font-size:11px;">90D</button>
       </div>
     </div>
-    <canvas id="portfolioChart" height="200"></canvas>
+    {% if snapshot_values %}
+    <canvas id="portfolioChart" height="180"></canvas>
+    {% else %}
+    <div style="height:180px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;">
+      <div class="icon-circle blue" style="width:56px;height:56px;font-size:26px;"><i class="bi bi-graph-up"></i></div>
+      <div style="font-size:13px;color:var(--nova-text-muted);">El gráfico aparecerá cuando realices operaciones</div>
+      <a href="{% url 'trading:trading' %}" class="btn-nova btn-nova-primary" style="padding:7px 18px;font-size:12px;">
+        <i class="bi bi-play-fill"></i> Comenzar a operar
+      </a>
+    </div>
+    {% endif %}
   </div>
 
   <!-- Asset Distribution -->
-  <div class="nova-card">
+  <div class="nova-card nova-card-hover">
     <div class="nova-card-header">
-      <span class="nova-card-title"><i class="bi bi-pie-chart-fill me-2"></i>Distribución</span>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div class="icon-circle purple"><i class="bi bi-pie-chart-fill"></i></div>
+        <span class="nova-card-title">Distribución</span>
+      </div>
     </div>
     {% if asset_distribution %}
     <div style="position:relative;display:flex;align-items:center;justify-content:center;margin-bottom:16px;">
-      <canvas id="donutChart" width="180" height="180"></canvas>
+      <canvas id="donutChart" width="160" height="160"></canvas>
       <div style="position:absolute;text-align:center;">
-        <div style="font-size:16px;font-weight:700;color:#fff;">${{ portfolio_value|floatformat:0 }}</div>
+        <div style="font-size:15px;font-weight:700;color:#fff;font-family:var(--nova-font-mono);">${{ portfolio_value|floatformat:0 }}</div>
         <div style="font-size:10px;color:var(--nova-text-muted);">Total</div>
       </div>
     </div>
-    <div style="display:flex;flex-direction:column;gap:8px;">
+    <div style="display:flex;flex-direction:column;gap:7px;">
       {% for item in asset_distribution|slice:":5" %}
       <div style="display:flex;align-items:center;justify-content:space-between;">
         <div style="display:flex;align-items:center;gap:8px;">
-          <div style="width:8px;height:8px;border-radius:50%;background:var(--nova-primary);"></div>
+          <div style="width:8px;height:8px;border-radius:50%;background:var(--nova-primary);flex-shrink:0;"></div>
           <span style="font-size:12px;color:var(--nova-text);">{{ item.symbol }}</span>
         </div>
         <div style="text-align:right;">
-          <div style="font-size:12px;font-weight:600;color:#fff;">${{ item.value }}</div>
-          <div style="font-size:10px;color:var(--nova-text-muted);">{{ item.pct }}%</div>
+          <span style="font-size:12px;font-weight:600;color:#fff;">${{ item.value }}</span>
+          <span style="font-size:10px;color:var(--nova-text-muted);margin-left:5px;">{{ item.pct }}%</span>
         </div>
       </div>
       {% endfor %}
     </div>
     {% else %}
-    <div style="text-align:center;padding:40px 20px;">
-      <div style="font-size:48px;margin-bottom:12px;">💼</div>
-      <div style="color:var(--nova-text-muted);font-size:13px;">Sin posiciones abiertas</div>
-      <a href="{% url 'trading:trading' %}" class="btn-nova btn-nova-primary" style="margin-top:16px;padding:8px 20px;font-size:12px;">Comenzar a operar</a>
+    <div class="empty-state">
+      <div class="empty-icon" style="background:rgba(123,97,255,0.15);">
+        <i class="bi bi-pie-chart" style="color:#A855F7;"></i>
+      </div>
+      <h4>Sin posiciones</h4>
+      <p>Opera en los mercados para ver la distribución de tu portafolio</p>
+      <a href="{% url 'trading:trading' %}" class="btn-nova btn-nova-primary" style="padding:7px 18px;font-size:12px;margin-top:4px;">
+        <i class="bi bi-graph-up-arrow"></i> Ir al Trading
+      </a>
     </div>
     {% endif %}
   </div>
 
 </div>
 
-<!-- BOTTOM GRID -->
-<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;">
+<!-- ── BOTTOM GRID ── -->
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:20px;">
 
   <!-- Recent Orders -->
-  <div class="nova-card" style="grid-column:span 2;">
+  <div class="nova-card nova-card-hover" style="grid-column:span 2;">
     <div class="nova-card-header">
-      <span class="nova-card-title"><i class="bi bi-clock-history me-2"></i>Operaciones Recientes</span>
-      <a href="{% url 'trading:order_history' %}" style="font-size:12px;color:var(--nova-primary-light);">Ver todas →</a>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div class="icon-circle green"><i class="bi bi-clock-history"></i></div>
+        <span class="nova-card-title">Operaciones Recientes</span>
+      </div>
+      <a href="{% url 'trading:order_history' %}" style="font-size:12px;color:var(--nova-primary-light);">Ver todas <i class="bi bi-arrow-right"></i></a>
     </div>
     {% if recent_orders %}
-    <table class="nova-table">
-      <thead>
-        <tr>
-          <th>Activo</th><th>Tipo</th><th>Cantidad</th><th>Precio</th><th>Total</th><th>Estado</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for order in recent_orders %}
-        <tr>
-          <td>
-            <div class="asset-cell">
-              <div class="asset-icon">
-                {% if order.asset.image_url %}<img src="{{ order.asset.image_url }}" onerror="this.style.display='none'">{% endif %}
-                {{ order.asset.symbol|first }}
+    <div style="overflow-x:auto;">
+      <table class="nova-table">
+        <thead>
+          <tr><th>Activo</th><th>Tipo</th><th>Cantidad</th><th>Precio</th><th>Total</th><th>Estado</th></tr>
+        </thead>
+        <tbody>
+          {% for order in recent_orders %}
+          <tr class="{% if order.side == 'buy' %}positive-row{% else %}negative-row{% endif %}">
+            <td>
+              <div class="asset-cell">
+                <div class="asset-icon">
+                  {% if order.asset.image_url %}
+                  <img src="{{ order.asset.image_url }}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+                  {% endif %}
+                  <span style="font-size:11px;font-weight:700;">{{ order.asset.symbol|first }}</span>
+                </div>
+                <div>
+                  <div class="asset-name">{{ order.asset.symbol }}</div>
+                  <div class="asset-symbol">{{ order.asset.name|truncatechars:12 }}</div>
+                </div>
               </div>
-              <div>
-                <div class="asset-name">{{ order.asset.symbol }}</div>
-                <div class="asset-symbol">{{ order.asset.name|truncatechars:12 }}</div>
-              </div>
-            </div>
-          </td>
-          <td><span class="badge-{% if order.side == 'buy' %}positive{% else %}negative{% endif %}">{% if order.side == 'buy' %}▲ COMPRA{% else %}▼ VENTA{% endif %}</span></td>
-          <td class="price-mono">{{ order.quantity|floatformat:4 }}</td>
-          <td class="price-mono">${{ order.filled_price|floatformat:2 }}</td>
-          <td class="price-mono">${{ order.total_value|floatformat:2 }}</td>
-          <td><span class="status-badge {{ order.status }}">{{ order.get_status_display }}</span></td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+            </td>
+            <td>
+              <span class="badge-{% if order.side == 'buy' %}positive{% else %}negative{% endif %}">
+                <i class="bi bi-{% if order.side == 'buy' %}arrow-up{% else %}arrow-down{% endif %}-circle-fill"></i>
+                {% if order.side == 'buy' %}COMPRA{% else %}VENTA{% endif %}
+              </span>
+            </td>
+            <td class="price-mono">{{ order.quantity|floatformat:4 }}</td>
+            <td class="price-mono">${{ order.filled_price|floatformat:2 }}</td>
+            <td class="price-mono" style="font-weight:700;color:#fff;">${{ order.total_value|floatformat:2 }}</td>
+            <td><span class="status-badge {{ order.status }}">{{ order.get_status_display }}</span></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
     {% else %}
-    <div style="text-align:center;padding:40px;">
-      <div style="font-size:48px;margin-bottom:12px;">📋</div>
-      <div style="color:var(--nova-text-muted);font-size:13px;">No hay operaciones aún</div>
-      <a href="{% url 'trading:trading' %}" class="btn-nova btn-nova-primary" style="margin-top:16px;padding:8px 20px;font-size:12px;">Realizar primera operación</a>
+    <div class="empty-state">
+      <div class="empty-icon" style="background:rgba(0,200,150,0.12);">
+        <i class="bi bi-receipt" style="color:var(--nova-success);font-size:28px;"></i>
+      </div>
+      <h4>Sin operaciones</h4>
+      <p>Tus operaciones de trading aparecerán aquí</p>
+      <a href="{% url 'trading:trading' %}" class="btn-nova btn-nova-primary" style="padding:8px 20px;font-size:12px;margin-top:4px;">
+        <i class="bi bi-graph-up-arrow"></i> Realizar primera operación
+      </a>
     </div>
     {% endif %}
   </div>
 
   <!-- Top Movers -->
-  <div class="nova-card">
+  <div class="nova-card nova-card-hover">
     <div class="nova-card-header">
-      <span class="nova-card-title"><i class="bi bi-lightning-fill me-2"></i>Top Movers</span>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div class="icon-circle gold"><i class="bi bi-lightning-fill"></i></div>
+        <span class="nova-card-title">Top Movers</span>
+      </div>
     </div>
-    <div style="margin-bottom:12px;">
-      <div style="font-size:11px;font-weight:600;color:var(--nova-success);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">▲ Mayores Ganancias</div>
+    <div style="margin-bottom:14px;">
+      <div style="font-size:10px;font-weight:700;color:var(--nova-success);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:8px;display:flex;align-items:center;gap:5px;">
+        <i class="bi bi-arrow-up-circle-fill"></i> Mayores Ganancias
+      </div>
       {% for asset in top_gainers %}
       <a href="{% url 'markets:asset_detail' asset.symbol %}" style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--nova-border-light);text-decoration:none;">
-        <div style="display:flex;align-items:center;gap:8px;">
-          {% if asset.image_url %}<img src="{{ asset.image_url }}" style="width:20px;height:20px;border-radius:50%;" onerror="this.style.display='none'">{% endif %}
+        <div style="display:flex;align-items:center;gap:7px;">
+          {% if asset.image_url %}
+          <img src="{{ asset.image_url }}" style="width:20px;height:20px;border-radius:50%;" onerror="this.style.display='none'">
+          {% else %}
+          <div style="width:20px;height:20px;border-radius:50%;background:linear-gradient(135deg,#0066FF,#00D4AA);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;">{{ asset.symbol|first }}</div>
+          {% endif %}
           <span style="font-size:12px;font-weight:600;color:#fff;">{{ asset.symbol }}</span>
         </div>
-        <span style="font-size:12px;font-weight:600;color:var(--nova-success);">+{{ asset.price_change_pct_24h|floatformat:2 }}%</span>
+        <span style="font-size:12px;font-weight:700;color:var(--nova-success);">+{{ asset.price_change_pct_24h|floatformat:2 }}%</span>
       </a>
       {% empty %}
-      <div style="color:var(--nova-text-muted);font-size:12px;text-align:center;padding:12px;">Sin datos</div>
+      <div style="font-size:12px;color:var(--nova-text-muted);text-align:center;padding:10px 0;">Sin datos disponibles</div>
       {% endfor %}
     </div>
     <div>
-      <div style="font-size:11px;font-weight:600;color:var(--nova-danger);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">▼ Mayores Pérdidas</div>
+      <div style="font-size:10px;font-weight:700;color:var(--nova-danger);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:8px;display:flex;align-items:center;gap:5px;">
+        <i class="bi bi-arrow-down-circle-fill"></i> Mayores Pérdidas
+      </div>
       {% for asset in top_losers %}
       <a href="{% url 'markets:asset_detail' asset.symbol %}" style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--nova-border-light);text-decoration:none;">
-        <div style="display:flex;align-items:center;gap:8px;">
-          {% if asset.image_url %}<img src="{{ asset.image_url }}" style="width:20px;height:20px;border-radius:50%;" onerror="this.style.display='none'">{% endif %}
+        <div style="display:flex;align-items:center;gap:7px;">
+          {% if asset.image_url %}
+          <img src="{{ asset.image_url }}" style="width:20px;height:20px;border-radius:50%;" onerror="this.style.display='none'">
+          {% else %}
+          <div style="width:20px;height:20px;border-radius:50%;background:linear-gradient(135deg,#FF3B5C,#CC2244);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;">{{ asset.symbol|first }}</div>
+          {% endif %}
           <span style="font-size:12px;font-weight:600;color:#fff;">{{ asset.symbol }}</span>
         </div>
-        <span style="font-size:12px;font-weight:600;color:var(--nova-danger);">{{ asset.price_change_pct_24h|floatformat:2 }}%</span>
+        <span style="font-size:12px;font-weight:700;color:var(--nova-danger);">{{ asset.price_change_pct_24h|floatformat:2 }}%</span>
       </a>
       {% empty %}
-      <div style="color:var(--nova-text-muted);font-size:12px;text-align:center;padding:12px;">Sin datos</div>
+      <div style="font-size:12px;color:var(--nova-text-muted);text-align:center;padding:10px 0;">Sin datos disponibles</div>
       {% endfor %}
     </div>
   </div>
 
 </div>
 
-<!-- Latest News -->
+<!-- ── LATEST NEWS ── -->
 {% if latest_news %}
-<div class="nova-card" style="margin-top:16px;">
+<div class="nova-card nova-card-hover">
   <div class="nova-card-header">
-    <span class="nova-card-title"><i class="bi bi-newspaper me-2"></i>Últimas Noticias</span>
-    <a href="{% url 'news:news' %}" style="font-size:12px;color:var(--nova-primary-light);">Ver todas →</a>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <div class="icon-circle blue"><i class="bi bi-newspaper"></i></div>
+      <span class="nova-card-title">Últimas Noticias del Mercado</span>
+    </div>
+    <a href="{% url 'news:news' %}" style="font-size:12px;color:var(--nova-primary-light);">Ver todas <i class="bi bi-arrow-right"></i></a>
   </div>
   <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;">
     {% for article in latest_news %}
     <a href="{{ article.source_url }}" target="_blank" style="text-decoration:none;">
-      <div class="news-card">
+      <div class="news-card nova-card-hover">
         {% if article.image_url %}
-        <img src="{{ article.image_url }}" class="news-image" onerror="this.style.display='none'">
+        <img src="{{ article.image_url }}" class="news-image" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+        <div class="news-image-placeholder" style="display:none;">
+          {% if article.category == 'crypto' %}<i class="bi bi-currency-bitcoin" style="font-size:40px;color:var(--nova-warning);"></i>
+          {% elif article.category == 'stocks' %}<i class="bi bi-graph-up-arrow" style="font-size:40px;color:var(--nova-success);"></i>
+          {% elif article.category == 'forex' %}<i class="bi bi-currency-exchange" style="font-size:40px;color:var(--nova-primary-light);"></i>
+          {% else %}<i class="bi bi-newspaper" style="font-size:40px;color:var(--nova-text-muted);"></i>{% endif %}
+        </div>
         {% else %}
-        <div class="news-image-placeholder">📰</div>
+        <div class="news-image-placeholder">
+          {% if article.category == 'crypto' %}<i class="bi bi-currency-bitcoin" style="font-size:40px;color:var(--nova-warning);"></i>
+          {% elif article.category == 'stocks' %}<i class="bi bi-graph-up-arrow" style="font-size:40px;color:var(--nova-success);"></i>
+          {% elif article.category == 'forex' %}<i class="bi bi-currency-exchange" style="font-size:40px;color:var(--nova-primary-light);"></i>
+          {% else %}<i class="bi bi-newspaper" style="font-size:40px;color:var(--nova-text-muted);"></i>{% endif %}
+        </div>
         {% endif %}
         <div class="news-body">
-          <div class="news-category">{{ article.get_category_display }}</div>
+          <div class="news-category">
+            {% if article.category == 'crypto' %}<i class="bi bi-currency-bitcoin me-1"></i>{% elif article.category == 'stocks' %}<i class="bi bi-graph-up me-1"></i>{% elif article.category == 'economy' %}<i class="bi bi-bank me-1"></i>{% else %}<i class="bi bi-globe me-1"></i>{% endif %}
+            {{ article.get_category_display }}
+          </div>
           <div class="news-title">{{ article.title }}</div>
           <div class="news-footer">
-            <span class="news-source">{{ article.source }}</span>
+            <span class="news-source"><i class="bi bi-newspaper me-1"></i>{{ article.source }}</span>
             <span class="news-date">{{ article.published_at|timesince }} ago</span>
           </div>
         </div>
@@ -226,56 +317,53 @@
   </div>
 </div>
 {% endif %}
+
 {% endblock %}
 
 {% block extra_js %}
 <script>
-// Portfolio Line Chart
+// ── Portfolio Line Chart ──
 const portfolioCtx = document.getElementById('portfolioChart');
 if (portfolioCtx) {
   const labels = {{ snapshot_labels|safe }};
   const values = {{ snapshot_values|safe }};
-  const displayLabels = labels.length ? labels : ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
-  const displayValues = values.length ? values : [0,0,0,0,0,0,0];
-
+  const l = labels.length ? labels : ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+  const v = values.length ? values : [0,0,0,0,0,0,0];
+  const isPositive = v[v.length-1] >= v[0];
   new Chart(portfolioCtx, {
     type: 'line',
     data: {
-      labels: displayLabels,
+      labels: l,
       datasets: [{
-        label: 'Valor del Portafolio',
-        data: displayValues,
-        borderColor: '#0066FF',
-        backgroundColor: 'rgba(0,102,255,0.08)',
-        borderWidth: 2,
-        fill: true,
-        tension: 0.4,
+        label: 'Portafolio',
+        data: v,
+        borderColor: isPositive ? '#00C896' : '#FF3B5C',
+        backgroundColor: isPositive ? 'rgba(0,200,150,0.07)' : 'rgba(255,59,92,0.07)',
+        borderWidth: 2.5, fill: true, tension: 0.4,
         pointRadius: 3,
-        pointBackgroundColor: '#0066FF',
-        pointBorderColor: '#fff',
-        pointBorderWidth: 1,
+        pointBackgroundColor: isPositive ? '#00C896' : '#FF3B5C',
+        pointBorderColor: '#0A1628', pointBorderWidth: 2,
       }]
     },
     options: {
-      responsive: true,
-      maintainAspectRatio: true,
-      plugins: { legend: { display: false }, tooltip: {
-        backgroundColor: '#0A1628',
-        borderColor: 'rgba(0,102,255,0.3)',
-        borderWidth: 1,
-        titleColor: '#fff',
-        bodyColor: '#7A8BA8',
-        callbacks: { label: ctx => ' $' + ctx.parsed.y.toLocaleString('es', {minimumFractionDigits:2}) }
-      }},
+      responsive: true, maintainAspectRatio: true,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#0D1F3C', borderColor: 'rgba(0,102,255,0.3)', borderWidth: 1,
+          titleColor: '#fff', bodyColor: '#7A8BA8',
+          callbacks: { label: ctx => ' $' + ctx.parsed.y.toLocaleString('es',{minimumFractionDigits:2}) }
+        }
+      },
       scales: {
-        x: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#7A8BA8', font: { size: 11 } } },
-        y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#7A8BA8', font: { size: 11 }, callback: v => '$' + v.toLocaleString() } }
+        x: { grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#7A8BA8', font: { size: 11 } } },
+        y: { grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#7A8BA8', font: { size: 11 }, callback: v => '$' + v.toLocaleString() } }
       }
     }
   });
 }
 
-// Donut Chart
+// ── Donut Chart ──
 const donutCtx = document.getElementById('donutChart');
 if (donutCtx) {
   const dist = {{ asset_distribution|safe }};
@@ -285,17 +373,17 @@ if (donutCtx) {
       type: 'doughnut',
       data: {
         labels: dist.map(d => d.symbol),
-        datasets: [{ data: dist.map(d => d.value), backgroundColor: colors.slice(0, dist.length), borderWidth: 2, borderColor: '#0A1628' }]
+        datasets: [{ data: dist.map(d => d.value), backgroundColor: colors.slice(0,dist.length), borderWidth: 2, borderColor: '#0A1628', hoverBorderWidth: 3 }]
       },
       options: {
-        responsive: false,
-        cutout: '70%',
-        plugins: { legend: { display: false }, tooltip: {
-          backgroundColor: '#0A1628',
-          borderColor: 'rgba(0,102,255,0.3)',
-          borderWidth: 1,
-          callbacks: { label: ctx => ` ${ctx.label}: $${ctx.parsed.toLocaleString()} (${dist[ctx.dataIndex].pct}%)` }
-        }}
+        responsive: false, cutout: '68%',
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#0D1F3C', borderColor: 'rgba(0,102,255,0.3)', borderWidth: 1,
+            callbacks: { label: ctx => ` ${ctx.label}: $${ctx.parsed.toLocaleString()} (${dist[ctx.dataIndex].pct}%)` }
+          }
+        }
       }
     });
   }
