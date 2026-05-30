@@ -200,3 +200,151 @@
 .icon-circle.red    { background: rgba(255,59,92,0.15);  color: var(--nova-danger); }
 .icon-circle.gold   { background: rgba(255,184,0,0.15);  color: var(--nova-warning); }
 .icon-circle.purple { background: rgba(123,97,255,0.15); color: #A855F7; }
+
+/* ── FIX: Ticker bar full width scroll ── */
+.price-ticker-bar { overflow: hidden; }
+.ticker-track {
+  display: flex;
+  gap: 32px;
+  white-space: nowrap;
+  animation: ticker-scroll 60s linear infinite;
+  width: max-content;
+}
+.ticker-track:hover { animation-play-state: paused; }
+@keyframes ticker-scroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.ticker-item {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 12px; padding: 0 4px;
+}
+.ticker-item .t-symbol { font-weight: 700; color: #fff; }
+.ticker-item .t-price  { font-family: var(--nova-font-mono); color: var(--nova-text); }
+
+/* ── FIX: Stat card icon size ── */
+.stat-card .stat-icon {
+  width: 48px; height: 48px;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 14px;
+}
+.stat-card .stat-icon i { font-size: 22px; }
+
+/* ── FIX: Asset icon in tables ── */
+.asset-icon {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  background: var(--nova-bg-hover);
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden; flex-shrink: 0;
+  font-size: 12px; font-weight: 700; color: var(--nova-primary-light);
+}
+.asset-icon img {
+  width: 100%; height: 100%; object-fit: cover; border-radius: 50%;
+}
+
+/* ── FIX: News image placeholder ── */
+.news-image-placeholder {
+  width: 100%; height: 160px;
+  background: linear-gradient(135deg, var(--nova-bg-card2), var(--nova-bg-hover));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 44px;
+}
+
+/* ── FIX: Empty state icon circle ── */
+.empty-state .empty-icon {
+  width: 72px; height: 72px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 30px;
+}
+
+/* ── FIX: icon-circle sizes ── */
+.icon-circle {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; flex-shrink: 0;
+}
+
+/* ── FIX: Balance chip ── */
+.balance-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(0,200,150,0.1);
+  border: 1px solid rgba(0,200,150,0.25);
+  border-radius: 20px; padding: 5px 14px;
+  font-size: 13px; font-weight: 700;
+  color: var(--nova-success);
+  font-family: var(--nova-font-mono);
+  white-space: nowrap;
+}
+
+/* ── FIX: Sidebar logo image glow ── */
+.sidebar-logo img {
+  box-shadow: 0 0 12px rgba(0,102,255,0.3);
+}
+
+/* ── FIX: Topbar search results ── */
+#searchResults a:last-child {
+  border-bottom: none !important;
+}
+
+/* ── FIX: Responsive grid on small screens ── */
+@media (max-width: 900px) {
+  .dashboard-main-grid { grid-template-columns: 1fr !important; }
+  .dashboard-bottom-grid { grid-template-columns: 1fr !important; }
+}
+
+/* ── FIX: Table asset icon fallback letter ── */
+.asset-icon-letter {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 800; color: #fff;
+  flex-shrink: 0;
+  background: linear-gradient(135deg, var(--nova-primary), var(--nova-secondary));
+}
+
+/* ── FIX: Verified badge ── */
+.verified-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: rgba(0,200,150,0.12);
+  border: 1px solid rgba(0,200,150,0.3);
+  border-radius: 20px; padding: 2px 10px;
+  font-size: 11px; font-weight: 600; color: var(--nova-success);
+}
+
+/* ── FIX: Pulse live indicator ── */
+.pulse-live {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 11px; font-weight: 600; color: var(--nova-success);
+}
+.pulse-live::before {
+  content: '';
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--nova-success);
+  animation: pulse-dot 1.5s infinite;
+  flex-shrink: 0;
+}
+
+/* ── FIX: Nova card title ── */
+.nova-card-title {
+  font-size: 12px; font-weight: 600;
+  color: var(--nova-text-muted);
+  text-transform: uppercase; letter-spacing: 0.6px;
+}
+
+/* ── FIX: Stat card value font ── */
+.stat-card .stat-value {
+  font-size: 22px; font-weight: 700; color: #fff;
+  font-family: var(--nova-font-mono); letter-spacing: -0.5px;
+  line-height: 1.2;
+}
+
+/* ── FIX: Page subtitle spacing ── */
+.page-subtitle {
+  font-size: 12px; color: var(--nova-text-muted);
+  margin-top: 4px; display: flex; align-items: center; gap: 6px;
+  flex-wrap: wrap;
+}
