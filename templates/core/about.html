@@ -2,57 +2,176 @@
 {% load static %}
 {% block title %}Nosotros{% endblock %}
 {% block body %}
-<div style="min-height:100vh;background:var(--nova-bg-dark);padding:80px 40px;">
-  <div style="max-width:900px;margin:0 auto;">
-    <a href="/" style="display:flex;align-items:center;gap:10px;margin-bottom:40px;text-decoration:none;">
-      <img src="{% static 'images/nova_capital.png' %}" alt="Nova Capital Group" style="width:32px;height:32px;object-fit:contain;border-radius:6px;">
-      <span style="font-size:13px;font-weight:700;color:#fff;">NOVA CAPITAL GROUP</span>
-    </a>
-    <div style="text-align:center;margin-bottom:60px;">
-      <div style="display:inline-block;background:rgba(0,102,255,0.1);border:1px solid rgba(0,102,255,0.3);border-radius:20px;padding:6px 20px;font-size:12px;font-weight:600;color:var(--nova-primary-light);margin-bottom:20px;text-transform:uppercase;letter-spacing:1px;">Sobre Nosotros</div>
-      <h1 style="font-size:42px;font-weight:800;color:#fff;margin-bottom:16px;">Inversiones de <span style="background:linear-gradient(135deg,#0066FF,#00D4AA);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">Clase Mundial</span></h1>
-      <p style="font-size:17px;color:var(--nova-text-muted);max-width:600px;margin:0 auto;line-height:1.7;">Nova Capital Group es una plataforma financiera de nueva generación que democratiza el acceso a los mercados globales con tecnología de nivel institucional.</p>
+
+<!-- NAVBAR -->
+<nav class="landing-nav" id="landingNav">
+  <div style="display:flex;align-items:center;gap:12px;">
+    <img src="{% static 'images/nova_capital.png' %}" alt="Nova Capital Group" style="width:38px;height:38px;object-fit:contain;border-radius:8px;">
+    <div>
+      <div style="font-size:13px;font-weight:700;color:#fff;letter-spacing:0.5px;">NOVA CAPITAL</div>
+      <div style="font-size:9px;color:var(--nova-text-muted);letter-spacing:2px;text-transform:uppercase;">GROUP</div>
     </div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px;margin-bottom:60px;">
-      <div class="nova-card" style="text-align:center;padding:32px 24px;">
-        <div style="font-size:48px;margin-bottom:16px;">🎯</div>
-        <h3 style="font-size:18px;font-weight:700;color:#fff;margin-bottom:10px;">Nuestra Misión</h3>
-        <p style="font-size:13px;color:var(--nova-text-muted);line-height:1.7;">Democratizar el acceso a los mercados financieros globales, ofreciendo herramientas profesionales a todos los inversores.</p>
+  </div>
+  <div class="landing-nav-menu" id="navMenu">
+    <a href="{% url 'core:about' %}" style="color:#fff;font-size:13px;padding:8px 16px;font-weight:600;">Nosotros</a>
+    <a href="{% url 'core:contact' %}" style="color:var(--nova-text-muted);font-size:13px;padding:8px 16px;">Contacto</a>
+    <a href="{% url 'two_factor:login' %}" class="btn-nova btn-nova-outline" style="padding:8px 20px;font-size:13px;">Iniciar Sesión</a>
+    <a href="{% url 'accounts:register' %}" class="btn-nova btn-nova-primary" style="padding:8px 20px;font-size:13px;">Comenzar Gratis</a>
+  </div>
+  <button class="landing-nav-toggle" onclick="toggleNavMenu()" aria-label="Menú" id="navToggle">
+    <i class="bi bi-list"></i>
+  </button>
+</nav>
+
+<!-- HERO -->
+<section style="padding:140px 40px 80px;text-align:center;position:relative;overflow:hidden;">
+  <div style="position:absolute;inset:0;background:radial-gradient(ellipse at center,rgba(0,102,255,0.1) 0%,transparent 70%);"></div>
+  <div style="position:absolute;inset:0;background-image:linear-gradient(rgba(0,102,255,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,102,255,0.04) 1px,transparent 1px);background-size:60px 60px;mask-image:radial-gradient(ellipse at center,black 30%,transparent 80%);"></div>
+  <div style="position:relative;z-index:1;max-width:700px;margin:0 auto;">
+    <div style="display:inline-block;background:rgba(0,102,255,0.1);border:1px solid rgba(0,102,255,0.3);border-radius:20px;padding:6px 20px;font-size:12px;font-weight:600;color:var(--nova-primary-light);margin-bottom:20px;text-transform:uppercase;letter-spacing:1px;">Sobre Nosotros</div>
+    <h1 style="font-size:clamp(32px,5vw,52px);font-weight:800;color:#fff;margin-bottom:16px;line-height:1.1;">Inversiones de <span style="background:linear-gradient(135deg,#0066FF,#00D4AA);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Clase Mundial</span></h1>
+    <p style="font-size:17px;color:var(--nova-text-muted);line-height:1.7;">Nova Capital Group es una plataforma financiera de nueva generación que democratiza el acceso a los mercados globales con tecnología de nivel institucional.</p>
+  </div>
+</section>
+
+<!-- MISSION / VISION / VALUES -->
+<section style="padding:0 40px 80px;">
+  <div style="max-width:1100px;margin:0 auto;">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:24px;margin-bottom:80px;">
+      <div class="nova-card nova-card-hover" style="text-align:center;padding:36px 28px;">
+        <div style="width:68px;height:68px;background:rgba(0,102,255,0.15);border-radius:18px;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;box-shadow:0 0 20px rgba(0,102,255,0.2);">
+          <i class="bi bi-bullseye" style="font-size:30px;color:var(--nova-primary-light);"></i>
+        </div>
+        <h3 style="font-size:18px;font-weight:700;color:#fff;margin-bottom:12px;">Nuestra Misión</h3>
+        <p style="font-size:13px;color:var(--nova-text-muted);line-height:1.8;">Democratizar el acceso a los mercados financieros globales, ofreciendo herramientas profesionales a todos los inversores sin importar su experiencia.</p>
       </div>
-      <div class="nova-card" style="text-align:center;padding:32px 24px;">
-        <div style="font-size:48px;margin-bottom:16px;">🔭</div>
-        <h3 style="font-size:18px;font-weight:700;color:#fff;margin-bottom:10px;">Nuestra Visión</h3>
-        <p style="font-size:13px;color:var(--nova-text-muted);line-height:1.7;">Ser la plataforma de referencia para inversores latinoamericanos que buscan acceder a mercados internacionales con confianza.</p>
+      <div class="nova-card nova-card-hover" style="text-align:center;padding:36px 28px;">
+        <div style="width:68px;height:68px;background:rgba(0,200,150,0.15);border-radius:18px;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;box-shadow:0 0 20px rgba(0,200,150,0.2);">
+          <i class="bi bi-eye-fill" style="font-size:30px;color:var(--nova-success);"></i>
+        </div>
+        <h3 style="font-size:18px;font-weight:700;color:#fff;margin-bottom:12px;">Nuestra Visión</h3>
+        <p style="font-size:13px;color:var(--nova-text-muted);line-height:1.8;">Ser la plataforma de referencia para inversores latinoamericanos que buscan acceder a mercados internacionales con confianza y seguridad.</p>
       </div>
-      <div class="nova-card" style="text-align:center;padding:32px 24px;">
-        <div style="font-size:48px;margin-bottom:16px;">💎</div>
-        <h3 style="font-size:18px;font-weight:700;color:#fff;margin-bottom:10px;">Nuestros Valores</h3>
-        <p style="font-size:13px;color:var(--nova-text-muted);line-height:1.7;">Transparencia, seguridad, innovación y compromiso con el éxito financiero de nuestros usuarios.</p>
+      <div class="nova-card nova-card-hover" style="text-align:center;padding:36px 28px;">
+        <div style="width:68px;height:68px;background:rgba(255,184,0,0.15);border-radius:18px;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;box-shadow:0 0 20px rgba(255,184,0,0.2);">
+          <i class="bi bi-gem" style="font-size:30px;color:var(--nova-warning);"></i>
+        </div>
+        <h3 style="font-size:18px;font-weight:700;color:#fff;margin-bottom:12px;">Nuestros Valores</h3>
+        <p style="font-size:13px;color:var(--nova-text-muted);line-height:1.8;">Transparencia, seguridad, innovación y compromiso absoluto con el éxito financiero de cada uno de nuestros usuarios.</p>
       </div>
     </div>
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:20px;margin-bottom:60px;">
-      <div style="text-align:center;padding:24px;background:var(--nova-bg-card);border:1px solid var(--nova-border);border-radius:var(--nova-radius);">
+
+    <!-- STATS -->
+    <div class="about-stats-grid" style="margin-bottom:80px;">
+      <div class="nova-card nova-card-hover" style="text-align:center;padding:28px 20px;">
+        <div style="width:48px;height:48px;background:rgba(0,102,255,0.15);border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">
+          <i class="bi bi-graph-up-arrow" style="font-size:22px;color:var(--nova-primary-light);"></i>
+        </div>
         <div style="font-size:32px;font-weight:800;color:#fff;font-family:var(--nova-font-mono);">$2.4B+</div>
         <div style="font-size:12px;color:var(--nova-text-muted);margin-top:6px;">Volumen Operado</div>
       </div>
-      <div style="text-align:center;padding:24px;background:var(--nova-bg-card);border:1px solid var(--nova-border);border-radius:var(--nova-radius);">
+      <div class="nova-card nova-card-hover" style="text-align:center;padding:28px 20px;">
+        <div style="width:48px;height:48px;background:rgba(0,200,150,0.15);border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">
+          <i class="bi bi-people-fill" style="font-size:22px;color:var(--nova-success);"></i>
+        </div>
         <div style="font-size:32px;font-weight:800;color:#fff;font-family:var(--nova-font-mono);">150K+</div>
         <div style="font-size:12px;color:var(--nova-text-muted);margin-top:6px;">Usuarios Activos</div>
       </div>
-      <div style="text-align:center;padding:24px;background:var(--nova-bg-card);border:1px solid var(--nova-border);border-radius:var(--nova-radius);">
+      <div class="nova-card nova-card-hover" style="text-align:center;padding:28px 20px;">
+        <div style="width:48px;height:48px;background:rgba(255,184,0,0.15);border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">
+          <i class="bi bi-bar-chart-fill" style="font-size:22px;color:var(--nova-warning);"></i>
+        </div>
         <div style="font-size:32px;font-weight:800;color:#fff;font-family:var(--nova-font-mono);">500+</div>
         <div style="font-size:12px;color:var(--nova-text-muted);margin-top:6px;">Activos Disponibles</div>
       </div>
-      <div style="text-align:center;padding:24px;background:var(--nova-bg-card);border:1px solid var(--nova-border);border-radius:var(--nova-radius);">
+      <div class="nova-card nova-card-hover" style="text-align:center;padding:28px 20px;">
+        <div style="width:48px;height:48px;background:rgba(123,97,255,0.15);border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">
+          <i class="bi bi-shield-check" style="font-size:22px;color:#A855F7;"></i>
+        </div>
         <div style="font-size:32px;font-weight:800;color:#fff;font-family:var(--nova-font-mono);">99.9%</div>
-        <div style="font-size:12px;color:var(--nova-text-muted);margin-top:6px;">Uptime</div>
+        <div style="font-size:12px;color:var(--nova-text-muted);margin-top:6px;">Uptime Garantizado</div>
       </div>
     </div>
-    <div style="text-align:center;">
-      <a href="{% url 'accounts:register' %}" class="btn-nova btn-nova-primary" style="padding:14px 36px;font-size:15px;"><i class="bi bi-rocket-takeoff-fill"></i> Comenzar Ahora</a>
+
+    <!-- FEATURES -->
+    <div style="margin-bottom:80px;">
+      <div style="text-align:center;margin-bottom:48px;">
+        <div class="section-tag">Tecnología</div>
+        <h2 class="section-title" style="font-size:clamp(24px,4vw,36px);">Construido para profesionales</h2>
+        <p class="section-subtitle">Infraestructura de nivel institucional al alcance de todos</p>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px;">
+        <div class="nova-card nova-card-hover" style="padding:24px;">
+          <div style="width:44px;height:44px;background:rgba(0,102,255,0.15);border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:14px;">
+            <i class="bi bi-shield-lock-fill" style="font-size:20px;color:var(--nova-primary-light);"></i>
+          </div>
+          <div style="font-size:15px;font-weight:700;color:#fff;margin-bottom:8px;">Seguridad Bancaria</div>
+          <div style="font-size:13px;color:var(--nova-text-muted);line-height:1.6;">2FA, encriptación AES-256, protección antifraude y monitoreo 24/7.</div>
+        </div>
+        <div class="nova-card nova-card-hover" style="padding:24px;">
+          <div style="width:44px;height:44px;background:rgba(0,200,150,0.15);border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:14px;">
+            <i class="bi bi-lightning-charge-fill" style="font-size:20px;color:var(--nova-success);"></i>
+          </div>
+          <div style="font-size:15px;font-weight:700;color:#fff;margin-bottom:8px;">Ejecución Instantánea</div>
+          <div style="font-size:13px;color:var(--nova-text-muted);line-height:1.6;">Órdenes de mercado y límite ejecutadas en milisegundos con latencia mínima.</div>
+        </div>
+        <div class="nova-card nova-card-hover" style="padding:24px;">
+          <div style="width:44px;height:44px;background:rgba(255,184,0,0.15);border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:14px;">
+            <i class="bi bi-graph-up" style="font-size:20px;color:var(--nova-warning);"></i>
+          </div>
+          <div style="font-size:15px;font-weight:700;color:#fff;margin-bottom:8px;">Gráficos Avanzados</div>
+          <div style="font-size:13px;color:var(--nova-text-muted);line-height:1.6;">TradingView integrado con indicadores técnicos RSI, MACD, Bollinger y más.</div>
+        </div>
+        <div class="nova-card nova-card-hover" style="padding:24px;">
+          <div style="width:44px;height:44px;background:rgba(123,97,255,0.15);border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:14px;">
+            <i class="bi bi-globe2" style="font-size:20px;color:#A855F7;"></i>
+          </div>
+          <div style="font-size:15px;font-weight:700;color:#fff;margin-bottom:8px;">Mercados Globales</div>
+          <div style="font-size:13px;color:var(--nova-text-muted);line-height:1.6;">Crypto, acciones, forex e índices de los principales mercados del mundo.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CTA -->
+    <div style="text-align:center;padding:60px 40px;background:var(--nova-bg-card);border:1px solid var(--nova-border);border-radius:var(--nova-radius-lg);position:relative;overflow:hidden;">
+      <div style="position:absolute;inset:0;background:radial-gradient(ellipse at center,rgba(0,102,255,0.08) 0%,transparent 70%);"></div>
+      <div style="position:relative;z-index:1;">
+        <h2 style="font-size:clamp(22px,4vw,32px);font-weight:800;color:#fff;margin-bottom:12px;">¿Listo para comenzar?</h2>
+        <p style="font-size:15px;color:var(--nova-text-muted);margin-bottom:28px;">Crea tu cuenta gratuita y accede a los mercados financieros globales hoy mismo.</p>
+        <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+          <a href="{% url 'accounts:register' %}" class="btn-nova btn-nova-primary" style="padding:13px 32px;font-size:14px;">
+            <i class="bi bi-rocket-takeoff-fill"></i> Crear Cuenta Gratis
+          </a>
+          <a href="{% url 'core:contact' %}" class="btn-nova btn-nova-outline" style="padding:13px 32px;font-size:14px;">
+            <i class="bi bi-chat-dots-fill"></i> Contactar Soporte
+          </a>
+        </div>
+      </div>
     </div>
   </div>
-</div>
+</section>
+
+<!-- FOOTER -->
+<footer style="background:var(--nova-bg-card);border-top:1px solid var(--nova-border);padding:32px 40px;">
+  <div style="max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <img src="{% static 'images/nova_capital.png' %}" alt="Nova Capital Group" style="width:28px;height:28px;object-fit:contain;border-radius:6px;opacity:0.8;">
+      <span style="font-size:11px;color:var(--nova-text-dim);">© {% now "Y" %} Nova Capital Group</span>
+    </div>
+    <div style="display:flex;gap:20px;flex-wrap:wrap;">
+      <a href="{% url 'core:terms' %}" style="font-size:12px;color:var(--nova-text-dim);">Términos</a>
+      <a href="{% url 'core:privacy' %}" style="font-size:12px;color:var(--nova-text-dim);">Privacidad</a>
+      <a href="{% url 'core:contact' %}" style="font-size:12px;color:var(--nova-text-dim);">Contacto</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+function toggleNavMenu() {
+  const menu = document.getElementById('navMenu');
+  const btn = document.getElementById('navToggle');
+  menu.classList.toggle('open');
+  btn.querySelector('i').className = menu.classList.contains('open') ? 'bi bi-x-lg' : 'bi bi-list';
+}
+</script>
 {% endblock %}
-
-

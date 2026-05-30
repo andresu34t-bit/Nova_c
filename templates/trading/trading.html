@@ -3,6 +3,8 @@
 {% block title %}Trading - {{ asset.symbol|default:"Terminal" }}{% endblock %}
 
 {% block content %}
+{# Token CSRF disponible para fetch() via JS #}
+<form id="csrfForm" style="display:none;">{% csrf_token %}</form>
 <div class="page-header">
   <div>
     <div class="page-title">Terminal de Trading</div>
@@ -15,7 +17,7 @@
   </div>
 </div>
 
-<div style="display:grid;grid-template-columns:1fr 320px;gap:16px;min-height:calc(100vh - 180px);">
+<div class="trading-main-grid" style="gap:16px;min-height:calc(100vh - 180px);">
 
   <!-- LEFT: Chart + Asset Selector -->
   <div style="display:flex;flex-direction:column;gap:16px;">
@@ -95,9 +97,12 @@
         </table>
       </div>
       {% else %}
-      <div style="text-align:center;padding:30px;color:var(--nova-text-muted);">
-        <div style="font-size:36px;margin-bottom:8px;">📋</div>
-        <div style="font-size:13px;">No hay órdenes recientes</div>
+      <div class="empty-state" style="padding:24px;">
+        <div class="empty-icon" style="background:rgba(0,102,255,0.1);">
+          <i class="bi bi-list-ul" style="color:var(--nova-primary-light);"></i>
+        </div>
+        <h4>Sin órdenes recientes</h4>
+        <p>Tus últimas operaciones aparecerán aquí</p>
       </div>
       {% endif %}
     </div>
@@ -208,9 +213,11 @@
       </a>
       {% endfor %}
       {% else %}
-      <div style="text-align:center;padding:20px;color:var(--nova-text-muted);">
-        <div style="font-size:28px;margin-bottom:8px;">⭐</div>
-        <div style="font-size:12px;">Añade activos a tu watchlist</div>
+      <div class="empty-state" style="padding:16px;">
+        <div class="empty-icon" style="background:rgba(255,184,0,0.1);width:48px;height:48px;">
+          <i class="bi bi-star" style="color:var(--nova-warning);font-size:20px;"></i>
+        </div>
+        <p style="font-size:12px;">Añade activos a tu watchlist</p>
       </div>
       {% endif %}
     </div>
@@ -291,12 +298,15 @@ function placeOrder() {
   btn.disabled = true;
   btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Procesando...';
 
+  // Obtener CSRF token de múltiples fuentes
+  const csrf = getCSRF();
+
   const formData = new FormData();
   formData.append('symbol', ASSET_SYMBOL);
   formData.append('side', currentSide);
   formData.append('order_type', document.getElementById('orderType').value);
   formData.append('quantity', qty);
-  formData.append('csrfmiddlewaretoken', csrfToken);
+  formData.append('csrfmiddlewaretoken', csrf);
 
   fetch('{% url "trading:place_order" %}', { method: 'POST', body: formData })
     .then(r => r.json())
@@ -328,9 +338,10 @@ function showOrderMsg(type, msg) {
 }
 
 function toggleWatchlistBtn() {
+  const csrf = getCSRF();
   const formData = new FormData();
   formData.append('symbol', ASSET_SYMBOL);
-  formData.append('csrfmiddlewaretoken', csrfToken);
+  formData.append('csrfmiddlewaretoken', csrf);
   fetch('{% url "trading:toggle_watchlist" %}', { method: 'POST', body: formData })
     .then(r => r.json())
     .then(d => {

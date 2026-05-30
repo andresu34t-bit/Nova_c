@@ -1,13 +1,46 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block title %}500 - Error del servidor{% endblock %}
 {% block body %}
 <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--nova-bg-dark);position:relative;overflow:hidden;">
+  <!-- Background effects -->
   <div style="position:absolute;inset:0;background:radial-gradient(ellipse at center,rgba(255,59,92,0.06) 0%,transparent 70%);"></div>
-  <div style="text-align:center;position:relative;z-index:1;padding:40px;">
-    <div style="font-size:120px;font-weight:900;color:rgba(255,59,92,0.2);font-family:var(--nova-font-mono);line-height:1;margin-bottom:8px;">500</div>
-    <div style="font-size:28px;font-weight:700;color:#fff;margin-bottom:12px;">Error del servidor</div>
-    <div style="font-size:15px;color:var(--nova-text-muted);margin-bottom:32px;">Algo salió mal. Nuestro equipo ha sido notificado.</div>
-    <a href="/" class="btn-nova btn-nova-primary" style="padding:12px 28px;font-size:14px;"><i class="bi bi-house-fill"></i> Ir al Inicio</a>
+  <div style="position:absolute;inset:0;background-image:linear-gradient(rgba(255,59,92,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(255,59,92,0.02) 1px,transparent 1px);background-size:60px 60px;mask-image:radial-gradient(ellipse at center,black 20%,transparent 70%);"></div>
+
+  <div style="text-align:center;position:relative;z-index:1;padding:40px 24px;max-width:520px;">
+    <!-- Icon -->
+    <div style="width:96px;height:96px;background:rgba(255,59,92,0.1);border:1px solid rgba(255,59,92,0.2);border-radius:24px;display:flex;align-items:center;justify-content:center;margin:0 auto 28px;">
+      <i class="bi bi-exclamation-triangle-fill" style="font-size:44px;color:var(--nova-danger);"></i>
+    </div>
+    <!-- Error code -->
+    <div style="font-size:96px;font-weight:900;color:rgba(255,59,92,0.15);font-family:var(--nova-font-mono);line-height:1;margin-bottom:4px;letter-spacing:-4px;">500</div>
+    <!-- Title -->
+    <div style="font-size:26px;font-weight:700;color:#fff;margin-bottom:12px;">Error del servidor</div>
+    <!-- Description -->
+    <div style="font-size:14px;color:var(--nova-text-muted);margin-bottom:36px;line-height:1.7;max-width:380px;margin-left:auto;margin-right:auto;">
+      Algo salió mal en nuestros servidores. Nuestro equipo técnico ha sido notificado automáticamente y está trabajando en la solución.
+    </div>
+    <!-- Alert -->
+    <div class="nova-alert warning" style="margin-bottom:28px;text-align:left;">
+      <i class="bi bi-clock-fill"></i>
+      Tiempo estimado de resolución: menos de 30 minutos.
+    </div>
+    <!-- Actions -->
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+      <a href="/" class="btn-nova btn-nova-primary" style="padding:12px 28px;font-size:14px;">
+        <i class="bi bi-house-fill"></i> Ir al Inicio
+      </a>
+      <button onclick="location.reload()" class="btn-nova btn-nova-ghost" style="padding:12px 28px;font-size:14px;">
+        <i class="bi bi-arrow-clockwise"></i> Reintentar
+      </button>
+    </div>
+    <!-- Support link -->
+    <div style="margin-top:32px;">
+      <a href="{% url 'core:contact' %}" style="font-size:12px;color:var(--nova-text-muted);display:inline-flex;align-items:center;gap:6px;">
+        <i class="bi bi-chat-dots-fill" style="color:var(--nova-primary-light);"></i>
+        ¿Necesitas ayuda urgente? Contacta a soporte
+      </a>
+    </div>
   </div>
 </div>
 {% endblock %}

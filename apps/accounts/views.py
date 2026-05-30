@@ -101,6 +101,8 @@ def profile_view(request):
         'kyc_docs': kyc_docs,
         'portfolio_value': user.get_portfolio_value(),
         'total_pnl': user.get_total_pnl(),
+        'total_deposited': float(user.total_deposited),
+        'total_withdrawn': float(user.total_withdrawn),
     }
     return render(request, 'accounts/profile.html', context)
 

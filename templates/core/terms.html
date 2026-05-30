@@ -2,41 +2,120 @@
 {% load static %}
 {% block title %}Términos de Servicio{% endblock %}
 {% block body %}
-<div style="min-height:100vh;background:var(--nova-bg-dark);padding:80px 40px;">
+
+<!-- NAVBAR -->
+<nav class="landing-nav" id="landingNav">
+  <div style="display:flex;align-items:center;gap:12px;">
+    <img src="{% static 'images/nova_capital.png' %}" alt="Nova Capital Group" style="width:38px;height:38px;object-fit:contain;border-radius:8px;">
+    <div>
+      <div style="font-size:13px;font-weight:700;color:#fff;letter-spacing:0.5px;">NOVA CAPITAL</div>
+      <div style="font-size:9px;color:var(--nova-text-muted);letter-spacing:2px;text-transform:uppercase;">GROUP</div>
+    </div>
+  </div>
+  <div class="landing-nav-menu" id="navMenu">
+    <a href="{% url 'core:about' %}" style="color:var(--nova-text-muted);font-size:13px;padding:8px 16px;">Nosotros</a>
+    <a href="{% url 'core:contact' %}" style="color:var(--nova-text-muted);font-size:13px;padding:8px 16px;">Contacto</a>
+    <a href="{% url 'two_factor:login' %}" class="btn-nova btn-nova-outline" style="padding:8px 20px;font-size:13px;">Iniciar Sesión</a>
+    <a href="{% url 'accounts:register' %}" class="btn-nova btn-nova-primary" style="padding:8px 20px;font-size:13px;">Comenzar Gratis</a>
+  </div>
+  <button class="landing-nav-toggle" onclick="toggleNavMenu()" aria-label="Menú" id="navToggle">
+    <i class="bi bi-list"></i>
+  </button>
+</nav>
+
+<div style="min-height:100vh;background:var(--nova-bg-dark);padding:120px 40px 80px;">
   <div style="max-width:800px;margin:0 auto;">
-    <a href="/" style="display:flex;align-items:center;gap:10px;margin-bottom:40px;text-decoration:none;">
-      <img src="{% static 'images/nova_capital.png' %}" alt="Nova Capital Group" style="width:32px;height:32px;object-fit:contain;border-radius:6px;">
-      <span style="font-size:13px;font-weight:700;color:#fff;">NOVA CAPITAL GROUP</span>
-    </a>
-    <h1 style="font-size:32px;font-weight:800;color:#fff;margin-bottom:8px;">Términos de Servicio</h1>
-    <p style="color:var(--nova-text-muted);margin-bottom:40px;">Última actualización: Enero 2024</p>
-    <div style="display:flex;flex-direction:column;gap:24px;">
-      <div class="nova-card">
-        <h3 style="font-size:16px;font-weight:700;color:#fff;margin-bottom:8px;">1. Aceptación de Términos</h3>
-        <p style="font-size:13px;color:var(--nova-text-muted);line-height:1.7;">Al acceder y utilizar Nova Capital Group, aceptas estar sujeto a estos Términos de Servicio. Si no estás de acuerdo con alguna parte de estos términos, no podrás acceder al servicio.</p>
+
+    <!-- Header -->
+    <div style="margin-bottom:40px;">
+      <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(0,102,255,0.1);border:1px solid rgba(0,102,255,0.3);border-radius:20px;padding:6px 16px;font-size:12px;font-weight:600;color:var(--nova-primary-light);margin-bottom:16px;">
+        <i class="bi bi-file-earmark-text-fill"></i> Legal
       </div>
+      <h1 style="font-size:clamp(24px,4vw,36px);font-weight:800;color:#fff;margin-bottom:8px;">Términos de Servicio</h1>
+      <p style="color:var(--nova-text-muted);font-size:13px;display:flex;align-items:center;gap:6px;">
+        <i class="bi bi-calendar3"></i> Última actualización: {% now "F Y" %}
+      </p>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:20px;">
       <div class="nova-card">
-        <h3 style="font-size:16px;font-weight:700;color:#fff;margin-bottom:8px;">2. Descripción del Servicio</h3>
-        <p style="font-size:13px;color:var(--nova-text-muted);line-height:1.7;">Nova Capital Group es una plataforma de simulación de inversiones y trading. Los datos mostrados son para fines educativos e informativos. No constituye asesoramiento financiero real ni una oferta de servicios de inversión regulados.</p>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+          <div class="icon-circle blue"><i class="bi bi-check-circle-fill"></i></div>
+          <h3 style="font-size:15px;font-weight:700;color:#fff;margin:0;">1. Aceptación de Términos</h3>
+        </div>
+        <p style="font-size:13px;color:var(--nova-text-muted);line-height:1.8;margin:0;">Al acceder y utilizar Nova Capital Group, aceptas estar sujeto a estos Términos de Servicio. Si no estás de acuerdo con alguna parte de estos términos, no podrás acceder al servicio.</p>
       </div>
+
+      <div class="nova-card">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+          <div class="icon-circle blue"><i class="bi bi-info-circle-fill"></i></div>
+          <h3 style="font-size:15px;font-weight:700;color:#fff;margin:0;">2. Descripción del Servicio</h3>
+        </div>
+        <p style="font-size:13px;color:var(--nova-text-muted);line-height:1.8;margin:0;">Nova Capital Group es una plataforma de simulación de inversiones y trading. Los datos mostrados son para fines educativos e informativos. No constituye asesoramiento financiero real ni una oferta de servicios de inversión regulados.</p>
+      </div>
+
       <div class="nova-card" style="border-color:rgba(255,184,0,0.3);">
-        <h3 style="font-size:16px;font-weight:700;color:var(--nova-warning);margin-bottom:8px;">⚠️ 3. Aviso de Riesgo</h3>
-        <p style="font-size:13px;color:var(--nova-text-muted);line-height:1.7;">Las inversiones en mercados financieros conllevan riesgo de pérdida del capital invertido. El rendimiento pasado no garantiza resultados futuros. Esta plataforma es únicamente para simulación y educación financiera.</p>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+          <div class="icon-circle gold"><i class="bi bi-exclamation-triangle-fill"></i></div>
+          <h3 style="font-size:15px;font-weight:700;color:var(--nova-warning);margin:0;">3. Aviso de Riesgo</h3>
+        </div>
+        <p style="font-size:13px;color:var(--nova-text-muted);line-height:1.8;margin:0;">Las inversiones en mercados financieros conllevan riesgo de pérdida del capital invertido. El rendimiento pasado no garantiza resultados futuros. Esta plataforma es únicamente para simulación y educación financiera.</p>
       </div>
+
       <div class="nova-card">
-        <h3 style="font-size:16px;font-weight:700;color:#fff;margin-bottom:8px;">4. Uso Aceptable</h3>
-        <p style="font-size:13px;color:var(--nova-text-muted);line-height:1.7;">Te comprometes a usar la plataforma de manera legal y ética. Está prohibido el uso para actividades fraudulentas, lavado de dinero o cualquier actividad ilegal o contraria a la normativa vigente.</p>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+          <div class="icon-circle green"><i class="bi bi-hand-thumbs-up-fill"></i></div>
+          <h3 style="font-size:15px;font-weight:700;color:#fff;margin:0;">4. Uso Aceptable</h3>
+        </div>
+        <p style="font-size:13px;color:var(--nova-text-muted);line-height:1.8;margin:0;">Te comprometes a usar la plataforma de manera legal y ética. Está prohibido el uso para actividades fraudulentas, lavado de dinero o cualquier actividad ilegal o contraria a la normativa vigente.</p>
       </div>
+
       <div class="nova-card">
-        <h3 style="font-size:16px;font-weight:700;color:#fff;margin-bottom:8px;">5. Privacidad y Datos</h3>
-        <p style="font-size:13px;color:var(--nova-text-muted);line-height:1.7;">Recopilamos y procesamos tus datos personales de acuerdo con nuestra Política de Privacidad. Implementamos medidas de seguridad de nivel bancario para proteger tu información.</p>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+          <div class="icon-circle purple"><i class="bi bi-shield-lock-fill"></i></div>
+          <h3 style="font-size:15px;font-weight:700;color:#fff;margin:0;">5. Privacidad y Datos</h3>
+        </div>
+        <p style="font-size:13px;color:var(--nova-text-muted);line-height:1.8;margin:0;">Recopilamos y procesamos tus datos personales de acuerdo con nuestra Política de Privacidad. Implementamos medidas de seguridad de nivel bancario para proteger tu información.</p>
+      </div>
+
+      <div class="nova-card">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+          <div class="icon-circle red"><i class="bi bi-x-circle-fill"></i></div>
+          <h3 style="font-size:15px;font-weight:700;color:#fff;margin:0;">6. Limitación de Responsabilidad</h3>
+        </div>
+        <p style="font-size:13px;color:var(--nova-text-muted);line-height:1.8;margin:0;">Nova Capital Group no será responsable por pérdidas financieras derivadas del uso de la plataforma. El servicio se proporciona "tal cual" sin garantías de ningún tipo.</p>
       </div>
     </div>
-    <div style="margin-top:40px;text-align:center;">
-      <a href="/" class="btn-nova btn-nova-primary" style="padding:12px 28px;">Volver al Inicio</a>
+
+    <div style="margin-top:40px;display:flex;gap:12px;flex-wrap:wrap;">
+      <a href="/" class="btn-nova btn-nova-primary" style="padding:12px 24px;">
+        <i class="bi bi-house-fill"></i> Volver al Inicio
+      </a>
+      <a href="{% url 'core:privacy' %}" class="btn-nova btn-nova-ghost" style="padding:12px 24px;">
+        <i class="bi bi-shield-lock-fill"></i> Política de Privacidad
+      </a>
     </div>
   </div>
 </div>
+
+<!-- FOOTER -->
+<footer style="background:var(--nova-bg-card);border-top:1px solid var(--nova-border);padding:24px 40px;">
+  <div style="max-width:800px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+    <span style="font-size:11px;color:var(--nova-text-dim);">© {% now "Y" %} Nova Capital Group</span>
+    <div style="display:flex;gap:16px;">
+      <a href="{% url 'core:terms' %}" style="font-size:11px;color:var(--nova-primary-light);">Términos</a>
+      <a href="{% url 'core:privacy' %}" style="font-size:11px;color:var(--nova-text-dim);">Privacidad</a>
+      <a href="{% url 'core:contact' %}" style="font-size:11px;color:var(--nova-text-dim);">Contacto</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+function toggleNavMenu() {
+  const menu = document.getElementById('navMenu');
+  const btn = document.getElementById('navToggle');
+  menu.classList.toggle('open');
+  btn.querySelector('i').className = menu.classList.contains('open') ? 'bi bi-x-lg' : 'bi bi-list';
+}
+</script>
 {% endblock %}
-
-

@@ -16,11 +16,19 @@
 </div>
 
 <!-- TABS -->
-<div style="display:flex;gap:4px;background:var(--nova-bg-card);border:1px solid var(--nova-border);border-radius:var(--nova-radius-sm);padding:4px;margin-bottom:20px;width:fit-content;">
-  <button onclick="switchTab('crypto')" id="tab-crypto" class="order-tab {% if active_tab == 'crypto' %}active buy{% endif %}" style="padding:8px 20px;font-size:13px;">₿ Criptomonedas</button>
-  <button onclick="switchTab('stocks')" id="tab-stocks" class="order-tab {% if active_tab == 'stocks' %}active buy{% endif %}" style="padding:8px 20px;font-size:13px;">📈 Acciones</button>
-  <button onclick="switchTab('forex')" id="tab-forex" class="order-tab {% if active_tab == 'forex' %}active buy{% endif %}" style="padding:8px 20px;font-size:13px;">💱 Forex</button>
-  <button onclick="switchTab('indices')" id="tab-indices" class="order-tab {% if active_tab == 'indices' %}active buy{% endif %}" style="padding:8px 20px;font-size:13px;">📊 Índices</button>
+<div style="display:flex;gap:4px;background:var(--nova-bg-card);border:1px solid var(--nova-border);border-radius:var(--nova-radius-sm);padding:4px;margin-bottom:20px;width:fit-content;flex-wrap:wrap;">
+  <button onclick="switchTab('crypto')" id="tab-crypto" class="order-tab {% if active_tab == 'crypto' %}active buy{% endif %}" style="padding:8px 20px;font-size:13px;">
+    <i class="bi bi-currency-bitcoin me-1"></i>Criptomonedas
+  </button>
+  <button onclick="switchTab('stocks')" id="tab-stocks" class="order-tab {% if active_tab == 'stocks' %}active buy{% endif %}" style="padding:8px 20px;font-size:13px;">
+    <i class="bi bi-graph-up-arrow me-1"></i>Acciones
+  </button>
+  <button onclick="switchTab('forex')" id="tab-forex" class="order-tab {% if active_tab == 'forex' %}active buy{% endif %}" style="padding:8px 20px;font-size:13px;">
+    <i class="bi bi-currency-exchange me-1"></i>Forex
+  </button>
+  <button onclick="switchTab('indices')" id="tab-indices" class="order-tab {% if active_tab == 'indices' %}active buy{% endif %}" style="padding:8px 20px;font-size:13px;">
+    <i class="bi bi-bar-chart-fill me-1"></i>Índices
+  </button>
 </div>
 
 <!-- CRYPTO TAB -->
@@ -77,9 +85,11 @@
           </tr>
           {% empty %}
           <tr><td colspan="10" style="text-align:center;padding:60px;color:var(--nova-text-muted);">
-            <div style="font-size:48px;margin-bottom:12px;">₿</div>
-            <div>No hay datos de criptomonedas.</div>
-            <button onclick="fetchData()" class="btn-nova btn-nova-primary" style="margin-top:16px;padding:8px 20px;font-size:12px;">Cargar datos</button>
+            <div style="width:64px;height:64px;background:rgba(255,184,0,0.1);border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
+              <i class="bi bi-currency-bitcoin" style="font-size:28px;color:var(--nova-warning);"></i>
+            </div>
+            <div style="font-size:15px;font-weight:600;color:#fff;margin-bottom:8px;">No hay datos de criptomonedas</div>
+            <button onclick="refreshPrices()" class="btn-nova btn-nova-primary" style="margin-top:8px;padding:8px 20px;font-size:12px;"><i class="bi bi-arrow-clockwise"></i> Cargar datos</button>
           </td></tr>
           {% endfor %}
         </tbody>
@@ -113,9 +123,12 @@
       </table>
     </div>
     {% else %}
-    <div style="text-align:center;padding:60px;color:var(--nova-text-muted);">
-      <div style="font-size:48px;margin-bottom:12px;">📈</div>
-      <div>Datos de acciones próximamente</div>
+    <div class="empty-state">
+      <div class="empty-icon" style="background:rgba(0,200,150,0.1);">
+        <i class="bi bi-building" style="color:var(--nova-success);font-size:28px;"></i>
+      </div>
+      <h4>Datos de acciones próximamente</h4>
+      <p>Estamos integrando los principales mercados de acciones globales</p>
     </div>
     {% endif %}
   </div>
@@ -146,9 +159,12 @@
       </table>
     </div>
     {% else %}
-    <div style="text-align:center;padding:60px;color:var(--nova-text-muted);">
-      <div style="font-size:48px;margin-bottom:12px;">💱</div>
-      <div>Datos de Forex próximamente</div>
+    <div class="empty-state">
+      <div class="empty-icon" style="background:rgba(0,102,255,0.1);">
+        <i class="bi bi-currency-exchange" style="color:var(--nova-primary-light);font-size:28px;"></i>
+      </div>
+      <h4>Datos de Forex próximamente</h4>
+      <p>Estamos integrando los principales pares de divisas del mercado Forex</p>
     </div>
     {% endif %}
   </div>
@@ -165,7 +181,7 @@
       {% for asset in indices %}
       <div class="market-card">
         <div class="mc-header">
-          <div class="mc-icon" style="background:rgba(0,102,255,0.15);font-size:18px;">📊</div>
+          <div class="mc-icon" style="background:rgba(0,102,255,0.15);font-size:18px;"><i class="bi bi-bar-chart-fill" style="color:var(--nova-primary-light);"></i></div>
           <div><div class="mc-symbol">{{ asset.symbol }}</div><div class="mc-name">{{ asset.name|truncatechars:16 }}</div></div>
         </div>
         <div class="mc-price">${{ asset.current_price|floatformat:2 }}</div>
@@ -176,9 +192,12 @@
       {% endfor %}
     </div>
     {% else %}
-    <div style="text-align:center;padding:60px;color:var(--nova-text-muted);">
-      <div style="font-size:48px;margin-bottom:12px;">📊</div>
-      <div>Datos de índices próximamente</div>
+    <div class="empty-state">
+      <div class="empty-icon" style="background:rgba(255,184,0,0.1);">
+        <i class="bi bi-bar-chart-fill" style="color:var(--nova-warning);font-size:28px;"></i>
+      </div>
+      <h4>Datos de índices próximamente</h4>
+      <p>Estamos integrando los principales índices bursátiles globales</p>
     </div>
     {% endif %}
   </div>

@@ -39,8 +39,6 @@
       </div>
     </div>
     <div style="display:flex;gap:32px;flex-wrap:wrap;">
-      {% for label, value, color in "Máx 24h,$"|add:asset.high_24h|floatformat:4|add:",var(--nova-success)|Mín 24h,$"|add:asset.low_24h|floatformat:4|add:",var(--nova-danger)" %}
-      {% endfor %}
       <div style="text-align:center;">
         <div style="font-size:11px;color:var(--nova-text-muted);margin-bottom:4px;">Máx 24h</div>
         <div style="font-size:16px;font-weight:700;color:var(--nova-success);font-family:var(--nova-font-mono);">${{ asset.high_24h|floatformat:4 }}</div>
@@ -132,7 +130,7 @@ new TradingView.widget({
 function toggleWL() {
   const formData = new FormData();
   formData.append('symbol', '{{ asset.symbol }}');
-  formData.append('csrfmiddlewaretoken', csrfToken);
+  formData.append('csrfmiddlewaretoken', getCSRF());
   fetch('{% url "trading:toggle_watchlist" %}', { method: 'POST', body: formData })
     .then(r => r.json())
     .then(d => location.reload());

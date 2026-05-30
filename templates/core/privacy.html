@@ -2,37 +2,154 @@
 {% load static %}
 {% block title %}Política de Privacidad{% endblock %}
 {% block body %}
-<div style="min-height:100vh;background:var(--nova-bg-dark);padding:80px 40px;">
+
+<!-- NAVBAR -->
+<nav class="landing-nav" id="landingNav">
+  <div style="display:flex;align-items:center;gap:12px;">
+    <img src="{% static 'images/nova_capital.png' %}" alt="Nova Capital Group" style="width:38px;height:38px;object-fit:contain;border-radius:8px;">
+    <div>
+      <div style="font-size:13px;font-weight:700;color:#fff;letter-spacing:0.5px;">NOVA CAPITAL</div>
+      <div style="font-size:9px;color:var(--nova-text-muted);letter-spacing:2px;text-transform:uppercase;">GROUP</div>
+    </div>
+  </div>
+  <div class="landing-nav-menu" id="navMenu">
+    <a href="{% url 'core:about' %}" style="color:var(--nova-text-muted);font-size:13px;padding:8px 16px;">Nosotros</a>
+    <a href="{% url 'core:contact' %}" style="color:var(--nova-text-muted);font-size:13px;padding:8px 16px;">Contacto</a>
+    <a href="{% url 'two_factor:login' %}" class="btn-nova btn-nova-outline" style="padding:8px 20px;font-size:13px;">Iniciar Sesión</a>
+    <a href="{% url 'accounts:register' %}" class="btn-nova btn-nova-primary" style="padding:8px 20px;font-size:13px;">Comenzar Gratis</a>
+  </div>
+  <button class="landing-nav-toggle" onclick="toggleNavMenu()" aria-label="Menú" id="navToggle">
+    <i class="bi bi-list"></i>
+  </button>
+</nav>
+
+<div style="min-height:100vh;background:var(--nova-bg-dark);padding:120px 40px 80px;">
   <div style="max-width:800px;margin:0 auto;">
-    <a href="/" style="display:flex;align-items:center;gap:10px;margin-bottom:40px;text-decoration:none;">
-      <img src="{% static 'images/nova_capital.png' %}" alt="Nova Capital Group" style="width:32px;height:32px;object-fit:contain;border-radius:6px;">
-      <span style="font-size:13px;font-weight:700;color:#fff;">NOVA CAPITAL GROUP</span>
-    </a>
-    <h1 style="font-size:32px;font-weight:800;color:#fff;margin-bottom:8px;">Política de Privacidad</h1>
-    <p style="color:var(--nova-text-muted);margin-bottom:40px;">Última actualización: Enero 2024</p>
-    <div style="display:flex;flex-direction:column;gap:24px;">
-      <div class="nova-card">
-        <h3 style="font-size:16px;font-weight:700;color:#fff;margin-bottom:8px;">Datos que Recopilamos</h3>
-        <p style="font-size:13px;color:var(--nova-text-muted);line-height:1.7;">Recopilamos información que nos proporcionas directamente: nombre, email, teléfono, país. También recopilamos datos de uso de la plataforma, dirección IP y datos del dispositivo para fines de seguridad.</p>
+
+    <!-- Header -->
+    <div style="margin-bottom:40px;">
+      <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(0,200,150,0.1);border:1px solid rgba(0,200,150,0.3);border-radius:20px;padding:6px 16px;font-size:12px;font-weight:600;color:var(--nova-success);margin-bottom:16px;">
+        <i class="bi bi-shield-check-fill"></i> Privacidad
       </div>
+      <h1 style="font-size:clamp(24px,4vw,36px);font-weight:800;color:#fff;margin-bottom:8px;">Política de Privacidad</h1>
+      <p style="color:var(--nova-text-muted);font-size:13px;display:flex;align-items:center;gap:6px;">
+        <i class="bi bi-calendar3"></i> Última actualización: {% now "F Y" %}
+      </p>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:20px;">
       <div class="nova-card">
-        <h3 style="font-size:16px;font-weight:700;color:#fff;margin-bottom:8px;">Cómo Usamos tus Datos</h3>
-        <p style="font-size:13px;color:var(--nova-text-muted);line-height:1.7;">Usamos tus datos para: proveer y mejorar el servicio, verificar tu identidad, prevenir fraudes, enviarte comunicaciones importantes y cumplir con obligaciones legales.</p>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+          <div class="icon-circle blue"><i class="bi bi-database-fill"></i></div>
+          <h3 style="font-size:15px;font-weight:700;color:#fff;margin:0;">Datos que Recopilamos</h3>
+        </div>
+        <p style="font-size:13px;color:var(--nova-text-muted);line-height:1.8;margin:0 0 12px;">Recopilamos información que nos proporcionas directamente:</p>
+        <ul style="font-size:13px;color:var(--nova-text-muted);line-height:1.8;margin:0;padding-left:20px;">
+          <li>Datos de identificación: nombre, apellido, email, teléfono, país</li>
+          <li>Datos de uso: actividad en la plataforma, operaciones realizadas</li>
+          <li>Datos técnicos: dirección IP, tipo de dispositivo, navegador</li>
+          <li>Documentos KYC: cuando los proporcionas voluntariamente</li>
+        </ul>
       </div>
+
       <div class="nova-card">
-        <h3 style="font-size:16px;font-weight:700;color:#fff;margin-bottom:8px;">Seguridad de Datos</h3>
-        <p style="font-size:13px;color:var(--nova-text-muted);line-height:1.7;">Implementamos medidas de seguridad técnicas y organizativas: encriptación AES-256, autenticación 2FA, monitoreo continuo y acceso restringido a datos sensibles.</p>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+          <div class="icon-circle green"><i class="bi bi-gear-fill"></i></div>
+          <h3 style="font-size:15px;font-weight:700;color:#fff;margin:0;">Cómo Usamos tus Datos</h3>
+        </div>
+        <p style="font-size:13px;color:var(--nova-text-muted);line-height:1.8;margin:0 0 12px;">Utilizamos tu información para:</p>
+        <ul style="font-size:13px;color:var(--nova-text-muted);line-height:1.8;margin:0;padding-left:20px;">
+          <li>Proveer y mejorar continuamente el servicio</li>
+          <li>Verificar tu identidad y prevenir fraudes</li>
+          <li>Enviarte comunicaciones importantes sobre tu cuenta</li>
+          <li>Cumplir con obligaciones legales y regulatorias</li>
+          <li>Analizar el uso de la plataforma para mejoras</li>
+        </ul>
       </div>
+
       <div class="nova-card">
-        <h3 style="font-size:16px;font-weight:700;color:#fff;margin-bottom:8px;">Tus Derechos</h3>
-        <p style="font-size:13px;color:var(--nova-text-muted);line-height:1.7;">Tienes derecho a: acceder a tus datos, corregirlos, solicitar su eliminación, oponerte al procesamiento y portabilidad de datos. Contáctanos para ejercer estos derechos.</p>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+          <div class="icon-circle purple"><i class="bi bi-shield-lock-fill"></i></div>
+          <h3 style="font-size:15px;font-weight:700;color:#fff;margin:0;">Seguridad de Datos</h3>
+        </div>
+        <p style="font-size:13px;color:var(--nova-text-muted);line-height:1.8;margin:0 0 12px;">Implementamos medidas de seguridad de nivel bancario:</p>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-top:8px;">
+          <div style="background:var(--nova-bg-dark);border-radius:var(--nova-radius-sm);padding:12px;display:flex;align-items:center;gap:8px;">
+            <i class="bi bi-lock-fill" style="color:var(--nova-success);font-size:16px;"></i>
+            <span style="font-size:12px;color:var(--nova-text);">Encriptación AES-256</span>
+          </div>
+          <div style="background:var(--nova-bg-dark);border-radius:var(--nova-radius-sm);padding:12px;display:flex;align-items:center;gap:8px;">
+            <i class="bi bi-phone-fill" style="color:var(--nova-primary-light);font-size:16px;"></i>
+            <span style="font-size:12px;color:var(--nova-text);">Autenticación 2FA</span>
+          </div>
+          <div style="background:var(--nova-bg-dark);border-radius:var(--nova-radius-sm);padding:12px;display:flex;align-items:center;gap:8px;">
+            <i class="bi bi-eye-slash-fill" style="color:var(--nova-warning);font-size:16px;"></i>
+            <span style="font-size:12px;color:var(--nova-text);">Acceso restringido</span>
+          </div>
+          <div style="background:var(--nova-bg-dark);border-radius:var(--nova-radius-sm);padding:12px;display:flex;align-items:center;gap:8px;">
+            <i class="bi bi-activity" style="color:var(--nova-danger);font-size:16px;"></i>
+            <span style="font-size:12px;color:var(--nova-text);">Monitoreo 24/7</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="nova-card">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+          <div class="icon-circle gold"><i class="bi bi-person-check-fill"></i></div>
+          <h3 style="font-size:15px;font-weight:700;color:#fff;margin:0;">Tus Derechos</h3>
+        </div>
+        <p style="font-size:13px;color:var(--nova-text-muted);line-height:1.8;margin:0 0 12px;">Como usuario tienes derecho a:</p>
+        <ul style="font-size:13px;color:var(--nova-text-muted);line-height:1.8;margin:0;padding-left:20px;">
+          <li><strong style="color:var(--nova-text);">Acceso:</strong> Solicitar una copia de tus datos personales</li>
+          <li><strong style="color:var(--nova-text);">Rectificación:</strong> Corregir datos inexactos o incompletos</li>
+          <li><strong style="color:var(--nova-text);">Eliminación:</strong> Solicitar la eliminación de tus datos</li>
+          <li><strong style="color:var(--nova-text);">Portabilidad:</strong> Recibir tus datos en formato estructurado</li>
+          <li><strong style="color:var(--nova-text);">Oposición:</strong> Oponerte al procesamiento de tus datos</li>
+        </ul>
+        <div class="nova-alert info" style="margin-top:16px;">
+          <i class="bi bi-envelope-fill"></i>
+          Para ejercer estos derechos, contáctanos en: <strong>privacidad@novacapitalgroup.com</strong>
+        </div>
+      </div>
+
+      <div class="nova-card">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+          <div class="icon-circle red"><i class="bi bi-share-fill"></i></div>
+          <h3 style="font-size:15px;font-weight:700;color:#fff;margin:0;">Compartir Datos con Terceros</h3>
+        </div>
+        <p style="font-size:13px;color:var(--nova-text-muted);line-height:1.8;margin:0;">No vendemos ni alquilamos tus datos personales a terceros. Solo compartimos información cuando es necesario para proveer el servicio, cumplir con la ley o proteger nuestros derechos legales.</p>
       </div>
     </div>
-    <div style="margin-top:40px;text-align:center;">
-      <a href="/" class="btn-nova btn-nova-primary" style="padding:12px 28px;">Volver al Inicio</a>
+
+    <div style="margin-top:40px;display:flex;gap:12px;flex-wrap:wrap;">
+      <a href="/" class="btn-nova btn-nova-primary" style="padding:12px 24px;">
+        <i class="bi bi-house-fill"></i> Volver al Inicio
+      </a>
+      <a href="{% url 'core:terms' %}" class="btn-nova btn-nova-ghost" style="padding:12px 24px;">
+        <i class="bi bi-file-earmark-text-fill"></i> Términos de Servicio
+      </a>
     </div>
   </div>
 </div>
+
+<!-- FOOTER -->
+<footer style="background:var(--nova-bg-card);border-top:1px solid var(--nova-border);padding:24px 40px;">
+  <div style="max-width:800px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+    <span style="font-size:11px;color:var(--nova-text-dim);">© {% now "Y" %} Nova Capital Group</span>
+    <div style="display:flex;gap:16px;">
+      <a href="{% url 'core:terms' %}" style="font-size:11px;color:var(--nova-text-dim);">Términos</a>
+      <a href="{% url 'core:privacy' %}" style="font-size:11px;color:var(--nova-primary-light);">Privacidad</a>
+      <a href="{% url 'core:contact' %}" style="font-size:11px;color:var(--nova-text-dim);">Contacto</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+function toggleNavMenu() {
+  const menu = document.getElementById('navMenu');
+  const btn = document.getElementById('navToggle');
+  menu.classList.toggle('open');
+  btn.querySelector('i').className = menu.classList.contains('open') ? 'bi bi-x-lg' : 'bi bi-list';
+}
+</script>
 {% endblock %}
-
-

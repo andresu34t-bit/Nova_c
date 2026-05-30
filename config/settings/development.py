@@ -20,7 +20,7 @@ if _use_sqlite or not _db_password:
             'NAME': BASE_DIR / 'db_dev.sqlite3',
         }
     }
-    print("\n⚠️  Usando SQLite para desarrollo. Para usar PostgreSQL, configura DB_PASSWORD en .env\n")
+    print("\n[WARNING] Usando SQLite para desarrollo. Para usar PostgreSQL, configura DB_PASSWORD en .env\n")
 else:
     DATABASES = {
         'default': {

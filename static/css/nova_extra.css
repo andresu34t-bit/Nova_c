@@ -1,6 +1,6 @@
 /* ============================================================
-   NOVA CAPITAL GROUP - Visual Audit Improvements
-   Premium fintech UI enhancements
+   NOVA CAPITAL GROUP - Premium Visual Audit & Responsive Fixes
+   Complete UI/UX overhaul for production-ready platform
    ============================================================ */
 
 /* ── SIDEBAR LOGO IMAGE ── */
@@ -25,9 +25,30 @@
   top: 0; bottom: 0;
   width: 60px;
   z-index: 2;
+  pointer-events: none;
 }
 .price-ticker-bar::before { left: 0; background: linear-gradient(90deg, var(--nova-bg-card2), transparent); }
 .price-ticker-bar::after  { right: 0; background: linear-gradient(-90deg, var(--nova-bg-card2), transparent); }
+
+/* ── TICKER SCROLL ── */
+.ticker-track {
+  display: flex;
+  gap: 32px;
+  white-space: nowrap;
+  animation: ticker-scroll 60s linear infinite;
+  width: max-content;
+}
+.ticker-track:hover { animation-play-state: paused; }
+@keyframes ticker-scroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.ticker-item {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 12px; padding: 0 4px;
+}
+.ticker-item .t-symbol { font-weight: 700; color: #fff; }
+.ticker-item .t-price  { font-family: var(--nova-font-mono); color: var(--nova-text); }
 
 /* ── STAT CARD GLOW VARIANTS ── */
 .stat-card.blue::before   { background: linear-gradient(90deg,#0066FF,#3385FF); }
@@ -36,14 +57,49 @@
 .stat-card.gold::before   { background: linear-gradient(90deg,#FFB800,#FF8C00); }
 .stat-card.purple::before { background: linear-gradient(90deg,#7B61FF,#A855F7); }
 
-/* ── ASSET ICON FALLBACK ── */
+/* ── STAT CARD ICON ── */
+.stat-card .stat-icon {
+  width: 48px; height: 48px;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 14px;
+  font-size: 22px;
+}
+.stat-card .stat-icon i { font-size: 22px; }
+
+/* ── STAT CARD VALUE ── */
+.stat-card .stat-value {
+  font-size: 22px; font-weight: 700; color: #fff;
+  font-family: var(--nova-font-mono); letter-spacing: -0.5px;
+  line-height: 1.2;
+}
+
+/* ── ASSET ICON ── */
+.asset-icon {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  background: var(--nova-bg-hover);
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden; flex-shrink: 0;
+  font-size: 12px; font-weight: 700; color: var(--nova-primary-light);
+}
+.asset-icon img {
+  width: 100%; height: 100%; object-fit: cover; border-radius: 50%;
+}
 .asset-icon-fallback {
   width: 32px; height: 32px;
   border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
   font-size: 13px; font-weight: 800;
-  color: #fff;
+  color: #fff; flex-shrink: 0;
+}
+.asset-icon-letter {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 800; color: #fff;
   flex-shrink: 0;
+  background: linear-gradient(135deg, var(--nova-primary), var(--nova-secondary));
 }
 
 /* ── EMPTY STATE ── */
@@ -57,15 +113,19 @@
   width: 72px; height: 72px;
   border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  font-size: 32px;
+  font-size: 30px;
   margin-bottom: 4px;
 }
 .empty-state h4 { font-size: 16px; font-weight: 700; color: #fff; margin: 0; }
 .empty-state p  { font-size: 13px; color: var(--nova-text-muted); margin: 0; max-width: 280px; }
 
-/* ── MARKET MINI CHART ── */
-.mini-chart-positive { color: var(--nova-success); }
-.mini-chart-negative { color: var(--nova-danger); }
+/* ── NEWS IMAGE PLACEHOLDER ── */
+.news-image-placeholder {
+  width: 100%; height: 160px;
+  background: linear-gradient(135deg, var(--nova-bg-card2), var(--nova-bg-hover));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 44px;
+}
 
 /* ── NOTIFICATION DOT ── */
 .notif-dot {
@@ -107,17 +167,17 @@
   border-color: rgba(0,102,255,0.4);
 }
 
-/* ── PULSE ANIMATION ── */
+/* ── PULSE LIVE ── */
 .pulse-live {
   display: inline-flex; align-items: center; gap: 6px;
   font-size: 11px; font-weight: 600; color: var(--nova-success);
 }
 .pulse-live::before {
   content: '';
-  width: 7px; height: 7px;
-  border-radius: 50%;
+  width: 7px; height: 7px; border-radius: 50%;
   background: var(--nova-success);
   animation: pulse-dot 1.5s infinite;
+  flex-shrink: 0;
 }
 
 /* ── TABLE ROW HIGHLIGHT ── */
@@ -138,6 +198,9 @@
     white-space: nowrap; z-index: 1000;
     box-shadow: var(--nova-shadow);
   }
+  /* Hide user mini-card text when collapsed */
+  .nova-sidebar.collapsed .sidebar-user-text { display: none; }
+  .nova-sidebar.collapsed .sidebar-footer-inner { justify-content: center; }
 }
 
 /* ── LOADING SKELETON ── */
@@ -154,13 +217,14 @@
 
 /* ── TOPBAR BALANCE CHIP ── */
 .balance-chip {
-  display: flex; align-items: center; gap: 6px;
+  display: inline-flex; align-items: center; gap: 6px;
   background: rgba(0,200,150,0.1);
   border: 1px solid rgba(0,200,150,0.25);
   border-radius: 20px; padding: 5px 14px;
   font-size: 13px; font-weight: 700;
   color: var(--nova-success);
   font-family: var(--nova-font-mono);
+  white-space: nowrap;
 }
 
 /* ── SECTION DIVIDER ── */
@@ -190,10 +254,10 @@
 
 /* ── ICON CIRCLE ── */
 .icon-circle {
-  width: 44px; height: 44px;
+  width: 36px; height: 36px;
   border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  font-size: 20px; flex-shrink: 0;
+  font-size: 16px; flex-shrink: 0;
 }
 .icon-circle.blue   { background: rgba(0,102,255,0.15); color: var(--nova-primary-light); }
 .icon-circle.green  { background: rgba(0,200,150,0.15); color: var(--nova-success); }
@@ -201,74 +265,7 @@
 .icon-circle.gold   { background: rgba(255,184,0,0.15);  color: var(--nova-warning); }
 .icon-circle.purple { background: rgba(123,97,255,0.15); color: #A855F7; }
 
-/* ── FIX: Ticker bar full width scroll ── */
-.price-ticker-bar { overflow: hidden; }
-.ticker-track {
-  display: flex;
-  gap: 32px;
-  white-space: nowrap;
-  animation: ticker-scroll 60s linear infinite;
-  width: max-content;
-}
-.ticker-track:hover { animation-play-state: paused; }
-@keyframes ticker-scroll {
-  0%   { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
-}
-.ticker-item {
-  display: inline-flex; align-items: center; gap: 8px;
-  font-size: 12px; padding: 0 4px;
-}
-.ticker-item .t-symbol { font-weight: 700; color: #fff; }
-.ticker-item .t-price  { font-family: var(--nova-font-mono); color: var(--nova-text); }
-
-/* ── FIX: Stat card icon size ── */
-.stat-card .stat-icon {
-  width: 48px; height: 48px;
-  border-radius: 12px;
-  display: flex; align-items: center; justify-content: center;
-  margin-bottom: 14px;
-}
-.stat-card .stat-icon i { font-size: 22px; }
-
-/* ── FIX: Asset icon in tables ── */
-.asset-icon {
-  width: 34px; height: 34px;
-  border-radius: 50%;
-  background: var(--nova-bg-hover);
-  display: flex; align-items: center; justify-content: center;
-  overflow: hidden; flex-shrink: 0;
-  font-size: 12px; font-weight: 700; color: var(--nova-primary-light);
-}
-.asset-icon img {
-  width: 100%; height: 100%; object-fit: cover; border-radius: 50%;
-}
-
-/* ── FIX: News image placeholder ── */
-.news-image-placeholder {
-  width: 100%; height: 160px;
-  background: linear-gradient(135deg, var(--nova-bg-card2), var(--nova-bg-hover));
-  display: flex; align-items: center; justify-content: center;
-  font-size: 44px;
-}
-
-/* ── FIX: Empty state icon circle ── */
-.empty-state .empty-icon {
-  width: 72px; height: 72px;
-  border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 30px;
-}
-
-/* ── FIX: icon-circle sizes ── */
-.icon-circle {
-  width: 36px; height: 36px;
-  border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 16px; flex-shrink: 0;
-}
-
-/* ── FIX: Balance chip ── */
+/* ── BALANCE CHIP ── */
 .balance-chip {
   display: inline-flex; align-items: center; gap: 6px;
   background: rgba(0,200,150,0.1);
@@ -280,71 +277,635 @@
   white-space: nowrap;
 }
 
-/* ── FIX: Sidebar logo image glow ── */
-.sidebar-logo img {
-  box-shadow: 0 0 12px rgba(0,102,255,0.3);
-}
+/* ── TOPBAR SEARCH RESULTS ── */
+#searchResults a:last-child { border-bottom: none !important; }
 
-/* ── FIX: Topbar search results ── */
-#searchResults a:last-child {
-  border-bottom: none !important;
-}
-
-/* ── FIX: Responsive grid on small screens ── */
-@media (max-width: 900px) {
-  .dashboard-main-grid { grid-template-columns: 1fr !important; }
-  .dashboard-bottom-grid { grid-template-columns: 1fr !important; }
-}
-
-/* ── FIX: Table asset icon fallback letter ── */
-.asset-icon-letter {
-  width: 34px; height: 34px;
-  border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 12px; font-weight: 800; color: #fff;
-  flex-shrink: 0;
-  background: linear-gradient(135deg, var(--nova-primary), var(--nova-secondary));
-}
-
-/* ── FIX: Verified badge ── */
-.verified-badge {
-  display: inline-flex; align-items: center; gap: 4px;
-  background: rgba(0,200,150,0.12);
-  border: 1px solid rgba(0,200,150,0.3);
-  border-radius: 20px; padding: 2px 10px;
-  font-size: 11px; font-weight: 600; color: var(--nova-success);
-}
-
-/* ── FIX: Pulse live indicator ── */
-.pulse-live {
-  display: inline-flex; align-items: center; gap: 6px;
-  font-size: 11px; font-weight: 600; color: var(--nova-success);
-}
-.pulse-live::before {
-  content: '';
-  width: 7px; height: 7px; border-radius: 50%;
-  background: var(--nova-success);
-  animation: pulse-dot 1.5s infinite;
-  flex-shrink: 0;
-}
-
-/* ── FIX: Nova card title ── */
+/* ── NOVA CARD TITLE ── */
 .nova-card-title {
   font-size: 12px; font-weight: 600;
   color: var(--nova-text-muted);
   text-transform: uppercase; letter-spacing: 0.6px;
 }
 
-/* ── FIX: Stat card value font ── */
-.stat-card .stat-value {
-  font-size: 22px; font-weight: 700; color: #fff;
-  font-family: var(--nova-font-mono); letter-spacing: -0.5px;
-  line-height: 1.2;
-}
-
-/* ── FIX: Page subtitle spacing ── */
+/* ── PAGE SUBTITLE ── */
 .page-subtitle {
   font-size: 12px; color: var(--nova-text-muted);
   margin-top: 4px; display: flex; align-items: center; gap: 6px;
   flex-wrap: wrap;
+}
+
+/* ── WITHDRAWAL BUTTON FIX (legible) ── */
+.btn-withdrawal {
+  background: linear-gradient(135deg, var(--nova-warning), #CC8800);
+  color: #fff !important;
+  font-weight: 700;
+}
+.btn-withdrawal:hover { opacity: 0.9; color: #fff !important; }
+
+/* ── STAT CARD NEUTRAL CHANGE ── */
+.stat-change.neutral { color: var(--nova-text-muted); }
+
+/* ── MINI CHART COLORS ── */
+.mini-chart-positive { color: var(--nova-success); }
+.mini-chart-negative { color: var(--nova-danger); }
+
+/* ── MARKET SENTIMENT GAUGE ── */
+.sentiment-gauge {
+  background: linear-gradient(90deg, var(--nova-danger) 0%, var(--nova-warning) 50%, var(--nova-success) 100%);
+  height: 8px; border-radius: 20px;
+}
+
+/* ── LANDING NAV MOBILE HAMBURGER ── */
+.landing-nav-toggle {
+  display: none;
+  background: none; border: none;
+  color: var(--nova-text-muted); font-size: 22px; cursor: pointer;
+  padding: 4px;
+}
+.landing-nav-menu {
+  display: flex; align-items: center; gap: 8px;
+}
+
+/* ── ABOUT PAGE STATS GRID RESPONSIVE ── */
+.about-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+/* ── CONTACT GRID ── */
+.contact-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+/* ── PROFILE GRID ── */
+.profile-main-grid {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 20px;
+}
+
+/* ── SECURITY GRID ── */
+.security-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+/* ── FINANCES GRID ── */
+.finances-quick-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+/* ── NEWS LAYOUT ── */
+.news-main-layout {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 20px;
+}
+
+/* ── PORTFOLIO MAIN GRID ── */
+.portfolio-main-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+/* ── DASHBOARD MAIN GRID ── */
+.dashboard-main-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+.dashboard-bottom-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+/* ── TRADING LAYOUT RESPONSIVE ── */
+.trading-main-grid {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 16px;
+  min-height: calc(100vh - 180px);
+}
+
+/* ── FORM GRID ── */
+.form-two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+/* ── SCROLLABLE TABLE WRAPPER ── */
+.table-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ── MOBILE BOTTOM NAV (optional enhancement) ── */
+.mobile-bottom-nav {
+  display: none;
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: var(--nova-bg-card);
+  border-top: 1px solid var(--nova-border);
+  z-index: 1001;
+  padding: 8px 0 env(safe-area-inset-bottom, 8px);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   RESPONSIVE BREAKPOINTS
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── ULTRAWIDE (>1600px) ── */
+@media (min-width: 1600px) {
+  .nova-content { padding: 28px 32px; }
+  .stat-card .stat-value { font-size: 26px; }
+}
+
+/* ── LARGE DESKTOP (1025px - 1280px) ── */
+@media (max-width: 1280px) {
+  .dashboard-bottom-grid { grid-template-columns: 1fr 1fr; }
+  .dashboard-bottom-grid > *:last-child { grid-column: span 2; }
+  .about-stats-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ── TABLET LANDSCAPE (769px - 1024px) ── */
+@media (max-width: 1024px) {
+  .dashboard-main-grid { grid-template-columns: 1fr !important; }
+  .dashboard-bottom-grid { grid-template-columns: 1fr !important; }
+  .portfolio-main-grid { grid-template-columns: 1fr !important; }
+  .trading-main-grid { grid-template-columns: 1fr !important; }
+  .news-main-layout { grid-template-columns: 1fr !important; }
+  .profile-main-grid { grid-template-columns: 1fr !important; }
+  .security-grid { grid-template-columns: 1fr !important; }
+  .finances-quick-grid { grid-template-columns: 1fr !important; }
+  .about-stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .contact-info-grid { grid-template-columns: 1fr !important; }
+  .form-two-col { grid-template-columns: 1fr !important; }
+  .nova-content { padding: 20px; }
+}
+
+/* ── TABLET PORTRAIT (577px - 768px) ── */
+@media (max-width: 768px) {
+  /* Sidebar */
+  .nova-sidebar { transform: translateX(-100%); width: 260px; }
+  .nova-sidebar.mobile-open { transform: translateX(0); }
+  .nova-sidebar .logo-text,
+  .nova-sidebar .nav-item span,
+  .nova-sidebar .nav-section-label { display: block !important; }
+  .nova-main { margin-left: 0 !important; }
+  .nova-content { padding: 16px; }
+
+  /* Topbar */
+  .nova-topbar { padding: 0 16px; gap: 10px; }
+  .topbar-search { max-width: 200px; }
+
+  /* Page header */
+  .page-header { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .page-header > div:last-child { width: 100%; }
+  .page-header > div:last-child .btn-nova { flex: 1; justify-content: center; }
+
+  /* Stat cards */
+  .stat-card .stat-value { font-size: 20px; }
+
+  /* Tables */
+  .nova-table th, .nova-table td { padding: 10px 12px; font-size: 12px; }
+
+  /* Grids */
+  .dashboard-main-grid,
+  .dashboard-bottom-grid,
+  .portfolio-main-grid,
+  .trading-main-grid,
+  .news-main-layout,
+  .profile-main-grid,
+  .security-grid,
+  .finances-quick-grid { grid-template-columns: 1fr !important; }
+
+  /* Landing */
+  .landing-hero { padding: 100px 20px 60px; }
+  .hero-stats { gap: 20px; flex-wrap: wrap; }
+  .hero-stat .stat-num { font-size: 22px; }
+  .features-section { padding: 60px 20px; }
+  .landing-nav { padding: 14px 20px; }
+  .landing-nav-toggle { display: block; }
+  .landing-nav-menu { display: none; flex-direction: column; position: absolute; top: 100%; left: 0; right: 0; background: var(--nova-bg-card); border-bottom: 1px solid var(--nova-border); padding: 16px 20px; gap: 12px; }
+  .landing-nav-menu.open { display: flex; }
+  .landing-nav { position: fixed; flex-wrap: wrap; }
+
+  /* About stats */
+  .about-stats-grid { grid-template-columns: repeat(2, 1fr); }
+
+  /* Contact */
+  .contact-info-grid { grid-template-columns: 1fr; }
+
+  /* Forms */
+  .form-two-col { grid-template-columns: 1fr; }
+
+  /* Register split */
+  .register-left { display: none !important; }
+  .register-right { max-width: 100% !important; padding: 40px 24px !important; }
+
+  /* Trading order panel */
+  .order-panel { min-width: unset; }
+
+  /* Footer */
+  footer { flex-direction: column; text-align: center; }
+}
+
+/* ── MOBILE (max 576px) ── */
+@media (max-width: 576px) {
+  .nova-content { padding: 12px; }
+  .nova-topbar { padding: 0 12px; gap: 8px; }
+  .topbar-search { display: none !important; }
+
+  /* Stat cards single column */
+  .stat-card .stat-value { font-size: 18px; }
+  .stat-card .stat-icon { width: 40px; height: 40px; font-size: 18px; }
+
+  /* Page title */
+  .page-title { font-size: 18px; }
+
+  /* Hero */
+  .hero-title { font-size: 28px; }
+  .hero-subtitle { font-size: 15px; }
+  .hero-actions { flex-direction: column; }
+  .hero-actions .btn-nova { width: 100%; justify-content: center; }
+  .hero-stats { flex-direction: column; gap: 16px; }
+
+  /* Features grid */
+  .features-grid { grid-template-columns: 1fr; }
+
+  /* Market grid */
+  .market-grid { grid-template-columns: 1fr 1fr; }
+
+  /* News grid */
+  .news-card .news-image,
+  .news-card .news-image-placeholder { height: 120px; }
+
+  /* About stats */
+  .about-stats-grid { grid-template-columns: 1fr 1fr; }
+
+  /* Watchlist grid */
+  .watchlist-grid { grid-template-columns: 1fr !important; }
+
+  /* Buttons full width on mobile */
+  .mobile-full { width: 100%; justify-content: center; }
+
+  /* Tables: hide less important columns */
+  .nova-table .hide-mobile { display: none; }
+
+  /* Deposit/withdrawal max-width */
+  .form-narrow { max-width: 100% !important; }
+
+  /* Balance chip hide on very small */
+  .balance-chip { display: none !important; }
+
+  /* Topbar user - hide name */
+  .topbar-user .user-name,
+  .topbar-user .user-role { display: none; }
+
+  /* Footer */
+  footer { padding: 16px 12px; }
+  footer > div:last-child { text-align: center; }
+}
+
+/* ── SMALL MOBILE (max 375px) ── */
+@media (max-width: 375px) {
+  .nova-content { padding: 10px; }
+  .page-title { font-size: 16px; }
+  .stat-card { padding: 14px; }
+  .nova-card { padding: 14px; }
+  .market-grid { grid-template-columns: 1fr; }
+}
+
+/* ── SAFE AREA (iPhone notch) ── */
+@supports (padding: max(0px)) {
+  .nova-topbar { padding-left: max(24px, env(safe-area-inset-left)); padding-right: max(24px, env(safe-area-inset-right)); }
+  .nova-sidebar { padding-bottom: env(safe-area-inset-bottom); }
+}
+
+/* ── PREVENT HORIZONTAL OVERFLOW ── */
+body { overflow-x: hidden; }
+.nova-layout { overflow-x: hidden; }
+.nova-main { overflow-x: hidden; min-width: 0; }
+
+/* ── TOUCH TARGETS (min 44px) ── */
+@media (max-width: 768px) {
+  .nav-item { min-height: 44px; }
+  .btn-nova { min-height: 40px; }
+  .topbar-btn { min-height: 44px; min-width: 44px; }
+}
+
+/* ── PRINT STYLES ── */
+@media print {
+  .nova-sidebar, .nova-topbar, .price-ticker-bar { display: none; }
+  .nova-main { margin-left: 0; }
+  .nova-content { padding: 0; }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   FINAL AUDIT FIXES
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── Feature icon: ensure Bootstrap icons display correctly ── */
+.feature-icon {
+  width: 56px; height: 56px;
+  border-radius: var(--nova-radius);
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 16px;
+}
+.feature-icon i { font-size: 24px; }
+
+/* ── Order tab: wrap on small screens ── */
+.order-tab { white-space: nowrap; }
+@media (max-width: 480px) {
+  .order-tab { font-size: 11px !important; padding: 6px 10px !important; }
+}
+
+/* ── Market tabs: wrap on mobile ── */
+#tab-crypto, #tab-stocks, #tab-forex, #tab-indices {
+  white-space: nowrap;
+}
+@media (max-width: 600px) {
+  #tab-crypto, #tab-stocks, #tab-forex, #tab-indices {
+    font-size: 11px !important;
+    padding: 6px 12px !important;
+  }
+}
+
+/* ── Deposit/Withdrawal form narrow ── */
+@media (max-width: 576px) {
+  .form-narrow { max-width: 100% !important; }
+}
+
+/* ── Profile grid: KYC form two-col ── */
+@media (max-width: 576px) {
+  .kyc-form-grid { grid-template-columns: 1fr !important; }
+}
+
+/* ── Register: left panel hide on mobile ── */
+@media (max-width: 991px) {
+  .register-left { display: none !important; }
+  .register-right { max-width: 100% !important; }
+}
+
+/* ── Login: left panel hide on mobile ── */
+@media (max-width: 991px) {
+  .login-left { display: none !important; }
+}
+
+/* ── Topbar: prevent overflow on very small screens ── */
+@media (max-width: 360px) {
+  .nova-topbar { padding: 0 8px; gap: 6px; }
+  .topbar-user { padding: 4px 8px; }
+}
+
+/* ── Sidebar footer user card: hide text when collapsed ── */
+.nova-sidebar.collapsed .sidebar-user-name,
+.nova-sidebar.collapsed .sidebar-user-balance { display: none; }
+
+/* ── Table: horizontal scroll indicator ── */
+.table-scroll-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: 0 0 var(--nova-radius) var(--nova-radius);
+}
+.table-scroll-wrapper::-webkit-scrollbar { height: 4px; }
+.table-scroll-wrapper::-webkit-scrollbar-thumb { background: var(--nova-border); border-radius: 2px; }
+
+/* ── Stat card: prevent text overflow ── */
+.stat-card .stat-value {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── Page header actions: full width on mobile ── */
+@media (max-width: 576px) {
+  .page-header-actions {
+    width: 100%;
+    display: flex;
+    gap: 8px;
+  }
+  .page-header-actions .btn-nova {
+    flex: 1;
+    justify-content: center;
+  }
+}
+
+/* ── Nova card: min-width 0 to prevent overflow ── */
+.nova-card { min-width: 0; }
+
+/* ── Asset detail price header: wrap on mobile ── */
+@media (max-width: 768px) {
+  .asset-price-header { flex-direction: column !important; align-items: flex-start !important; }
+  .asset-price-stats { flex-wrap: wrap; gap: 16px !important; }
+}
+
+/* ── Trading layout: order panel full width on mobile ── */
+@media (max-width: 1024px) {
+  .order-panel { width: 100% !important; }
+}
+
+/* ── Watchlist grid: 2 cols on tablet, 1 on mobile ── */
+.watchlist-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 16px;
+}
+@media (max-width: 480px) {
+  .watchlist-grid { grid-template-columns: 1fr; }
+}
+
+/* ── News category tabs: scroll on mobile ── */
+.news-category-tabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+/* ── Dropdown menu: max-height on mobile ── */
+@media (max-width: 576px) {
+  .dropdown-menu { max-height: 80vh; overflow-y: auto; }
+}
+
+/* ── Footer: stack on mobile ── */
+@media (max-width: 576px) {
+  .nova-footer { flex-direction: column !important; text-align: center; gap: 12px !important; }
+  .nova-footer > div:last-child { justify-content: center; }
+}
+
+/* ── Pulse dot animation (ensure defined) ── */
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.4); }
+}
+
+/* ── Glow pulse animation ── */
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 20px rgba(0,102,255,0.3); }
+  50% { box-shadow: 0 0 40px rgba(0,102,255,0.6); }
+}
+
+/* ── Smooth page transitions ── */
+.nova-content { animation: fadeIn 0.2s ease; }
+
+/* ── Input date color fix (dark theme) ── */
+input[type="date"].nova-input,
+input[type="file"].nova-input {
+  color-scheme: dark;
+}
+input[type="file"].nova-input {
+  padding: 8px 14px;
+  cursor: pointer;
+}
+input[type="file"].nova-input::file-selector-button {
+  background: var(--nova-bg-hover);
+  border: 1px solid var(--nova-border);
+  border-radius: 6px;
+  color: var(--nova-text);
+  padding: 4px 12px;
+  font-size: 12px;
+  cursor: pointer;
+  margin-right: 10px;
+  transition: var(--nova-transition);
+}
+input[type="file"].nova-input::file-selector-button:hover {
+  background: var(--nova-primary);
+  border-color: var(--nova-primary);
+  color: #fff;
+}
+
+/* ── Textarea resize handle ── */
+textarea.nova-input {
+  resize: vertical;
+  min-height: 80px;
+}
+
+/* ── Select option background ── */
+.nova-select option {
+  background: var(--nova-bg-card2);
+  color: var(--nova-text);
+}
+
+/* ── Checkbox accent ── */
+input[type="checkbox"] {
+  accent-color: var(--nova-primary);
+  width: 15px;
+  height: 15px;
+  cursor: pointer;
+}
+
+/* ── Focus visible outline for accessibility ── */
+:focus-visible {
+  outline: 2px solid var(--nova-primary);
+  outline-offset: 2px;
+}
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--nova-primary);
+  outline-offset: 2px;
+}
+
+/* ── Scrollbar for sidebar nav ── */
+.sidebar-nav::-webkit-scrollbar { width: 3px; }
+.sidebar-nav::-webkit-scrollbar-thumb { background: var(--nova-border); border-radius: 2px; }
+
+/* ── Active nav item: no text decoration ── */
+.nav-item { text-decoration: none !important; }
+.nav-item:hover { text-decoration: none !important; }
+
+/* ── Topbar dropdown: z-index fix ── */
+.nova-topbar .dropdown-menu { z-index: 1050; }
+
+/* ── Price ticker: no text selection ── */
+.price-ticker-bar { user-select: none; }
+
+/* ── Chart canvas: responsive ── */
+canvas { max-width: 100%; }
+
+/* ── TradingView chart container ── */
+#tradingview_chart, #tv_chart {
+  width: 100% !important;
+  min-height: 450px;
+}
+@media (max-width: 768px) {
+  #tradingview_chart, #tv_chart { min-height: 300px; }
+}
+
+/* ── Balance chip: hide on very small ── */
+@media (max-width: 480px) {
+  .balance-chip { display: none !important; }
+  .pulse-live { display: none !important; }
+}
+
+/* ── Stat card grid: auto-fit with min 160px ── */
+.stat-grid-auto {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+/* ── W-100 utility ── */
+.w-100 { width: 100% !important; }
+
+/* ── Overflow hidden for layout ── */
+.overflow-hidden { overflow: hidden; }
+
+/* ── Text truncate ── */
+.text-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── Flex gap utilities ── */
+.gap-4  { gap: 4px; }
+.gap-6  { gap: 6px; }
+.gap-8  { gap: 8px; }
+.gap-10 { gap: 10px; }
+.gap-12 { gap: 12px; }
+.gap-16 { gap: 16px; }
+.gap-20 { gap: 20px; }
+.gap-24 { gap: 24px; }
+
+/* ── Margin utilities ── */
+.mt-4  { margin-top: 4px; }
+.mt-8  { margin-top: 8px; }
+.mt-12 { margin-top: 12px; }
+.mt-16 { margin-top: 16px; }
+.mt-20 { margin-top: 20px; }
+.mt-24 { margin-top: 24px; }
+.mb-4  { margin-bottom: 4px; }
+.mb-8  { margin-bottom: 8px; }
+.mb-12 { margin-bottom: 12px; }
+.mb-16 { margin-bottom: 16px; }
+.mb-20 { margin-bottom: 20px; }
+.mb-24 { margin-bottom: 24px; }
+
+/* ── Sidebar collapsed (1024px): hide user text ── */
+@media (max-width: 1024px) {
+  .nova-sidebar .sidebar-user-text { display: none; }
+  .nova-sidebar .sidebar-footer-inner { justify-content: center; }
+}
+@media (max-width: 768px) {
+  .nova-sidebar .sidebar-user-text { display: block; }
+  .nova-sidebar .sidebar-footer-inner { justify-content: flex-start; }
 }

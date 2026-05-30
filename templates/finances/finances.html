@@ -16,34 +16,42 @@
 
 <!-- STATS -->
 <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:24px;">
-  <div class="stat-card">
-    <div class="stat-icon" style="background:rgba(0,200,150,0.15);">💰</div>
+  <div class="stat-card green nova-card-hover">
+    <div class="stat-icon" style="background:rgba(0,200,150,0.15);">
+      <i class="bi bi-wallet2" style="color:var(--nova-success);"></i>
+    </div>
     <div class="stat-label">Saldo Disponible</div>
     <div class="stat-value" style="color:var(--nova-success);">${{ balance|floatformat:2 }}</div>
-    <div class="stat-change positive"><i class="bi bi-wallet2"></i> USD</div>
+    <div class="stat-change positive"><i class="bi bi-cash-stack"></i> USD</div>
   </div>
-  <div class="stat-card">
-    <div class="stat-icon" style="background:rgba(0,102,255,0.15);">📥</div>
+  <div class="stat-card blue nova-card-hover">
+    <div class="stat-icon" style="background:rgba(0,102,255,0.15);">
+      <i class="bi bi-arrow-down-circle-fill" style="color:var(--nova-primary-light);"></i>
+    </div>
     <div class="stat-label">Total Depositado</div>
     <div class="stat-value">${{ total_deposited|floatformat:2 }}</div>
-    <div class="stat-change positive"><i class="bi bi-arrow-down-circle"></i> Histórico</div>
+    <div class="stat-change positive"><i class="bi bi-clock-history"></i> Histórico</div>
   </div>
-  <div class="stat-card">
-    <div class="stat-icon" style="background:rgba(255,59,92,0.15);">📤</div>
+  <div class="stat-card red nova-card-hover">
+    <div class="stat-icon" style="background:rgba(255,59,92,0.15);">
+      <i class="bi bi-arrow-up-circle-fill" style="color:var(--nova-danger);"></i>
+    </div>
     <div class="stat-label">Total Retirado</div>
     <div class="stat-value">${{ total_withdrawn|floatformat:2 }}</div>
-    <div class="stat-change negative"><i class="bi bi-arrow-up-circle"></i> Histórico</div>
+    <div class="stat-change negative"><i class="bi bi-clock-history"></i> Histórico</div>
   </div>
-  <div class="stat-card">
-    <div class="stat-icon" style="background:rgba(255,184,0,0.15);">💸</div>
+  <div class="stat-card gold nova-card-hover">
+    <div class="stat-icon" style="background:rgba(255,184,0,0.15);">
+      <i class="bi bi-percent" style="color:var(--nova-warning);"></i>
+    </div>
     <div class="stat-label">Comisiones Pagadas</div>
     <div class="stat-value">${{ total_fees|floatformat:4 }}</div>
-    <div class="stat-change neutral"><i class="bi bi-percent"></i> 0.1% por operación</div>
+    <div class="stat-change neutral"><i class="bi bi-info-circle"></i> 0.1% por operación</div>
   </div>
 </div>
 
 <!-- QUICK ACTIONS -->
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;">
+<div class="finances-quick-grid" style="margin-bottom:24px;">
 
   <!-- Deposit Form -->
   <div class="nova-card">
@@ -62,11 +70,11 @@
       <div class="nova-form-group">
         <label class="nova-label">Método de Pago</label>
         <select name="payment_method" class="nova-select">
-          <option value="bank_transfer">🏦 Transferencia Bancaria</option>
-          <option value="credit_card">💳 Tarjeta de Crédito</option>
-          <option value="debit_card">💳 Tarjeta de Débito</option>
-          <option value="crypto">₿ Criptomoneda</option>
-          <option value="paypal">🅿️ PayPal</option>
+          <option value="bank_transfer">Transferencia Bancaria</option>
+          <option value="credit_card">Tarjeta de Crédito</option>
+          <option value="debit_card">Tarjeta de Débito</option>
+          <option value="crypto">Criptomoneda</option>
+          <option value="paypal">PayPal</option>
         </select>
       </div>
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:16px;">
@@ -99,9 +107,9 @@
       <div class="nova-form-group">
         <label class="nova-label">Método de Retiro</label>
         <select name="payment_method" class="nova-select">
-          <option value="bank_transfer">🏦 Transferencia Bancaria</option>
-          <option value="crypto">₿ Criptomoneda</option>
-          <option value="paypal">🅿️ PayPal</option>
+          <option value="bank_transfer">Transferencia Bancaria</option>
+          <option value="crypto">Criptomoneda</option>
+          <option value="paypal">PayPal</option>
         </select>
       </div>
       <div class="nova-alert info" style="margin-bottom:16px;">
@@ -132,14 +140,29 @@
         <tr>
           <td>
             <div style="display:flex;align-items:center;gap:8px;">
-              <span style="font-size:18px;">
-                {% if tx.transaction_type == 'deposit' %}📥
-                {% elif tx.transaction_type == 'withdrawal' %}📤
-                {% elif tx.transaction_type == 'trade_buy' %}📈
-                {% elif tx.transaction_type == 'trade_sell' %}📉
-                {% elif tx.transaction_type == 'fee' %}💸
-                {% else %}💱{% endif %}
-              </span>
+              <div style="width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;
+                {% if tx.transaction_type == 'deposit' %}background:rgba(0,200,150,0.15);
+                {% elif tx.transaction_type == 'withdrawal' %}background:rgba(255,184,0,0.15);
+                {% elif tx.transaction_type == 'trade_buy' %}background:rgba(0,102,255,0.15);
+                {% elif tx.transaction_type == 'trade_sell' %}background:rgba(255,59,92,0.15);
+                {% elif tx.transaction_type == 'fee' %}background:rgba(122,139,168,0.15);
+                {% else %}background:rgba(0,102,255,0.1);{% endif %}">
+                <i class="bi bi-
+                  {% if tx.transaction_type == 'deposit' %}arrow-down-circle-fill
+                  {% elif tx.transaction_type == 'withdrawal' %}arrow-up-circle-fill
+                  {% elif tx.transaction_type == 'trade_buy' %}graph-up-arrow
+                  {% elif tx.transaction_type == 'trade_sell' %}graph-down-arrow
+                  {% elif tx.transaction_type == 'fee' %}percent
+                  {% else %}currency-exchange{% endif %}"
+                  style="font-size:13px;color:
+                    {% if tx.transaction_type == 'deposit' %}var(--nova-success)
+                    {% elif tx.transaction_type == 'withdrawal' %}var(--nova-warning)
+                    {% elif tx.transaction_type == 'trade_buy' %}var(--nova-primary-light)
+                    {% elif tx.transaction_type == 'trade_sell' %}var(--nova-danger)
+                    {% elif tx.transaction_type == 'fee' %}var(--nova-text-muted)
+                    {% else %}var(--nova-primary-light){% endif %};">
+                </i>
+              </div>
               <span style="font-size:12px;font-weight:600;color:#fff;">{{ tx.get_transaction_type_display }}</span>
             </div>
           </td>
@@ -156,11 +179,13 @@
     </table>
   </div>
   {% else %}
-  <div style="text-align:center;padding:60px;color:var(--nova-text-muted);">
-    <div style="font-size:56px;margin-bottom:16px;">💳</div>
-    <div style="font-size:15px;font-weight:600;color:var(--nova-text);margin-bottom:8px;">Sin transacciones</div>
-    <div style="font-size:13px;margin-bottom:20px;">Realiza tu primer depósito para comenzar</div>
-    <a href="{% url 'finances:deposit' %}" class="btn-nova btn-nova-success" style="padding:10px 24px;">
+  <div class="empty-state" style="padding:60px 24px;">
+    <div class="empty-icon" style="background:rgba(0,102,255,0.1);">
+      <i class="bi bi-credit-card" style="color:var(--nova-primary-light);font-size:28px;"></i>
+    </div>
+    <h4>Sin transacciones</h4>
+    <p>Realiza tu primer depósito para comenzar a operar</p>
+    <a href="{% url 'finances:deposit' %}" class="btn-nova btn-nova-success" style="padding:10px 24px;margin-top:4px;">
       <i class="bi bi-plus-circle-fill"></i> Hacer Depósito
     </a>
   </div>

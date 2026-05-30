@@ -13,38 +13,48 @@
 
 <!-- STATS -->
 <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:24px;">
-  <div class="stat-card">
-    <div class="stat-icon" style="background:rgba(0,102,255,0.15);">🏦</div>
+  <div class="stat-card blue nova-card-hover">
+    <div class="stat-icon" style="background:rgba(0,102,255,0.15);">
+      <i class="bi bi-bank" style="color:var(--nova-primary-light);"></i>
+    </div>
     <div class="stat-label">Activos Totales</div>
     <div class="stat-value">${{ total_assets|floatformat:2 }}</div>
     <div class="stat-change positive"><i class="bi bi-wallet2"></i> Portafolio + Efectivo</div>
   </div>
-  <div class="stat-card">
-    <div class="stat-icon" style="background:rgba(0,200,150,0.15);">📈</div>
+  <div class="stat-card green nova-card-hover">
+    <div class="stat-icon" style="background:rgba(0,200,150,0.15);">
+      <i class="bi bi-graph-up-arrow" style="color:var(--nova-success);"></i>
+    </div>
     <div class="stat-label">Valor Portafolio</div>
     <div class="stat-value">${{ portfolio_value|floatformat:2 }}</div>
     <div class="stat-change {% if total_pnl >= 0 %}positive{% else %}negative{% endif %}">
-      <i class="bi bi-graph-up"></i> {{ positions.count }} posiciones
+      <i class="bi bi-briefcase-fill"></i> {{ positions.count }} posiciones
     </div>
   </div>
-  <div class="stat-card">
-    <div class="stat-icon" style="background:rgba({% if total_pnl >= 0 %}0,200,150{% else %}255,59,92{% endif %},0.15);">{% if total_pnl >= 0 %}💹{% else %}📉{% endif %}</div>
+  <div class="stat-card {% if total_pnl >= 0 %}green{% else %}red{% endif %} nova-card-hover">
+    <div class="stat-icon" style="background:rgba({% if total_pnl >= 0 %}0,200,150{% else %}255,59,92{% endif %},0.15);">
+      <i class="bi bi-{% if total_pnl >= 0 %}graph-up-arrow{% else %}graph-down-arrow{% endif %}" style="color:{% if total_pnl >= 0 %}var(--nova-success){% else %}var(--nova-danger){% endif %};"></i>
+    </div>
     <div class="stat-label">P&L No Realizado</div>
     <div class="stat-value" style="color:{% if total_pnl >= 0 %}var(--nova-success){% else %}var(--nova-danger){% endif %};">
       {% if total_pnl >= 0 %}+{% endif %}${{ total_pnl|floatformat:2 }}
     </div>
-    <div class="stat-change {% if total_pnl >= 0 %}positive{% else %}negative{% endif %}">
+    <div class="stat-change {% if total_pnl_pct >= 0 %}positive{% else %}negative{% endif %}">
       {% if total_pnl_pct >= 0 %}+{% endif %}{{ total_pnl_pct|floatformat:2 }}%
     </div>
   </div>
-  <div class="stat-card">
-    <div class="stat-icon" style="background:rgba(255,184,0,0.15);">💰</div>
+  <div class="stat-card gold nova-card-hover">
+    <div class="stat-icon" style="background:rgba(255,184,0,0.15);">
+      <i class="bi bi-cash-stack" style="color:var(--nova-warning);"></i>
+    </div>
     <div class="stat-label">Saldo Efectivo</div>
     <div class="stat-value">${{ cash_balance|floatformat:2 }}</div>
-    <div class="stat-change positive"><i class="bi bi-cash-stack"></i> Disponible</div>
+    <div class="stat-change positive"><i class="bi bi-wallet2"></i> Disponible</div>
   </div>
-  <div class="stat-card">
-    <div class="stat-icon" style="background:rgba(0,212,170,0.15);">✅</div>
+  <div class="stat-card {% if total_realized >= 0 %}green{% else %}red{% endif %} nova-card-hover">
+    <div class="stat-icon" style="background:rgba({% if total_realized >= 0 %}0,200,150{% else %}255,59,92{% endif %},0.15);">
+      <i class="bi bi-check-circle-fill" style="color:{% if total_realized >= 0 %}var(--nova-success){% else %}var(--nova-danger){% endif %};"></i>
+    </div>
     <div class="stat-label">P&L Realizado</div>
     <div class="stat-value" style="color:{% if total_realized >= 0 %}var(--nova-success){% else %}var(--nova-danger){% endif %};">
       {% if total_realized >= 0 %}+{% endif %}${{ total_realized|floatformat:2 }}
@@ -54,7 +64,7 @@
 </div>
 
 <!-- MAIN GRID -->
-<div style="display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:24px;">
+<div class="portfolio-main-grid" style="margin-bottom:24px;">
 
   <!-- Evolution Chart -->
   <div class="nova-card">
@@ -88,10 +98,13 @@
       {% endfor %}
     </div>
     {% else %}
-    <div style="text-align:center;padding:40px;color:var(--nova-text-muted);">
-      <div style="font-size:48px;margin-bottom:12px;">💼</div>
-      <div style="font-size:13px;">Sin posiciones abiertas</div>
-      <a href="{% url 'trading:trading' %}" class="btn-nova btn-nova-primary" style="margin-top:16px;padding:8px 20px;font-size:12px;">Comenzar a operar</a>
+    <div class="empty-state" style="padding:40px 24px;">
+      <div class="empty-icon" style="background:rgba(0,102,255,0.1);">
+        <i class="bi bi-briefcase" style="color:var(--nova-primary-light);font-size:28px;"></i>
+      </div>
+      <h4>Sin posiciones abiertas</h4>
+      <p>Comienza a operar para ver tu distribución de activos</p>
+      <a href="{% url 'trading:trading' %}" class="btn-nova btn-nova-primary" style="margin-top:4px;padding:8px 20px;font-size:12px;">Comenzar a operar</a>
     </div>
     {% endif %}
   </div>
@@ -146,11 +159,13 @@
     </table>
   </div>
   {% else %}
-  <div style="text-align:center;padding:60px;color:var(--nova-text-muted);">
-    <div style="font-size:56px;margin-bottom:16px;">💼</div>
-    <div style="font-size:15px;font-weight:600;color:var(--nova-text);margin-bottom:8px;">Sin posiciones abiertas</div>
-    <div style="font-size:13px;margin-bottom:20px;">Comienza a operar para ver tu portafolio aquí</div>
-    <a href="{% url 'trading:trading' %}" class="btn-nova btn-nova-primary" style="padding:10px 24px;">
+  <div class="empty-state" style="padding:60px 24px;">
+    <div class="empty-icon" style="background:rgba(0,102,255,0.1);">
+      <i class="bi bi-briefcase" style="color:var(--nova-primary-light);font-size:28px;"></i>
+    </div>
+    <h4>Sin posiciones abiertas</h4>
+    <p>Comienza a operar para ver tu portafolio aquí</p>
+    <a href="{% url 'trading:trading' %}" class="btn-nova btn-nova-primary" style="padding:10px 24px;margin-top:4px;">
       <i class="bi bi-graph-up-arrow"></i> Ir al Trading
     </a>
   </div>

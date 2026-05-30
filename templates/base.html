@@ -58,12 +58,24 @@
 
 <!-- Nova JS -->
 <script>
-  // CSRF helper
+  // CSRF helper — lee de cookie (requiere CSRF_COOKIE_HTTPONLY=False) o del meta tag
   function getCookie(name) {
     let v = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
     return v ? v[2] : null;
   }
-  const csrfToken = getCookie('csrftoken') || document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
+  const csrfToken = getCookie('csrftoken')
+    || document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+    || document.querySelector('[name=csrfmiddlewaretoken]')?.value
+    || '';
+
+  // Helper global para obtener CSRF desde cualquier fuente disponible
+  function getCSRF() {
+    return getCookie('csrftoken')
+      || document.querySelector('[name=csrfmiddlewaretoken]')?.value
+      || document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+      || csrfToken
+      || '';
+  }
 
   // Sidebar toggle
   function toggleSidebar() {

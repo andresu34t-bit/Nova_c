@@ -16,12 +16,12 @@ class SecurityHeadersMiddleware(MiddlewareMixin):
         response['Permissions-Policy'] = 'geolocation=(), microphone=(), camera=()'
         response['Content-Security-Policy'] = (
             "default-src 'self'; "
-            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com; "
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com https://s3.tradingview.com https://charting_library.tradingview.com; "
             "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.googleapis.com; "
-            "font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; "
+            "font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; "
             "img-src 'self' data: https: blob:; "
-            "connect-src 'self' https://api.coingecko.com https://finnhub.io wss:; "
-            "frame-src 'none';"
+            "connect-src 'self' https://api.coingecko.com https://finnhub.io https://newsapi.org wss: https://s3.tradingview.com; "
+            "frame-src 'self' https://s3.tradingview.com https://www.tradingview.com;"
         )
         return response
 

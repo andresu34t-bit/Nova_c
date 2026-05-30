@@ -169,7 +169,15 @@ def place_order(request):
 @login_required
 def order_history(request):
     orders = Order.objects.filter(user=request.user).select_related('asset').order_by('-created_at')
-    return render(request, 'trading/order_history.html', {'orders': orders})
+    buy_count = orders.filter(side='buy').count()
+    sell_count = orders.filter(side='sell').count()
+    filled_count = orders.filter(status='filled').count()
+    return render(request, 'trading/order_history.html', {
+        'orders': orders,
+        'buy_count': buy_count,
+        'sell_count': sell_count,
+        'filled_count': filled_count,
+    })
 
 
 @login_required

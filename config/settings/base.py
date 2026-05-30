@@ -156,7 +156,7 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
 # CSRF
 CSRF_COOKIE_SECURE = config('CSRF_COOKIE_SECURE', default=True, cast=bool)
-CSRF_COOKIE_HTTPONLY = True
+CSRF_COOKIE_HTTPONLY = False   # Debe ser False para que JS pueda leer el token
 CSRF_COOKIE_SAMESITE = 'Lax'
 
 # Security Headers

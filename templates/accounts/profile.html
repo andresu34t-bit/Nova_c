@@ -13,7 +13,7 @@
   </a>
 </div>
 
-<div style="display:grid;grid-template-columns:1fr 2fr;gap:20px;">
+<div class="profile-main-grid" style="gap:20px;">
 
   <!-- Profile Card -->
   <div style="display:flex;flex-direction:column;gap:16px;">
@@ -156,7 +156,9 @@
         {% for doc in kyc_docs %}
         <div style="display:flex;align-items:center;justify-content:space-between;padding:12px;background:var(--nova-bg-dark);border-radius:var(--nova-radius-sm);border:1px solid var(--nova-border);">
           <div style="display:flex;align-items:center;gap:10px;">
-            <span style="font-size:20px;">📄</span>
+            <div style="width:36px;height:36px;background:rgba(0,102,255,0.15);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <i class="bi bi-file-earmark-check-fill" style="font-size:16px;color:var(--nova-primary-light);"></i>
+            </div>
             <div>
               <div style="font-size:13px;font-weight:600;color:#fff;">{{ doc.get_document_type_display }}</div>
               <div style="font-size:11px;color:var(--nova-text-muted);">{{ doc.uploaded_at|date:"d/m/Y" }}</div>
@@ -209,14 +211,24 @@
             {% elif log.action == 'withdrawal' %}background:rgba(255,184,0,0.15);
             {% elif log.action == 'login_failed' %}background:rgba(255,59,92,0.15);
             {% else %}background:rgba(0,102,255,0.1);{% endif %}">
-            {% if log.action == 'login' %}🔐
-            {% elif log.action == 'logout' %}🚪
-            {% elif log.action == 'trade' %}📊
-            {% elif log.action == 'deposit' %}💰
-            {% elif log.action == 'withdrawal' %}💸
-            {% elif log.action == 'login_failed' %}⚠️
-            {% elif log.action == 'password_change' %}🔑
-            {% else %}📋{% endif %}
+            <i class="bi bi-
+              {% if log.action == 'login' %}box-arrow-in-right
+              {% elif log.action == 'logout' %}box-arrow-left
+              {% elif log.action == 'trade' %}graph-up-arrow
+              {% elif log.action == 'deposit' %}arrow-down-circle-fill
+              {% elif log.action == 'withdrawal' %}arrow-up-circle-fill
+              {% elif log.action == 'login_failed' %}exclamation-triangle-fill
+              {% elif log.action == 'password_change' %}key-fill
+              {% else %}clock-history{% endif %}"
+              style="color:
+                {% if log.action == 'login' %}var(--nova-primary-light)
+                {% elif log.action == 'logout' %}var(--nova-text-muted)
+                {% elif log.action == 'trade' or log.action == 'deposit' %}var(--nova-success)
+                {% elif log.action == 'withdrawal' %}var(--nova-warning)
+                {% elif log.action == 'login_failed' %}var(--nova-danger)
+                {% elif log.action == 'password_change' %}var(--nova-warning)
+                {% else %}var(--nova-primary-light){% endif %};">
+            </i>
           </div>
           <div style="flex:1;min-width:0;">
             <div style="font-size:12px;font-weight:600;color:#fff;">{{ log.get_action_display }}</div>
@@ -234,9 +246,12 @@
         {% endfor %}
       </div>
       {% else %}
-      <div style="text-align:center;padding:30px;color:var(--nova-text-muted);">
-        <div style="font-size:36px;margin-bottom:8px;">📋</div>
-        <div style="font-size:13px;">Sin actividad registrada</div>
+      <div class="empty-state" style="padding:30px 24px;">
+        <div class="empty-icon" style="background:rgba(0,102,255,0.1);">
+          <i class="bi bi-clock-history" style="color:var(--nova-primary-light);"></i>
+        </div>
+        <h4>Sin actividad registrada</h4>
+        <p>Tu historial de actividad aparecerá aquí</p>
       </div>
       {% endif %}
     </div>

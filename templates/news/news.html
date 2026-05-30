@@ -15,15 +15,27 @@
 
 <!-- CATEGORY TABS -->
 <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;">
-  <a href="?category=all" class="btn-nova {% if active_category == 'all' %}btn-nova-primary{% else %}btn-nova-ghost{% endif %}" style="padding:7px 16px;font-size:12px;">🌐 Todas</a>
-  <a href="?category=crypto" class="btn-nova {% if active_category == 'crypto' %}btn-nova-primary{% else %}btn-nova-ghost{% endif %}" style="padding:7px 16px;font-size:12px;">₿ Cripto</a>
-  <a href="?category=stocks" class="btn-nova {% if active_category == 'stocks' %}btn-nova-primary{% else %}btn-nova-ghost{% endif %}" style="padding:7px 16px;font-size:12px;">📈 Acciones</a>
-  <a href="?category=forex" class="btn-nova {% if active_category == 'forex' %}btn-nova-primary{% else %}btn-nova-ghost{% endif %}" style="padding:7px 16px;font-size:12px;">💱 Forex</a>
-  <a href="?category=economy" class="btn-nova {% if active_category == 'economy' %}btn-nova-primary{% else %}btn-nova-ghost{% endif %}" style="padding:7px 16px;font-size:12px;">🏦 Economía</a>
-  <a href="?category=technology" class="btn-nova {% if active_category == 'technology' %}btn-nova-primary{% else %}btn-nova-ghost{% endif %}" style="padding:7px 16px;font-size:12px;">💻 Tecnología</a>
+  <a href="?category=all" class="btn-nova {% if active_category == 'all' %}btn-nova-primary{% else %}btn-nova-ghost{% endif %}" style="padding:7px 16px;font-size:12px;">
+    <i class="bi bi-globe2 me-1"></i>Todas
+  </a>
+  <a href="?category=crypto" class="btn-nova {% if active_category == 'crypto' %}btn-nova-primary{% else %}btn-nova-ghost{% endif %}" style="padding:7px 16px;font-size:12px;">
+    <i class="bi bi-currency-bitcoin me-1"></i>Cripto
+  </a>
+  <a href="?category=stocks" class="btn-nova {% if active_category == 'stocks' %}btn-nova-primary{% else %}btn-nova-ghost{% endif %}" style="padding:7px 16px;font-size:12px;">
+    <i class="bi bi-graph-up-arrow me-1"></i>Acciones
+  </a>
+  <a href="?category=forex" class="btn-nova {% if active_category == 'forex' %}btn-nova-primary{% else %}btn-nova-ghost{% endif %}" style="padding:7px 16px;font-size:12px;">
+    <i class="bi bi-currency-exchange me-1"></i>Forex
+  </a>
+  <a href="?category=economy" class="btn-nova {% if active_category == 'economy' %}btn-nova-primary{% else %}btn-nova-ghost{% endif %}" style="padding:7px 16px;font-size:12px;">
+    <i class="bi bi-bank me-1"></i>Economía
+  </a>
+  <a href="?category=technology" class="btn-nova {% if active_category == 'technology' %}btn-nova-primary{% else %}btn-nova-ghost{% endif %}" style="padding:7px 16px;font-size:12px;">
+    <i class="bi bi-cpu-fill me-1"></i>Tecnología
+  </a>
 </div>
 
-<div style="display:grid;grid-template-columns:2fr 1fr;gap:20px;">
+<div class="news-main-layout" style="gap:20px;">
 
   <!-- MAIN NEWS -->
   <div>
@@ -37,9 +49,14 @@
         {% for article in featured %}
         <a href="{{ article.source_url }}" target="_blank" style="text-decoration:none;display:flex;gap:16px;padding:12px;background:var(--nova-bg-dark);border-radius:var(--nova-radius-sm);border:1px solid var(--nova-border);transition:var(--nova-transition);" onmouseover="this.style.borderColor='var(--nova-primary)'" onmouseout="this.style.borderColor='var(--nova-border)'">
           {% if article.image_url %}
-          <img src="{{ article.image_url }}" style="width:100px;height:70px;object-fit:cover;border-radius:8px;flex-shrink:0;" onerror="this.style.display='none'">
+          <img src="{{ article.image_url }}" style="width:100px;height:70px;object-fit:cover;border-radius:8px;flex-shrink:0;" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+          <div style="width:100px;height:70px;background:linear-gradient(135deg,var(--nova-bg-card2),var(--nova-bg-hover));border-radius:8px;flex-shrink:0;display:none;align-items:center;justify-content:center;">
+            <i class="bi bi-newspaper" style="font-size:28px;color:var(--nova-text-muted);"></i>
+          </div>
           {% else %}
-          <div style="width:100px;height:70px;background:linear-gradient(135deg,var(--nova-bg-card2),var(--nova-bg-hover));border-radius:8px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:28px;">📰</div>
+          <div style="width:100px;height:70px;background:linear-gradient(135deg,var(--nova-bg-card2),var(--nova-bg-hover));border-radius:8px;flex-shrink:0;display:flex;align-items:center;justify-content:center;">
+            <i class="bi bi-newspaper" style="font-size:28px;color:var(--nova-text-muted);"></i>
+          </div>
           {% endif %}
           <div>
             <div style="font-size:10px;font-weight:700;color:var(--nova-primary-light);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">{{ article.get_category_display }}</div>
@@ -61,11 +78,19 @@
           {% if article.image_url %}
           <img src="{{ article.image_url }}" class="news-image" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
           <div class="news-image-placeholder" style="display:none;">
-            {% if article.category == 'crypto' %}₿{% elif article.category == 'stocks' %}📈{% elif article.category == 'forex' %}💱{% elif article.category == 'economy' %}🏦{% else %}📰{% endif %}
+            {% if article.category == 'crypto' %}<i class="bi bi-currency-bitcoin" style="font-size:40px;color:var(--nova-warning);"></i>
+            {% elif article.category == 'stocks' %}<i class="bi bi-graph-up-arrow" style="font-size:40px;color:var(--nova-success);"></i>
+            {% elif article.category == 'forex' %}<i class="bi bi-currency-exchange" style="font-size:40px;color:var(--nova-primary-light);"></i>
+            {% elif article.category == 'economy' %}<i class="bi bi-bank" style="font-size:40px;color:var(--nova-secondary);"></i>
+            {% else %}<i class="bi bi-newspaper" style="font-size:40px;color:var(--nova-text-muted);"></i>{% endif %}
           </div>
           {% else %}
           <div class="news-image-placeholder">
-            {% if article.category == 'crypto' %}₿{% elif article.category == 'stocks' %}📈{% elif article.category == 'forex' %}💱{% elif article.category == 'economy' %}🏦{% else %}📰{% endif %}
+            {% if article.category == 'crypto' %}<i class="bi bi-currency-bitcoin" style="font-size:40px;color:var(--nova-warning);"></i>
+            {% elif article.category == 'stocks' %}<i class="bi bi-graph-up-arrow" style="font-size:40px;color:var(--nova-success);"></i>
+            {% elif article.category == 'forex' %}<i class="bi bi-currency-exchange" style="font-size:40px;color:var(--nova-primary-light);"></i>
+            {% elif article.category == 'economy' %}<i class="bi bi-bank" style="font-size:40px;color:var(--nova-secondary);"></i>
+            {% else %}<i class="bi bi-newspaper" style="font-size:40px;color:var(--nova-text-muted);"></i>{% endif %}
           </div>
           {% endif %}
           <div class="news-body">
@@ -85,7 +110,9 @@
     </div>
     {% else %}
     <div class="nova-card" style="text-align:center;padding:80px 40px;">
-      <div style="font-size:64px;margin-bottom:20px;">📰</div>
+      <div style="width:80px;height:80px;background:rgba(0,102,255,0.1);border-radius:20px;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;">
+        <i class="bi bi-newspaper" style="font-size:36px;color:var(--nova-primary-light);"></i>
+      </div>
       <div style="font-size:18px;font-weight:700;color:#fff;margin-bottom:8px;">Sin noticias disponibles</div>
       <div style="font-size:14px;color:var(--nova-text-muted);margin-bottom:24px;">Configura tu API key de NewsAPI para ver noticias en tiempo real</div>
       <button onclick="fetchNews()" class="btn-nova btn-nova-primary" style="padding:10px 24px;">
@@ -130,9 +157,11 @@
         {% endfor %}
       </div>
       {% else %}
-      <div style="text-align:center;padding:40px 20px;color:var(--nova-text-muted);">
-        <div style="font-size:40px;margin-bottom:12px;">📅</div>
-        <div style="font-size:13px;">Sin eventos próximos</div>
+      <div class="empty-state" style="padding:32px 20px;">
+        <div class="empty-icon" style="background:rgba(0,102,255,0.1);width:52px;height:52px;">
+          <i class="bi bi-calendar-event" style="color:var(--nova-primary-light);font-size:22px;"></i>
+        </div>
+        <p style="font-size:12px;">Sin eventos próximos</p>
       </div>
       {% endif %}
     </div>
@@ -143,7 +172,9 @@
         <span class="nova-card-title"><i class="bi bi-activity me-2"></i>Sentimiento del Mercado</span>
       </div>
       <div style="text-align:center;padding:20px 0;">
-        <div style="font-size:48px;margin-bottom:8px;">😐</div>
+        <div style="width:64px;height:64px;background:rgba(255,184,0,0.1);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">
+          <i class="bi bi-activity" style="font-size:28px;color:var(--nova-warning);"></i>
+        </div>
         <div style="font-size:16px;font-weight:700;color:#fff;margin-bottom:4px;">Neutral</div>
         <div style="font-size:12px;color:var(--nova-text-muted);">Índice de Miedo y Codicia</div>
         <div style="margin-top:16px;background:var(--nova-bg-dark);border-radius:20px;height:8px;overflow:hidden;">

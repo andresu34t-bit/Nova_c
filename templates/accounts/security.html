@@ -6,23 +6,38 @@
 <div class="page-header">
   <div>
     <div class="page-title">Centro de Seguridad</div>
-    <div class="page-subtitle">Gestiona la seguridad de tu cuenta</div>
+    <div class="page-subtitle">
+      <span class="pulse-live">EN VIVO</span>
+      &nbsp;·&nbsp; Gestiona la seguridad de tu cuenta
+    </div>
   </div>
 </div>
 
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;">
+<div class="security-grid" style="margin-bottom:20px;">
 
-  <!-- Password -->
-  <div class="nova-card">
+  <!-- ── PASSWORD ── -->
+  <div class="nova-card nova-card-hover">
     <div class="nova-card-header">
-      <span class="nova-card-title"><i class="bi bi-key-fill me-2" style="color:var(--nova-accent);"></i>Contraseña</span>
+      <span class="nova-card-title"><i class="bi bi-key-fill me-2" style="color:var(--nova-warning);"></i>Contraseña</span>
       <span class="status-badge completed">Activa</span>
     </div>
     <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;">
-      <div style="width:48px;height:48px;background:rgba(255,184,0,0.15);border-radius:var(--nova-radius-sm);display:flex;align-items:center;justify-content:center;font-size:22px;">🔑</div>
+      <div style="width:52px;height:52px;background:rgba(255,184,0,0.15);border-radius:var(--nova-radius-sm);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <i class="bi bi-key-fill" style="font-size:24px;color:var(--nova-warning);"></i>
+      </div>
       <div>
         <div style="font-size:14px;font-weight:600;color:#fff;">Contraseña de acceso</div>
         <div style="font-size:12px;color:var(--nova-text-muted);">Última actualización: {{ user.updated_at|date:"d/m/Y" }}</div>
+      </div>
+    </div>
+    <!-- Password strength indicator -->
+    <div style="margin-bottom:16px;">
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+        <span style="font-size:11px;color:var(--nova-text-muted);">Fortaleza de contraseña</span>
+        <span style="font-size:11px;font-weight:600;color:var(--nova-success);">Fuerte</span>
+      </div>
+      <div class="nova-progress">
+        <div class="nova-progress-fill" style="width:80%;background:linear-gradient(90deg,var(--nova-success),#00D4AA);"></div>
       </div>
     </div>
     <a href="{% url 'accounts:change_password' %}" class="btn-nova btn-nova-outline w-100" style="padding:10px;font-size:13px;justify-content:center;">
@@ -30,8 +45,8 @@
     </a>
   </div>
 
-  <!-- 2FA -->
-  <div class="nova-card">
+  <!-- ── 2FA ── -->
+  <div class="nova-card nova-card-hover">
     <div class="nova-card-header">
       <span class="nova-card-title"><i class="bi bi-shield-lock-fill me-2" style="color:var(--nova-primary-light);"></i>Autenticación 2FA</span>
       {% if user.two_factor_enabled %}
@@ -41,7 +56,9 @@
       {% endif %}
     </div>
     <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;">
-      <div style="width:48px;height:48px;background:rgba(0,102,255,0.15);border-radius:var(--nova-radius-sm);display:flex;align-items:center;justify-content:center;font-size:22px;">🛡️</div>
+      <div style="width:52px;height:52px;background:rgba(0,102,255,0.15);border-radius:var(--nova-radius-sm);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <i class="bi bi-shield-lock-fill" style="font-size:24px;color:var(--nova-primary-light);"></i>
+      </div>
       <div>
         <div style="font-size:14px;font-weight:600;color:#fff;">Autenticación de dos factores</div>
         <div style="font-size:12px;color:var(--nova-text-muted);">
@@ -54,15 +71,20 @@
       <i class="bi bi-exclamation-triangle-fill"></i>
       Activa 2FA para proteger mejor tu cuenta
     </div>
+    {% else %}
+    <div class="nova-alert success" style="margin-bottom:12px;">
+      <i class="bi bi-check-circle-fill"></i>
+      Tu cuenta está protegida con 2FA
+    </div>
     {% endif %}
     <a href="{% url 'two_factor:setup' %}" class="btn-nova {% if user.two_factor_enabled %}btn-nova-outline{% else %}btn-nova-primary{% endif %} w-100" style="padding:10px;font-size:13px;justify-content:center;">
-      <i class="bi bi-{% if user.two_factor_enabled %}gear{% else %}shield-plus{% endif %}"></i>
+      <i class="bi bi-{% if user.two_factor_enabled %}gear-fill{% else %}shield-plus{% endif %}"></i>
       {% if user.two_factor_enabled %}Gestionar 2FA{% else %}Activar 2FA{% endif %}
     </a>
   </div>
 
-  <!-- Email Verification -->
-  <div class="nova-card">
+  <!-- ── EMAIL ── -->
+  <div class="nova-card nova-card-hover">
     <div class="nova-card-header">
       <span class="nova-card-title"><i class="bi bi-envelope-check-fill me-2" style="color:var(--nova-success);"></i>Email</span>
       {% if user.email_verified %}
@@ -72,9 +94,11 @@
       {% endif %}
     </div>
     <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;">
-      <div style="width:48px;height:48px;background:rgba(0,200,150,0.15);border-radius:var(--nova-radius-sm);display:flex;align-items:center;justify-content:center;font-size:22px;">✉️</div>
-      <div>
-        <div style="font-size:14px;font-weight:600;color:#fff;">{{ user.email }}</div>
+      <div style="width:52px;height:52px;background:rgba(0,200,150,0.15);border-radius:var(--nova-radius-sm);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <i class="bi bi-envelope-fill" style="font-size:24px;color:var(--nova-success);"></i>
+      </div>
+      <div style="min-width:0;">
+        <div style="font-size:14px;font-weight:600;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ user.email }}</div>
         <div style="font-size:12px;color:var(--nova-text-muted);">
           {% if user.email_verified %}Email verificado correctamente{% else %}Verifica tu correo electrónico{% endif %}
         </div>
@@ -91,20 +115,23 @@
     {% endif %}
   </div>
 
-  <!-- Sessions -->
-  <div class="nova-card">
+  <!-- ── SESSION ── -->
+  <div class="nova-card nova-card-hover">
     <div class="nova-card-header">
       <span class="nova-card-title"><i class="bi bi-laptop me-2" style="color:var(--nova-secondary);"></i>Sesión Activa</span>
+      <span class="status-badge completed">Activa</span>
     </div>
     <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;">
-      <div style="width:48px;height:48px;background:rgba(0,212,170,0.15);border-radius:var(--nova-radius-sm);display:flex;align-items:center;justify-content:center;font-size:22px;">💻</div>
+      <div style="width:52px;height:52px;background:rgba(0,212,170,0.15);border-radius:var(--nova-radius-sm);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <i class="bi bi-laptop" style="font-size:24px;color:var(--nova-secondary);"></i>
+      </div>
       <div>
         <div style="font-size:14px;font-weight:600;color:#fff;">Sesión actual</div>
-        <div style="font-size:12px;color:var(--nova-text-muted);">
-          IP: {{ user.last_login_ip|default:"Desconocida" }}
+        <div style="font-size:12px;color:var(--nova-text-muted);display:flex;align-items:center;gap:4px;">
+          <i class="bi bi-geo-alt"></i> IP: {{ user.last_login_ip|default:"Desconocida" }}
         </div>
-        <div style="font-size:11px;color:var(--nova-text-dim);">
-          Última actividad: {{ user.last_activity|date:"d/m/Y H:i"|default:"—" }}
+        <div style="font-size:11px;color:var(--nova-text-dim);margin-top:2px;">
+          <i class="bi bi-clock"></i> {{ user.last_activity|date:"d/m/Y H:i"|default:"—" }}
         </div>
       </div>
     </div>
@@ -114,36 +141,66 @@
   </div>
 </div>
 
-<!-- Activity Log -->
+<!-- ── ACTIVITY LOG ── -->
 <div class="nova-card">
   <div class="nova-card-header">
-    <span class="nova-card-title"><i class="bi bi-shield-exclamation me-2"></i>Registro de Actividad de Seguridad</span>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <div class="icon-circle red"><i class="bi bi-shield-exclamation"></i></div>
+      <span class="nova-card-title">Registro de Actividad de Seguridad</span>
+    </div>
     <span style="font-size:12px;color:var(--nova-text-muted);">Últimas 50 acciones</span>
   </div>
   {% if activity_logs %}
   <div style="overflow-x:auto;">
     <table class="nova-table">
       <thead>
-        <tr><th>Acción</th><th>Descripción</th><th>IP</th><th>Fecha</th></tr>
+        <tr>
+          <th>Acción</th>
+          <th>Descripción</th>
+          <th>IP</th>
+          <th>Fecha</th>
+        </tr>
       </thead>
       <tbody>
         {% for log in activity_logs %}
         <tr>
           <td>
-            <div style="display:flex;align-items:center;gap:8px;">
-              <span style="font-size:16px;">
-                {% if log.action == 'login' %}🔐
-                {% elif log.action == 'logout' %}🚪
-                {% elif log.action == 'login_failed' %}⚠️
-                {% elif log.action == 'password_change' %}🔑
-                {% elif log.action == 'trade' %}📊
-                {% elif log.action == 'deposit' %}💰
-                {% elif log.action == 'withdrawal' %}💸
-                {% elif log.action == '2fa_enabled' %}🛡️
-                {% elif log.action == 'email_verified' %}✉️
-                {% elif log.action == 'suspicious' %}🚨
-                {% else %}📋{% endif %}
-              </span>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div style="width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;
+                {% if log.action == 'login' %}background:rgba(0,102,255,0.15);
+                {% elif log.action == 'logout' %}background:rgba(122,139,168,0.15);
+                {% elif log.action == 'login_failed' or log.action == 'suspicious' %}background:rgba(255,59,92,0.15);
+                {% elif log.action == 'password_change' %}background:rgba(255,184,0,0.15);
+                {% elif log.action == 'trade' %}background:rgba(0,200,150,0.15);
+                {% elif log.action == 'deposit' %}background:rgba(0,200,150,0.15);
+                {% elif log.action == 'withdrawal' %}background:rgba(255,184,0,0.15);
+                {% elif log.action == '2fa_enabled' %}background:rgba(0,102,255,0.15);
+                {% elif log.action == 'email_verified' %}background:rgba(0,200,150,0.15);
+                {% else %}background:rgba(0,102,255,0.1);{% endif %}">
+                <i class="bi bi-
+                  {% if log.action == 'login' %}box-arrow-in-right
+                  {% elif log.action == 'logout' %}box-arrow-left
+                  {% elif log.action == 'login_failed' %}exclamation-triangle-fill
+                  {% elif log.action == 'password_change' %}key-fill
+                  {% elif log.action == 'trade' %}graph-up-arrow
+                  {% elif log.action == 'deposit' %}arrow-down-circle-fill
+                  {% elif log.action == 'withdrawal' %}arrow-up-circle-fill
+                  {% elif log.action == '2fa_enabled' %}shield-lock-fill
+                  {% elif log.action == 'email_verified' %}envelope-check-fill
+                  {% elif log.action == 'suspicious' %}shield-exclamation
+                  {% else %}clock-history{% endif %}"
+                  style="font-size:14px;color:
+                    {% if log.action == 'login' %}var(--nova-primary-light)
+                    {% elif log.action == 'logout' %}var(--nova-text-muted)
+                    {% elif log.action == 'login_failed' or log.action == 'suspicious' %}var(--nova-danger)
+                    {% elif log.action == 'password_change' %}var(--nova-warning)
+                    {% elif log.action == 'deposit' or log.action == 'trade' %}var(--nova-success)
+                    {% elif log.action == 'withdrawal' %}var(--nova-warning)
+                    {% elif log.action == '2fa_enabled' %}var(--nova-primary-light)
+                    {% elif log.action == 'email_verified' %}var(--nova-success)
+                    {% else %}var(--nova-text-muted){% endif %};">
+                </i>
+              </div>
               <span style="font-size:12px;font-weight:600;color:{% if log.action == 'login_failed' or log.action == 'suspicious' %}var(--nova-danger){% else %}#fff{% endif %};">
                 {{ log.get_action_display }}
               </span>
@@ -155,16 +212,19 @@
           <td style="font-family:var(--nova-font-mono);font-size:11px;color:var(--nova-text-muted);">
             {{ log.ip_address|default:"—" }}
           </td>
-          <td style="font-size:11px;color:var(--nova-text-muted);">{{ log.created_at|date:"d/m/Y H:i:s" }}</td>
+          <td style="font-size:11px;color:var(--nova-text-muted);white-space:nowrap;">{{ log.created_at|date:"d/m/Y H:i:s" }}</td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
   {% else %}
-  <div style="text-align:center;padding:60px;color:var(--nova-text-muted);">
-    <div style="font-size:48px;margin-bottom:12px;">🛡️</div>
-    <div style="font-size:14px;">Sin actividad registrada</div>
+  <div class="empty-state">
+    <div class="empty-icon" style="background:rgba(0,102,255,0.1);">
+      <i class="bi bi-shield-check" style="color:var(--nova-primary-light);"></i>
+    </div>
+    <h4>Sin actividad registrada</h4>
+    <p>El registro de actividad de seguridad aparecerá aquí</p>
   </div>
   {% endif %}
 </div>

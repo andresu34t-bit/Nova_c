@@ -2,61 +2,165 @@
 {% load static %}
 {% block title %}Contacto{% endblock %}
 {% block body %}
-<div style="min-height:100vh;background:var(--nova-bg-dark);padding:80px 40px;">
-  <div style="max-width:700px;margin:0 auto;">
-    <a href="/" style="display:flex;align-items:center;gap:10px;margin-bottom:40px;text-decoration:none;">
-      <img src="{% static 'images/nova_capital.png' %}" alt="Nova Capital Group" style="width:32px;height:32px;object-fit:contain;border-radius:6px;">
-      <span style="font-size:13px;font-weight:700;color:#fff;">NOVA CAPITAL GROUP</span>
-    </a>
-    <h1 style="font-size:36px;font-weight:800;color:#fff;margin-bottom:8px;">Contáctanos</h1>
-    <p style="color:var(--nova-text-muted);margin-bottom:40px;font-size:15px;">Estamos aquí para ayudarte. Escríbenos y te responderemos en menos de 24 horas.</p>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:32px;">
-      <div class="nova-card" style="text-align:center;padding:24px;">
-        <div style="font-size:32px;margin-bottom:10px;">📧</div>
-        <div style="font-size:13px;font-weight:600;color:#fff;margin-bottom:4px;">Email</div>
+
+<!-- NAVBAR -->
+<nav class="landing-nav" id="landingNav">
+  <div style="display:flex;align-items:center;gap:12px;">
+    <img src="{% static 'images/nova_capital.png' %}" alt="Nova Capital Group" style="width:38px;height:38px;object-fit:contain;border-radius:8px;">
+    <div>
+      <div style="font-size:13px;font-weight:700;color:#fff;letter-spacing:0.5px;">NOVA CAPITAL</div>
+      <div style="font-size:9px;color:var(--nova-text-muted);letter-spacing:2px;text-transform:uppercase;">GROUP</div>
+    </div>
+  </div>
+  <div class="landing-nav-menu" id="navMenu">
+    <a href="{% url 'core:about' %}" style="color:var(--nova-text-muted);font-size:13px;padding:8px 16px;">Nosotros</a>
+    <a href="{% url 'core:contact' %}" style="color:#fff;font-size:13px;padding:8px 16px;font-weight:600;">Contacto</a>
+    <a href="{% url 'two_factor:login' %}" class="btn-nova btn-nova-outline" style="padding:8px 20px;font-size:13px;">Iniciar Sesión</a>
+    <a href="{% url 'accounts:register' %}" class="btn-nova btn-nova-primary" style="padding:8px 20px;font-size:13px;">Comenzar Gratis</a>
+  </div>
+  <button class="landing-nav-toggle" onclick="toggleNavMenu()" aria-label="Menú" id="navToggle">
+    <i class="bi bi-list"></i>
+  </button>
+</nav>
+
+<div style="min-height:100vh;background:var(--nova-bg-dark);padding:120px 40px 80px;">
+  <div style="max-width:900px;margin:0 auto;">
+
+    <!-- Header -->
+    <div style="text-align:center;margin-bottom:56px;">
+      <div style="display:inline-block;background:rgba(0,102,255,0.1);border:1px solid rgba(0,102,255,0.3);border-radius:20px;padding:6px 20px;font-size:12px;font-weight:600;color:var(--nova-primary-light);margin-bottom:16px;text-transform:uppercase;letter-spacing:1px;">Soporte</div>
+      <h1 style="font-size:clamp(28px,5vw,42px);font-weight:800;color:#fff;margin-bottom:12px;">¿Cómo podemos ayudarte?</h1>
+      <p style="color:var(--nova-text-muted);font-size:15px;max-width:500px;margin:0 auto;line-height:1.7;">Estamos aquí para ayudarte. Escríbenos y te responderemos en menos de 24 horas.</p>
+    </div>
+
+    <!-- Contact channels -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:40px;">
+      <div class="nova-card nova-card-hover" style="text-align:center;padding:28px 20px;">
+        <div style="width:52px;height:52px;background:rgba(0,102,255,0.15);border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;">
+          <i class="bi bi-envelope-fill" style="font-size:22px;color:var(--nova-primary-light);"></i>
+        </div>
+        <div style="font-size:14px;font-weight:600;color:#fff;margin-bottom:6px;">Email</div>
         <div style="font-size:12px;color:var(--nova-primary-light);">soporte@novacapitalgroup.com</div>
+        <div style="font-size:11px;color:var(--nova-text-dim);margin-top:4px;">Respuesta en &lt;24h</div>
       </div>
-      <div class="nova-card" style="text-align:center;padding:24px;">
-        <div style="font-size:32px;margin-bottom:10px;">💬</div>
-        <div style="font-size:13px;font-weight:600;color:#fff;margin-bottom:4px;">Chat en Vivo</div>
+      <div class="nova-card nova-card-hover" style="text-align:center;padding:28px 20px;">
+        <div style="width:52px;height:52px;background:rgba(0,200,150,0.15);border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;">
+          <i class="bi bi-chat-dots-fill" style="font-size:22px;color:var(--nova-success);"></i>
+        </div>
+        <div style="font-size:14px;font-weight:600;color:#fff;margin-bottom:6px;">Chat en Vivo</div>
         <div style="font-size:12px;color:var(--nova-success);">Disponible 24/7</div>
+        <div style="font-size:11px;color:var(--nova-text-dim);margin-top:4px;">Respuesta inmediata</div>
+      </div>
+      <div class="nova-card nova-card-hover" style="text-align:center;padding:28px 20px;">
+        <div style="width:52px;height:52px;background:rgba(255,184,0,0.15);border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;">
+          <i class="bi bi-telephone-fill" style="font-size:22px;color:var(--nova-warning);"></i>
+        </div>
+        <div style="font-size:14px;font-weight:600;color:#fff;margin-bottom:6px;">Teléfono</div>
+        <div style="font-size:12px;color:var(--nova-warning);">+1 (800) NOVA-CAP</div>
+        <div style="font-size:11px;color:var(--nova-text-dim);margin-top:4px;">Lun–Vie 9am–6pm</div>
       </div>
     </div>
+
+    <!-- Contact form -->
     <div class="nova-card">
-      <div class="nova-card-title" style="margin-bottom:20px;"><i class="bi bi-envelope-fill me-2"></i>Enviar Mensaje</div>
-      <form>
+      <div class="nova-card-header" style="margin-bottom:24px;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div class="icon-circle blue"><i class="bi bi-send-fill"></i></div>
+          <span class="nova-card-title">Enviar Mensaje</span>
+        </div>
+      </div>
+      <form method="post" action="#">
         {% csrf_token %}
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;" class="form-two-col">
           <div class="nova-form-group" style="margin-bottom:0;">
-            <label class="nova-label">Nombre</label>
-            <input type="text" class="nova-input" placeholder="Tu nombre">
+            <label class="nova-label">Nombre completo</label>
+            <input type="text" name="name" class="nova-input" placeholder="Juan García" required>
           </div>
           <div class="nova-form-group" style="margin-bottom:0;">
-            <label class="nova-label">Email</label>
-            <input type="email" class="nova-input" placeholder="tu@email.com">
+            <label class="nova-label">Correo electrónico</label>
+            <input type="email" name="email" class="nova-input" placeholder="tu@email.com" required>
           </div>
         </div>
         <div class="nova-form-group">
           <label class="nova-label">Asunto</label>
-          <select class="nova-select">
-            <option>Soporte técnico</option>
-            <option>Consulta sobre cuenta</option>
-            <option>Problema con transacción</option>
-            <option>Información general</option>
-            <option>Otro</option>
+          <select name="subject" class="nova-select">
+            <option value="support">Soporte técnico</option>
+            <option value="account">Consulta sobre cuenta</option>
+            <option value="transaction">Problema con transacción</option>
+            <option value="trading">Consulta de trading</option>
+            <option value="general">Información general</option>
+            <option value="other">Otro</option>
           </select>
         </div>
         <div class="nova-form-group">
           <label class="nova-label">Mensaje</label>
-          <textarea class="nova-input" rows="5" placeholder="Describe tu consulta..."></textarea>
+          <textarea name="message" class="nova-input" rows="5" placeholder="Describe tu consulta con el mayor detalle posible..." required style="resize:vertical;"></textarea>
         </div>
-        <button type="submit" class="btn-nova btn-nova-primary" style="padding:12px 28px;font-size:14px;">
-          <i class="bi bi-send-fill"></i> Enviar Mensaje
-        </button>
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+          <div style="font-size:12px;color:var(--nova-text-muted);">
+            <i class="bi bi-lock-fill me-1" style="color:var(--nova-success);"></i>
+            Tu información está protegida y nunca será compartida.
+          </div>
+          <button type="submit" class="btn-nova btn-nova-primary" style="padding:12px 28px;font-size:14px;">
+            <i class="bi bi-send-fill"></i> Enviar Mensaje
+          </button>
+        </div>
       </form>
     </div>
+
+    <!-- FAQ -->
+    <div style="margin-top:48px;">
+      <h2 style="font-size:22px;font-weight:700;color:#fff;margin-bottom:24px;text-align:center;">Preguntas Frecuentes</h2>
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        {% for q, a in faq_items|default:"" %}{% endfor %}
+        <div class="nova-card" style="padding:18px 20px;">
+          <div style="font-size:14px;font-weight:600;color:#fff;margin-bottom:6px;display:flex;align-items:center;gap:8px;">
+            <i class="bi bi-question-circle-fill" style="color:var(--nova-primary-light);"></i>
+            ¿Cómo realizo un depósito?
+          </div>
+          <div style="font-size:13px;color:var(--nova-text-muted);line-height:1.6;">Inicia sesión, ve a Finanzas → Depositar, elige el monto y método de pago. Los fondos se acreditan instantáneamente en modo simulación.</div>
+        </div>
+        <div class="nova-card" style="padding:18px 20px;">
+          <div style="font-size:14px;font-weight:600;color:#fff;margin-bottom:6px;display:flex;align-items:center;gap:8px;">
+            <i class="bi bi-question-circle-fill" style="color:var(--nova-primary-light);"></i>
+            ¿Cómo activo la autenticación 2FA?
+          </div>
+          <div style="font-size:13px;color:var(--nova-text-muted);line-height:1.6;">Ve a Seguridad → Autenticación 2FA → Activar 2FA. Sigue las instrucciones para vincular tu aplicación de autenticación.</div>
+        </div>
+        <div class="nova-card" style="padding:18px 20px;">
+          <div style="font-size:14px;font-weight:600;color:#fff;margin-bottom:6px;display:flex;align-items:center;gap:8px;">
+            <i class="bi bi-question-circle-fill" style="color:var(--nova-primary-light);"></i>
+            ¿Es una plataforma real o de simulación?
+          </div>
+          <div style="font-size:13px;color:var(--nova-text-muted);line-height:1.6;">Nova Capital Group es una plataforma de simulación financiera con datos de mercado reales. No se realizan transacciones financieras reales.</div>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
+
+<!-- FOOTER -->
+<footer style="background:var(--nova-bg-card);border-top:1px solid var(--nova-border);padding:32px 40px;">
+  <div style="max-width:900px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <img src="{% static 'images/nova_capital.png' %}" alt="Nova Capital Group" style="width:28px;height:28px;object-fit:contain;border-radius:6px;opacity:0.8;">
+      <span style="font-size:11px;color:var(--nova-text-dim);">© {% now "Y" %} Nova Capital Group</span>
+    </div>
+    <div style="display:flex;gap:20px;flex-wrap:wrap;">
+      <a href="{% url 'core:terms' %}" style="font-size:12px;color:var(--nova-text-dim);">Términos</a>
+      <a href="{% url 'core:privacy' %}" style="font-size:12px;color:var(--nova-text-dim);">Privacidad</a>
+      <a href="{% url 'core:about' %}" style="font-size:12px;color:var(--nova-text-dim);">Nosotros</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+function toggleNavMenu() {
+  const menu = document.getElementById('navMenu');
+  const btn = document.getElementById('navToggle');
+  menu.classList.toggle('open');
+  btn.querySelector('i').className = menu.classList.contains('open') ? 'bi bi-x-lg' : 'bi bi-list';
+}
+</script>
 {% endblock %}
-
-

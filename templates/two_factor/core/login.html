@@ -5,98 +5,222 @@
 {% block body %}
 <div style="min-height:100vh;display:flex;background:var(--nova-bg-dark);">
 
-  <!-- Left Panel -->
-  <div style="flex:1;background:linear-gradient(135deg,var(--nova-bg-card) 0%,var(--nova-bg-card2) 100%);border-right:1px solid var(--nova-border);padding:60px 40px;display:flex;flex-direction:column;justify-content:center;" class="d-none d-lg-flex">
+  <!-- ── LEFT PANEL ── -->
+  <div style="flex:1;background:linear-gradient(135deg,var(--nova-bg-card) 0%,var(--nova-bg-card2) 100%);border-right:1px solid var(--nova-border);padding:60px 40px;display:flex;flex-direction:column;justify-content:space-between;" class="d-none d-lg-flex">
     <div style="max-width:420px;">
-      <a href="{% url 'core:home' %}" style="display:flex;align-items:center;gap:12px;margin-bottom:60px;text-decoration:none;">
-        <img src="{% static 'images/nova_capital.png' %}" alt="Nova Capital Group" style="width:40px;height:40px;object-fit:contain;border-radius:10px;">
+      <a href="{% url 'core:home' %}" style="display:flex;align-items:center;gap:12px;margin-bottom:64px;text-decoration:none;">
+        <img src="{% static 'images/nova_capital.png' %}" alt="Nova Capital Group" style="width:42px;height:42px;object-fit:contain;border-radius:10px;box-shadow:0 0 16px rgba(0,102,255,0.3);">
         <div>
-          <div style="font-size:14px;font-weight:700;color:#fff;">NOVA CAPITAL GROUP</div>
-          <div style="font-size:10px;color:var(--nova-text-muted);letter-spacing:2px;">INVERSIONES GLOBALES</div>
+          <div style="font-size:14px;font-weight:700;color:#fff;letter-spacing:0.5px;">NOVA CAPITAL GROUP</div>
+          <div style="font-size:10px;color:var(--nova-text-muted);letter-spacing:2px;text-transform:uppercase;">Inversiones Globales</div>
         </div>
       </a>
-      <h2 style="font-size:32px;font-weight:800;color:#fff;margin-bottom:16px;line-height:1.2;">Bienvenido de<br><span style="background:linear-gradient(135deg,#0066FF,#00D4AA);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">vuelta</span></h2>
-      <p style="color:var(--nova-text-muted);font-size:15px;line-height:1.7;margin-bottom:40px;">Accede a tu cuenta para gestionar tu portafolio y operar en los mercados globales.</p>
-      <div style="display:flex;flex-direction:column;gap:16px;">
-        <div style="display:flex;align-items:center;gap:12px;padding:16px;background:rgba(0,102,255,0.05);border:1px solid rgba(0,102,255,0.15);border-radius:var(--nova-radius-sm);">
-          <span style="font-size:24px;">🛡️</span>
+      <h2 style="font-size:clamp(24px,3vw,34px);font-weight:800;color:#fff;margin-bottom:16px;line-height:1.2;">
+        Bienvenido de<br>
+        <span style="background:linear-gradient(135deg,#0066FF,#00D4AA);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">vuelta</span>
+      </h2>
+      <p style="color:var(--nova-text-muted);font-size:14px;line-height:1.7;margin-bottom:40px;">Accede a tu cuenta para gestionar tu portafolio y operar en los mercados financieros globales.</p>
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <div style="display:flex;align-items:center;gap:14px;padding:16px;background:rgba(0,102,255,0.06);border:1px solid rgba(0,102,255,0.15);border-radius:var(--nova-radius-sm);">
+          <div style="width:40px;height:40px;background:rgba(0,102,255,0.15);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <i class="bi bi-shield-lock-fill" style="font-size:18px;color:var(--nova-primary-light);"></i>
+          </div>
           <div>
             <div style="font-size:13px;font-weight:600;color:#fff;">Conexión segura</div>
             <div style="font-size:11px;color:var(--nova-text-muted);">Encriptación SSL/TLS de extremo a extremo</div>
           </div>
         </div>
-        <div style="display:flex;align-items:center;gap:12px;padding:16px;background:rgba(0,200,150,0.05);border:1px solid rgba(0,200,150,0.15);border-radius:var(--nova-radius-sm);">
-          <span style="font-size:24px;">⚡</span>
+        <div style="display:flex;align-items:center;gap:14px;padding:16px;background:rgba(0,200,150,0.06);border:1px solid rgba(0,200,150,0.15);border-radius:var(--nova-radius-sm);">
+          <div style="width:40px;height:40px;background:rgba(0,200,150,0.15);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <i class="bi bi-lightning-charge-fill" style="font-size:18px;color:var(--nova-success);"></i>
+          </div>
           <div>
             <div style="font-size:13px;font-weight:600;color:#fff;">Acceso instantáneo</div>
             <div style="font-size:11px;color:var(--nova-text-muted);">Mercados en tiempo real disponibles 24/7</div>
           </div>
         </div>
+        <div style="display:flex;align-items:center;gap:14px;padding:16px;background:rgba(255,184,0,0.06);border:1px solid rgba(255,184,0,0.15);border-radius:var(--nova-radius-sm);">
+          <div style="width:40px;height:40px;background:rgba(255,184,0,0.15);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <i class="bi bi-graph-up-arrow" style="font-size:18px;color:var(--nova-warning);"></i>
+          </div>
+          <div>
+            <div style="font-size:13px;font-weight:600;color:#fff;">500+ activos</div>
+            <div style="font-size:11px;color:var(--nova-text-muted);">Crypto, acciones, forex e índices globales</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;gap:32px;padding-top:32px;border-top:1px solid var(--nova-border);">
+      <div>
+        <div style="font-size:20px;font-weight:800;color:#fff;font-family:var(--nova-font-mono);">150K+</div>
+        <div style="font-size:11px;color:var(--nova-text-muted);">Usuarios activos</div>
+      </div>
+      <div>
+        <div style="font-size:20px;font-weight:800;color:#fff;font-family:var(--nova-font-mono);">$2.4B+</div>
+        <div style="font-size:11px;color:var(--nova-text-muted);">Volumen operado</div>
+      </div>
+      <div>
+        <div style="font-size:20px;font-weight:800;color:#fff;font-family:var(--nova-font-mono);">99.9%</div>
+        <div style="font-size:11px;color:var(--nova-text-muted);">Uptime</div>
       </div>
     </div>
   </div>
 
-  <!-- Right Panel -->
+  <!-- ── RIGHT PANEL ── -->
   <div style="flex:1;max-width:520px;padding:60px 40px;display:flex;flex-direction:column;justify-content:center;overflow-y:auto;">
+
+    <!-- Mobile logo -->
+    <div class="d-flex d-lg-none" style="align-items:center;gap:10px;margin-bottom:40px;">
+      <img src="{% static 'images/nova_capital.png' %}" alt="Nova Capital Group" style="width:36px;height:36px;object-fit:contain;border-radius:8px;">
+      <div style="font-size:13px;font-weight:700;color:#fff;">NOVA CAPITAL GROUP</div>
+    </div>
+
     <div style="max-width:380px;margin:0 auto;width:100%;">
+
+      {% if wizard.steps.current == 'auth' %}
       <div style="margin-bottom:32px;">
         <h1 style="font-size:26px;font-weight:800;color:#fff;margin-bottom:8px;">Iniciar Sesión</h1>
         <p style="color:var(--nova-text-muted);font-size:14px;">¿No tienes cuenta? <a href="{% url 'accounts:register' %}" style="color:var(--nova-primary-light);font-weight:600;">Regístrate gratis</a></p>
       </div>
+      {% else %}
+      <div style="text-align:center;margin-bottom:32px;">
+        <div style="width:64px;height:64px;background:rgba(0,102,255,0.15);border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
+          <i class="bi bi-shield-lock-fill" style="font-size:28px;color:var(--nova-primary-light);"></i>
+        </div>
+        <h1 style="font-size:22px;font-weight:800;color:#fff;margin-bottom:8px;">Verificación en dos pasos</h1>
+        <p style="color:var(--nova-text-muted);font-size:13px;">Ingresa el código de tu aplicación autenticadora</p>
+      </div>
+      {% endif %}
 
       {% if form.errors %}
       <div class="nova-alert error" style="margin-bottom:20px;">
         <i class="bi bi-exclamation-triangle-fill"></i>
-        Credenciales incorrectas. Verifica tu email y contraseña.
+        {% if wizard.steps.current == 'auth' %}
+          Credenciales incorrectas. Verifica tu email y contraseña.
+        {% else %}
+          Código inválido. Inténtalo de nuevo.
+        {% endif %}
       </div>
       {% endif %}
 
       <form method="post" novalidate>
         {% csrf_token %}
+
+        {# ── CAMPO OBLIGATORIO DEL WIZARD ── #}
+        {{ wizard.management_form }}
+
         {% if wizard.steps.current == 'auth' %}
+        <!-- ── PASO 1: CREDENCIALES ── -->
         <div class="nova-form-group">
           <label class="nova-label">Correo Electrónico</label>
-          <input type="email" name="{{ form.username.html_name }}" class="nova-input" placeholder="correo@ejemplo.com" value="{{ form.username.value|default:'' }}" autofocus required>
+          <div style="position:relative;">
+            <i class="bi bi-envelope" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--nova-text-muted);font-size:14px;pointer-events:none;"></i>
+            <input type="email"
+                   name="{{ form.username.html_name }}"
+                   class="nova-input{% if form.username.errors %} is-invalid{% endif %}"
+                   placeholder="correo@ejemplo.com"
+                   value="{{ form.username.value|default:'' }}"
+                   autofocus required
+                   style="padding-left:38px;">
+          </div>
+          {% if form.username.errors %}
+          <div style="color:var(--nova-danger);font-size:11px;margin-top:4px;">{{ form.username.errors.0 }}</div>
+          {% endif %}
         </div>
+
         <div class="nova-form-group">
           <label class="nova-label">Contraseña</label>
           <div style="position:relative;">
-            <input type="password" name="{{ form.password.html_name }}" class="nova-input" placeholder="Tu contraseña" id="loginPwd" required>
-            <button type="button" onclick="togglePwd('loginPwd',this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--nova-text-muted);cursor:pointer;"><i class="bi bi-eye"></i></button>
+            <i class="bi bi-lock" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--nova-text-muted);font-size:14px;pointer-events:none;"></i>
+            <input type="password"
+                   name="{{ form.password.html_name }}"
+                   class="nova-input{% if form.password.errors %} is-invalid{% endif %}"
+                   placeholder="Tu contraseña"
+                   id="loginPwd" required
+                   style="padding-left:38px;padding-right:44px;">
+            <button type="button" onclick="togglePwd('loginPwd',this)"
+                    style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--nova-text-muted);cursor:pointer;padding:4px;">
+              <i class="bi bi-eye"></i>
+            </button>
           </div>
+          {% if form.password.errors %}
+          <div style="color:var(--nova-danger);font-size:11px;margin-top:4px;">{{ form.password.errors.0 }}</div>
+          {% endif %}
         </div>
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
           <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:var(--nova-text-muted);">
-            <input type="checkbox" style="accent-color:var(--nova-primary);"> Recordarme
+            <input type="checkbox" name="remember" style="accent-color:var(--nova-primary);width:14px;height:14px;"> Recordarme
           </label>
           <a href="#" style="font-size:13px;color:var(--nova-primary-light);">¿Olvidaste tu contraseña?</a>
         </div>
-        {% else %}
-        <!-- 2FA Step -->
-        <div style="text-align:center;margin-bottom:24px;">
-          <div style="font-size:48px;margin-bottom:12px;">🛡️</div>
-          <div style="font-size:16px;font-weight:700;color:#fff;margin-bottom:8px;">Verificación en dos pasos</div>
-          <div style="font-size:13px;color:var(--nova-text-muted);">Ingresa el código de tu aplicación autenticadora</div>
-        </div>
+
+        {% elif wizard.steps.current == 'token' %}
+        <!-- ── PASO 2: CÓDIGO 2FA ── -->
         <div class="nova-form-group">
-          <label class="nova-label">Código de Verificación</label>
-          <input type="text" name="{{ form.otp_token.html_name }}" class="nova-input" placeholder="000000" maxlength="6" style="text-align:center;font-size:24px;font-family:var(--nova-font-mono);letter-spacing:8px;" autofocus>
+          <label class="nova-label">Código de Verificación (6 dígitos)</label>
+          <input type="text"
+                 name="{{ form.otp_token.html_name }}"
+                 class="nova-input"
+                 placeholder="000000"
+                 maxlength="6"
+                 inputmode="numeric"
+                 pattern="[0-9]*"
+                 autofocus
+                 style="text-align:center;font-size:28px;font-family:var(--nova-font-mono);letter-spacing:10px;padding:14px;">
         </div>
+        <div class="nova-alert info" style="margin-bottom:20px;">
+          <i class="bi bi-info-circle-fill"></i>
+          Abre tu aplicación autenticadora y copia el código de 6 dígitos.
+        </div>
+
+        {% elif wizard.steps.current == 'backup' %}
+        <!-- ── PASO 3: CÓDIGO DE RESPALDO ── -->
+        <div class="nova-form-group">
+          <label class="nova-label">Código de Respaldo</label>
+          <input type="text"
+                 name="{{ form.otp_token.html_name }}"
+                 class="nova-input"
+                 placeholder="Código de respaldo"
+                 autofocus
+                 style="text-align:center;font-size:18px;font-family:var(--nova-font-mono);letter-spacing:4px;padding:14px;">
+        </div>
+        <div class="nova-alert warning" style="margin-bottom:20px;">
+          <i class="bi bi-exclamation-triangle-fill"></i>
+          Usa uno de tus códigos de respaldo de un solo uso.
+        </div>
+
+        {% else %}
+        {# Fallback: renderizar el form completo del wizard #}
+        {{ form.as_p }}
         {% endif %}
 
-        <button type="submit" class="btn-nova btn-nova-primary w-100" style="padding:13px;font-size:14px;justify-content:center;">
+        <button type="submit" class="btn-nova btn-nova-primary w-100" style="padding:14px;font-size:14px;justify-content:center;">
           {% if wizard.steps.current == 'auth' %}
-          <i class="bi bi-box-arrow-in-right"></i> Iniciar Sesión
+            <i class="bi bi-box-arrow-in-right"></i> Iniciar Sesión
+          {% elif wizard.steps.current == 'token' or wizard.steps.current == 'backup' %}
+            <i class="bi bi-shield-check"></i> Verificar Código
           {% else %}
-          <i class="bi bi-shield-check"></i> Verificar
+            <i class="bi bi-arrow-right-circle-fill"></i> Continuar
           {% endif %}
         </button>
       </form>
 
-      <div style="margin-top:24px;text-align:center;font-size:12px;color:var(--nova-text-dim);">
+      <div style="display:flex;align-items:center;gap:12px;margin:24px 0;">
+        <div style="flex:1;height:1px;background:var(--nova-border);"></div>
+        <span style="font-size:11px;color:var(--nova-text-dim);">o</span>
+        <div style="flex:1;height:1px;background:var(--nova-border);"></div>
+      </div>
+
+      <div style="text-align:center;">
+        <span style="font-size:13px;color:var(--nova-text-muted);">¿No tienes cuenta? </span>
+        <a href="{% url 'accounts:register' %}" style="font-size:13px;color:var(--nova-primary-light);font-weight:600;">Crear cuenta gratis</a>
+      </div>
+
+      <div style="margin-top:24px;text-align:center;font-size:11px;color:var(--nova-text-dim);">
         Al iniciar sesión aceptas nuestros
-        <a href="{% url 'core:terms' %}" style="color:var(--nova-primary-light);">Términos</a> y
-        <a href="{% url 'core:privacy' %}" style="color:var(--nova-primary-light);">Privacidad</a>
+        <a href="{% url 'core:terms' %}" style="color:var(--nova-text-muted);">Términos</a> y
+        <a href="{% url 'core:privacy' %}" style="color:var(--nova-text-muted);">Privacidad</a>
       </div>
     </div>
   </div>
@@ -109,6 +233,14 @@ function togglePwd(id, btn) {
   input.type = input.type === 'password' ? 'text' : 'password';
   icon.className = input.type === 'password' ? 'bi bi-eye' : 'bi bi-eye-slash';
 }
+// Auto-format OTP input
+document.addEventListener('DOMContentLoaded', () => {
+  const otpInput = document.querySelector('input[maxlength="6"]');
+  if (otpInput) {
+    otpInput.addEventListener('input', function() {
+      this.value = this.value.replace(/\D/g, '').slice(0, 6);
+    });
+  }
+});
 </script>
 {% endblock %}
-

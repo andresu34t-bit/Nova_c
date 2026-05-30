@@ -5,7 +5,7 @@
 
 {% block body %}
 <!-- NAVBAR -->
-<nav class="landing-nav">
+<nav class="landing-nav" id="landingNav">
   <div style="display:flex;align-items:center;gap:12px;">
     <img src="{% static 'images/nova_capital.png' %}" alt="Nova Capital Group" style="width:38px;height:38px;object-fit:contain;border-radius:8px;">
     <div>
@@ -13,13 +13,26 @@
       <div style="font-size:9px;color:var(--nova-text-muted);letter-spacing:2px;text-transform:uppercase;">GROUP</div>
     </div>
   </div>
-  <div style="display:flex;align-items:center;gap:8px;">
-    <a href="{% url 'core:about' %}" style="color:var(--nova-text-muted);font-size:13px;padding:8px 16px;">Nosotros</a>
-    <a href="{% url 'core:contact' %}" style="color:var(--nova-text-muted);font-size:13px;padding:8px 16px;">Contacto</a>
+  <!-- Desktop menu -->
+  <div class="landing-nav-menu" id="navMenu">
+    <a href="{% url 'core:about' %}" style="color:var(--nova-text-muted);font-size:13px;padding:8px 16px;white-space:nowrap;">Nosotros</a>
+    <a href="{% url 'core:contact' %}" style="color:var(--nova-text-muted);font-size:13px;padding:8px 16px;white-space:nowrap;">Contacto</a>
     <a href="{% url 'two_factor:login' %}" class="btn-nova btn-nova-outline" style="padding:8px 20px;font-size:13px;">Iniciar Sesión</a>
     <a href="{% url 'accounts:register' %}" class="btn-nova btn-nova-primary" style="padding:8px 20px;font-size:13px;">Comenzar Gratis</a>
   </div>
+  <!-- Mobile hamburger -->
+  <button class="landing-nav-toggle" onclick="toggleNavMenu()" aria-label="Menú" id="navToggle">
+    <i class="bi bi-list"></i>
+  </button>
 </nav>
+<script>
+function toggleNavMenu() {
+  const menu = document.getElementById('navMenu');
+  const btn = document.getElementById('navToggle');
+  menu.classList.toggle('open');
+  btn.querySelector('i').className = menu.classList.contains('open') ? 'bi bi-x-lg' : 'bi bi-list';
+}
+</script>
 
 <!-- HERO -->
 <section class="landing-hero">
@@ -122,32 +135,44 @@
     </div>
     <div class="features-grid">
       <div class="feature-card">
-        <div class="feature-icon" style="background:rgba(0,102,255,0.15);">🛡️</div>
+        <div class="feature-icon" style="background:rgba(0,102,255,0.15);">
+          <i class="bi bi-shield-lock-fill" style="font-size:24px;color:var(--nova-primary-light);"></i>
+        </div>
         <div class="feature-title">Seguridad Bancaria</div>
         <div class="feature-desc">Autenticación 2FA, encriptación AES-256, protección contra fuerza bruta y monitoreo antifraude 24/7.</div>
       </div>
       <div class="feature-card">
-        <div class="feature-icon" style="background:rgba(0,200,150,0.15);">📊</div>
+        <div class="feature-icon" style="background:rgba(0,200,150,0.15);">
+          <i class="bi bi-graph-up-arrow" style="font-size:24px;color:var(--nova-success);"></i>
+        </div>
         <div class="feature-title">Trading Avanzado</div>
         <div class="feature-desc">Gráficos profesionales estilo TradingView, órdenes de mercado y límite, historial completo de operaciones.</div>
       </div>
       <div class="feature-card">
-        <div class="feature-icon" style="background:rgba(255,184,0,0.15);">⚡</div>
+        <div class="feature-icon" style="background:rgba(255,184,0,0.15);">
+          <i class="bi bi-lightning-charge-fill" style="font-size:24px;color:var(--nova-warning);"></i>
+        </div>
         <div class="feature-title">Datos en Tiempo Real</div>
         <div class="feature-desc">Precios actualizados al instante de criptomonedas, acciones, forex e índices de los principales mercados globales.</div>
       </div>
       <div class="feature-card">
-        <div class="feature-icon" style="background:rgba(255,59,92,0.15);">💼</div>
+        <div class="feature-icon" style="background:rgba(255,59,92,0.15);">
+          <i class="bi bi-briefcase-fill" style="font-size:24px;color:var(--nova-danger);"></i>
+        </div>
         <div class="feature-title">Gestión de Portafolio</div>
         <div class="feature-desc">Visualiza tu distribución de activos, rendimiento histórico, ganancias y pérdidas en tiempo real.</div>
       </div>
       <div class="feature-card">
-        <div class="feature-icon" style="background:rgba(0,212,170,0.15);">🌐</div>
+        <div class="feature-icon" style="background:rgba(0,212,170,0.15);">
+          <i class="bi bi-globe2" style="font-size:24px;color:var(--nova-secondary);"></i>
+        </div>
         <div class="feature-title">Mercados Globales</div>
         <div class="feature-desc">Accede a más de 500 activos: Bitcoin, Ethereum, S&P 500, EUR/USD, oro, petróleo y mucho más.</div>
       </div>
       <div class="feature-card">
-        <div class="feature-icon" style="background:rgba(0,102,255,0.15);">📰</div>
+        <div class="feature-icon" style="background:rgba(0,102,255,0.15);">
+          <i class="bi bi-newspaper" style="font-size:24px;color:var(--nova-primary-light);"></i>
+        </div>
         <div class="feature-title">Noticias Financieras</div>
         <div class="feature-desc">Mantente informado con noticias del mercado en tiempo real, análisis y calendario económico.</div>
       </div>
@@ -164,29 +189,56 @@
     <a href="{% url 'accounts:register' %}" class="btn-nova btn-nova-primary" style="padding:16px 48px;font-size:16px;">
       <i class="bi bi-rocket-takeoff-fill"></i> Crear Cuenta Gratuita
     </a>
-    <div style="margin-top:20px;font-size:12px;color:var(--nova-text-dim);">
-      Sin tarjeta de crédito · Sin comisiones ocultas · Cancela cuando quieras
+    <div style="margin-top:20px;font-size:12px;color:var(--nova-text-dim);display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap;">
+      <span><i class="bi bi-check-circle-fill" style="color:var(--nova-success);margin-right:4px;"></i>Sin tarjeta de crédito</span>
+      <span><i class="bi bi-check-circle-fill" style="color:var(--nova-success);margin-right:4px;"></i>Sin comisiones ocultas</span>
+      <span><i class="bi bi-check-circle-fill" style="color:var(--nova-success);margin-right:4px;"></i>Cancela cuando quieras</span>
     </div>
   </div>
 </section>
 
 <!-- FOOTER -->
-<footer style="background:var(--nova-bg-card);border-top:1px solid var(--nova-border);padding:40px;">
-  <div style="max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px;">
-    <div style="display:flex;align-items:center;gap:12px;">
-      <img src="{% static 'images/nova_capital.png' %}" alt="Nova Capital Group" style="width:32px;height:32px;object-fit:contain;border-radius:6px;">
-      <div>
-        <div style="font-size:12px;font-weight:700;color:#fff;">NOVA CAPITAL GROUP</div>
-        <div style="font-size:10px;color:var(--nova-text-muted);">© 2024 Todos los derechos reservados</div>
+<footer style="background:var(--nova-bg-card);border-top:1px solid var(--nova-border);padding:40px 40px 32px;">
+  <div style="max-width:1200px;margin:0 auto;">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:32px;margin-bottom:32px;">
+      <!-- Brand -->
+      <div style="max-width:280px;">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+          <img src="{% static 'images/nova_capital.png' %}" alt="Nova Capital Group" style="width:36px;height:36px;object-fit:contain;border-radius:8px;">
+          <div>
+            <div style="font-size:13px;font-weight:700;color:#fff;">NOVA CAPITAL GROUP</div>
+            <div style="font-size:10px;color:var(--nova-text-muted);letter-spacing:1px;">INVERSIONES GLOBALES</div>
+          </div>
+        </div>
+        <p style="font-size:12px;color:var(--nova-text-dim);line-height:1.6;">Plataforma de simulación financiera para aprender a invertir en mercados globales con herramientas de nivel institucional.</p>
+      </div>
+      <!-- Links -->
+      <div style="display:flex;gap:48px;flex-wrap:wrap;">
+        <div>
+          <div style="font-size:11px;font-weight:700;color:var(--nova-text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;">Plataforma</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <a href="{% url 'accounts:register' %}" style="font-size:12px;color:var(--nova-text-dim);">Crear Cuenta</a>
+            <a href="{% url 'two_factor:login' %}" style="font-size:12px;color:var(--nova-text-dim);">Iniciar Sesión</a>
+            <a href="{% url 'core:about' %}" style="font-size:12px;color:var(--nova-text-dim);">Nosotros</a>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:11px;font-weight:700;color:var(--nova-text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;">Legal</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <a href="{% url 'core:terms' %}" style="font-size:12px;color:var(--nova-text-dim);">Términos de Servicio</a>
+            <a href="{% url 'core:privacy' %}" style="font-size:12px;color:var(--nova-text-dim);">Política de Privacidad</a>
+            <a href="{% url 'core:contact' %}" style="font-size:12px;color:var(--nova-text-dim);">Soporte</a>
+          </div>
+        </div>
       </div>
     </div>
-    <div style="display:flex;gap:24px;flex-wrap:wrap;">
-      <a href="{% url 'core:terms' %}" style="font-size:12px;color:var(--nova-text-muted);">Términos</a>
-      <a href="{% url 'core:privacy' %}" style="font-size:12px;color:var(--nova-text-muted);">Privacidad</a>
-      <a href="{% url 'core:contact' %}" style="font-size:12px;color:var(--nova-text-muted);">Contacto</a>
-    </div>
-    <div style="font-size:11px;color:var(--nova-text-dim);max-width:400px;text-align:right;">
-      ⚠️ Aviso de riesgo: Las inversiones conllevan riesgo de pérdida. Esta plataforma es para fines educativos y de simulación.
+    <!-- Bottom bar -->
+    <div style="border-top:1px solid var(--nova-border);padding-top:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+      <div style="font-size:11px;color:var(--nova-text-dim);">© {% now "Y" %} Nova Capital Group · Todos los derechos reservados</div>
+      <div style="font-size:11px;color:var(--nova-text-dim);display:flex;align-items:center;gap:6px;">
+        <i class="bi bi-exclamation-triangle" style="color:var(--nova-warning);"></i>
+        Plataforma de simulación financiera · No constituye asesoramiento de inversión
+      </div>
     </div>
   </div>
 </footer>
