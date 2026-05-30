@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block title %}Política de Privacidad{% endblock %}
+{% block body %}
+<div style="min-height:100vh;background:var(--nova-bg-dark);padding:80px 40px;">
+  <div style="max-width:800px;margin:0 auto;">
+    <a href="/" style="display:flex;align-items:center;gap:10px;margin-bottom:40px;text-decoration:none;">
+      <div style="width:32px;height:32px;background:linear-gradient(135deg,#0066FF,#00D4AA);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:900;color:#fff;">N</div>
+      <span style="font-size:13px;font-weight:700;color:#fff;">NOVA CAPITAL GROUP</span>
+    </a>
+    <h1 style="font-size:32px;font-weight:800;color:#fff;margin-bottom:8px;">Política de Privacidad</h1>
+    <p style="color:var(--nova-text-muted);margin-bottom:40px;">Última actualización: Enero 2024</p>
+    <div style="display:flex;flex-direction:column;gap:24px;">
+      <div class="nova-card">
+        <h3 style="font-size:16px;font-weight:700;color:#fff;margin-bottom:8px;">Datos que Recopilamos</h3>
+        <p style="font-size:13px;color:var(--nova-text-muted);line-height:1.7;">Recopilamos información que nos proporcionas directamente: nombre, email, teléfono, país. También recopilamos datos de uso de la plataforma, dirección IP y datos del dispositivo para fines de seguridad.</p>
+      </div>
+      <div class="nova-card">
+        <h3 style="font-size:16px;font-weight:700;color:#fff;margin-bottom:8px;">Cómo Usamos tus Datos</h3>
+        <p style="font-size:13px;color:var(--nova-text-muted);line-height:1.7;">Usamos tus datos para: proveer y mejorar el servicio, verificar tu identidad, prevenir fraudes, enviarte comunicaciones importantes y cumplir con obligaciones legales.</p>
+      </div>
+      <div class="nova-card">
+        <h3 style="font-size:16px;font-weight:700;color:#fff;margin-bottom:8px;">Seguridad de Datos</h3>
+        <p style="font-size:13px;color:var(--nova-text-muted);line-height:1.7;">Implementamos medidas de seguridad técnicas y organizativas: encriptación AES-256, autenticación 2FA, monitoreo continuo y acceso restringido a datos sensibles.</p>
+      </div>
+      <div class="nova-card">
+        <h3 style="font-size:16px;font-weight:700;color:#fff;margin-bottom:8px;">Tus Derechos</h3>
+        <p style="font-size:13px;color:var(--nova-text-muted);line-height:1.7;">Tienes derecho a: acceder a tus datos, corregirlos, solicitar su eliminación, oponerte al procesamiento y portabilidad de datos. Contáctanos para ejercer estos derechos.</p>
+      </div>
+    </div>
+    <div style="margin-top:40px;text-align:center;">
+      <a href="/" class="btn-nova btn-nova-primary" style="padding:12px 28px;">Volver al Inicio</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

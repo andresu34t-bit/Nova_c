@@ -1,0 +1,60 @@
+{% extends 'base_app.html' %}
+{% block title %}Editar Perfil{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="page-title">Editar Perfil</div>
+    <div class="page-subtitle">Actualiza tu información personal</div>
+  </div>
+  <a href="{% url 'accounts:profile' %}" class="btn-nova btn-nova-ghost"><i class="bi bi-arrow-left"></i> Volver</a>
+</div>
+
+<div style="max-width:640px;">
+  <div class="nova-card">
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+        <div class="nova-form-group">
+          <label class="nova-label">Nombre</label>
+          <input type="text" name="first_name" class="nova-input" value="{{ form.first_name.value|default:'' }}">
+        </div>
+        <div class="nova-form-group">
+          <label class="nova-label">Apellido</label>
+          <input type="text" name="last_name" class="nova-input" value="{{ form.last_name.value|default:'' }}">
+        </div>
+        <div class="nova-form-group">
+          <label class="nova-label">Teléfono</label>
+          <input type="tel" name="phone" class="nova-input" value="{{ form.phone.value|default:'' }}">
+        </div>
+        <div class="nova-form-group">
+          <label class="nova-label">Fecha de Nacimiento</label>
+          <input type="date" name="date_of_birth" class="nova-input" value="{{ form.date_of_birth.value|default:'' }}">
+        </div>
+        <div class="nova-form-group">
+          <label class="nova-label">País</label>
+          <input type="text" name="country" class="nova-input" value="{{ form.country.value|default:'' }}">
+        </div>
+        <div class="nova-form-group">
+          <label class="nova-label">Ciudad</label>
+          <input type="text" name="city" class="nova-input" value="{{ form.city.value|default:'' }}">
+        </div>
+        <div class="nova-form-group" style="grid-column:span 2;">
+          <label class="nova-label">Dirección</label>
+          <textarea name="address" class="nova-input" rows="2">{{ form.address.value|default:'' }}</textarea>
+        </div>
+        <div class="nova-form-group" style="grid-column:span 2;">
+          <label class="nova-label">Foto de Perfil</label>
+          <input type="file" name="avatar" class="nova-input" accept="image/*">
+        </div>
+      </div>
+      <div style="display:flex;gap:12px;margin-top:8px;">
+        <button type="submit" class="btn-nova btn-nova-primary" style="padding:12px 28px;font-size:14px;">
+          <i class="bi bi-check-circle-fill"></i> Guardar Cambios
+        </button>
+        <a href="{% url 'accounts:profile' %}" class="btn-nova btn-nova-ghost" style="padding:12px 20px;font-size:14px;">Cancelar</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

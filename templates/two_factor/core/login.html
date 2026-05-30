@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Iniciar Sesión{% endblock %}
+
+{% block body %}
+<div style="min-height:100vh;display:flex;background:var(--nova-bg-dark);">
+
+  <!-- Left Panel -->
+  <div style="flex:1;background:linear-gradient(135deg,var(--nova-bg-card) 0%,var(--nova-bg-card2) 100%);border-right:1px solid var(--nova-border);padding:60px 40px;display:flex;flex-direction:column;justify-content:center;" class="d-none d-lg-flex">
+    <div style="max-width:420px;">
+      <a href="{% url 'core:home' %}" style="display:flex;align-items:center;gap:12px;margin-bottom:60px;text-decoration:none;">
+        <div style="width:40px;height:40px;background:linear-gradient(135deg,#0066FF,#00D4AA);border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:900;color:#fff;font-size:18px;">N</div>
+        <div>
+          <div style="font-size:14px;font-weight:700;color:#fff;">NOVA CAPITAL GROUP</div>
+          <div style="font-size:10px;color:var(--nova-text-muted);letter-spacing:2px;">INVERSIONES GLOBALES</div>
+        </div>
+      </a>
+      <h2 style="font-size:32px;font-weight:800;color:#fff;margin-bottom:16px;line-height:1.2;">Bienvenido de<br><span style="background:linear-gradient(135deg,#0066FF,#00D4AA);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">vuelta</span></h2>
+      <p style="color:var(--nova-text-muted);font-size:15px;line-height:1.7;margin-bottom:40px;">Accede a tu cuenta para gestionar tu portafolio y operar en los mercados globales.</p>
+      <div style="display:flex;flex-direction:column;gap:16px;">
+        <div style="display:flex;align-items:center;gap:12px;padding:16px;background:rgba(0,102,255,0.05);border:1px solid rgba(0,102,255,0.15);border-radius:var(--nova-radius-sm);">
+          <span style="font-size:24px;">🛡️</span>
+          <div>
+            <div style="font-size:13px;font-weight:600;color:#fff;">Conexión segura</div>
+            <div style="font-size:11px;color:var(--nova-text-muted);">Encriptación SSL/TLS de extremo a extremo</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;padding:16px;background:rgba(0,200,150,0.05);border:1px solid rgba(0,200,150,0.15);border-radius:var(--nova-radius-sm);">
+          <span style="font-size:24px;">⚡</span>
+          <div>
+            <div style="font-size:13px;font-weight:600;color:#fff;">Acceso instantáneo</div>
+            <div style="font-size:11px;color:var(--nova-text-muted);">Mercados en tiempo real disponibles 24/7</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Panel -->
+  <div style="flex:1;max-width:520px;padding:60px 40px;display:flex;flex-direction:column;justify-content:center;overflow-y:auto;">
+    <div style="max-width:380px;margin:0 auto;width:100%;">
+      <div style="margin-bottom:32px;">
+        <h1 style="font-size:26px;font-weight:800;color:#fff;margin-bottom:8px;">Iniciar Sesión</h1>
+        <p style="color:var(--nova-text-muted);font-size:14px;">¿No tienes cuenta? <a href="{% url 'accounts:register' %}" style="color:var(--nova-primary-light);font-weight:600;">Regístrate gratis</a></p>
+      </div>
+
+      {% if form.errors %}
+      <div class="nova-alert error" style="margin-bottom:20px;">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+        Credenciales incorrectas. Verifica tu email y contraseña.
+      </div>
+      {% endif %}
+
+      <form method="post" novalidate>
+        {% csrf_token %}
+        {% if wizard.steps.current == 'auth' %}
+        <div class="nova-form-group">
+          <label class="nova-label">Correo Electrónico</label>
+          <input type="email" name="{{ form.username.html_name }}" class="nova-input" placeholder="correo@ejemplo.com" value="{{ form.username.value|default:'' }}" autofocus required>
+        </div>
+        <div class="nova-form-group">
+          <label class="nova-label">Contraseña</label>
+          <div style="position:relative;">
+            <input type="password" name="{{ form.password.html_name }}" class="nova-input" placeholder="Tu contraseña" id="loginPwd" required>
+            <button type="button" onclick="togglePwd('loginPwd',this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--nova-text-muted);cursor:pointer;"><i class="bi bi-eye"></i></button>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:var(--nova-text-muted);">
+            <input type="checkbox" style="accent-color:var(--nova-primary);"> Recordarme
+          </label>
+          <a href="#" style="font-size:13px;color:var(--nova-primary-light);">¿Olvidaste tu contraseña?</a>
+        </div>
+        {% else %}
+        <!-- 2FA Step -->
+        <div style="text-align:center;margin-bottom:24px;">
+          <div style="font-size:48px;margin-bottom:12px;">🛡️</div>
+          <div style="font-size:16px;font-weight:700;color:#fff;margin-bottom:8px;">Verificación en dos pasos</div>
+          <div style="font-size:13px;color:var(--nova-text-muted);">Ingresa el código de tu aplicación autenticadora</div>
+        </div>
+        <div class="nova-form-group">
+          <label class="nova-label">Código de Verificación</label>
+          <input type="text" name="{{ form.otp_token.html_name }}" class="nova-input" placeholder="000000" maxlength="6" style="text-align:center;font-size:24px;font-family:var(--nova-font-mono);letter-spacing:8px;" autofocus>
+        </div>
+        {% endif %}
+
+        <button type="submit" class="btn-nova btn-nova-primary w-100" style="padding:13px;font-size:14px;justify-content:center;">
+          {% if wizard.steps.current == 'auth' %}
+          <i class="bi bi-box-arrow-in-right"></i> Iniciar Sesión
+          {% else %}
+          <i class="bi bi-shield-check"></i> Verificar
+          {% endif %}
+        </button>
+      </form>
+
+      <div style="margin-top:24px;text-align:center;font-size:12px;color:var(--nova-text-dim);">
+        Al iniciar sesión aceptas nuestros
+        <a href="{% url 'core:terms' %}" style="color:var(--nova-primary-light);">Términos</a> y
+        <a href="{% url 'core:privacy' %}" style="color:var(--nova-primary-light);">Privacidad</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function togglePwd(id, btn) {
+  const input = document.getElementById(id);
+  const icon = btn.querySelector('i');
+  input.type = input.type === 'password' ? 'text' : 'password';
+  icon.className = input.type === 'password' ? 'bi bi-eye' : 'bi bi-eye-slash';
+}
+</script>
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block title %}Cuenta Bloqueada{% endblock %}
+{% block body %}
+<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--nova-bg-dark);">
+  <div style="text-align:center;max-width:480px;padding:40px;">
+    <div style="font-size:72px;margin-bottom:20px;">🔒</div>
+    <div style="font-size:24px;font-weight:700;color:#fff;margin-bottom:12px;">Acceso Temporalmente Bloqueado</div>
+    <div style="font-size:14px;color:var(--nova-text-muted);margin-bottom:24px;line-height:1.7;">
+      Tu cuenta ha sido bloqueada temporalmente debido a múltiples intentos fallidos de inicio de sesión. Por seguridad, espera 1 hora antes de intentarlo nuevamente.
+    </div>
+    <div class="nova-alert warning" style="margin-bottom:24px;">
+      <i class="bi bi-shield-exclamation"></i>
+      Si no fuiste tú, cambia tu contraseña inmediatamente.
+    </div>
+    <a href="/" class="btn-nova btn-nova-primary" style="padding:12px 28px;font-size:14px;"><i class="bi bi-house-fill"></i> Ir al Inicio</a>
+  </div>
+</div>
+{% endblock %}

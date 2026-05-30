@@ -1,0 +1,245 @@
+{% extends 'base_app.html' %}
+{% load static %}
+{% block title %}Portafolio{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="page-title">Mi Portafolio</div>
+    <div class="page-subtitle">Gestión de activos y rendimiento</div>
+  </div>
+  <a href="{% url 'trading:trading' %}" class="btn-nova btn-nova-primary"><i class="bi bi-plus-circle-fill"></i> Nueva Operación</a>
+</div>
+
+<!-- STATS -->
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:24px;">
+  <div class="stat-card">
+    <div class="stat-icon" style="background:rgba(0,102,255,0.15);">🏦</div>
+    <div class="stat-label">Activos Totales</div>
+    <div class="stat-value">${{ total_assets|floatformat:2 }}</div>
+    <div class="stat-change positive"><i class="bi bi-wallet2"></i> Portafolio + Efectivo</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon" style="background:rgba(0,200,150,0.15);">📈</div>
+    <div class="stat-label">Valor Portafolio</div>
+    <div class="stat-value">${{ portfolio_value|floatformat:2 }}</div>
+    <div class="stat-change {% if total_pnl >= 0 %}positive{% else %}negative{% endif %}">
+      <i class="bi bi-graph-up"></i> {{ positions.count }} posiciones
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon" style="background:rgba({% if total_pnl >= 0 %}0,200,150{% else %}255,59,92{% endif %},0.15);">{% if total_pnl >= 0 %}💹{% else %}📉{% endif %}</div>
+    <div class="stat-label">P&L No Realizado</div>
+    <div class="stat-value" style="color:{% if total_pnl >= 0 %}var(--nova-success){% else %}var(--nova-danger){% endif %};">
+      {% if total_pnl >= 0 %}+{% endif %}${{ total_pnl|floatformat:2 }}
+    </div>
+    <div class="stat-change {% if total_pnl >= 0 %}positive{% else %}negative{% endif %}">
+      {% if total_pnl_pct >= 0 %}+{% endif %}{{ total_pnl_pct|floatformat:2 }}%
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon" style="background:rgba(255,184,0,0.15);">💰</div>
+    <div class="stat-label">Saldo Efectivo</div>
+    <div class="stat-value">${{ cash_balance|floatformat:2 }}</div>
+    <div class="stat-change positive"><i class="bi bi-cash-stack"></i> Disponible</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon" style="background:rgba(0,212,170,0.15);">✅</div>
+    <div class="stat-label">P&L Realizado</div>
+    <div class="stat-value" style="color:{% if total_realized >= 0 %}var(--nova-success){% else %}var(--nova-danger){% endif %};">
+      {% if total_realized >= 0 %}+{% endif %}${{ total_realized|floatformat:2 }}
+    </div>
+    <div class="stat-change positive"><i class="bi bi-check-circle"></i> Posiciones cerradas</div>
+  </div>
+</div>
+
+<!-- MAIN GRID -->
+<div style="display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:24px;">
+
+  <!-- Evolution Chart -->
+  <div class="nova-card">
+    <div class="nova-card-header">
+      <span class="nova-card-title"><i class="bi bi-graph-up me-2"></i>Evolución del Capital</span>
+    </div>
+    <canvas id="evolutionChart" height="200"></canvas>
+  </div>
+
+  <!-- Distribution -->
+  <div class="nova-card">
+    <div class="nova-card-header">
+      <span class="nova-card-title"><i class="bi bi-pie-chart-fill me-2"></i>Distribución de Activos</span>
+    </div>
+    {% if distribution %}
+    <div style="display:flex;align-items:center;justify-content:center;margin-bottom:16px;">
+      <canvas id="distChart" width="160" height="160"></canvas>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      {% for item in distribution %}
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div style="width:10px;height:10px;border-radius:2px;background:var(--nova-primary);"></div>
+          <span style="font-size:12px;color:var(--nova-text);">{{ item.symbol }}</span>
+        </div>
+        <div style="text-align:right;">
+          <span style="font-size:12px;font-weight:600;color:#fff;">${{ item.value }}</span>
+          <span style="font-size:10px;color:var(--nova-text-muted);margin-left:6px;">{{ item.pct }}%</span>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div style="text-align:center;padding:40px;color:var(--nova-text-muted);">
+      <div style="font-size:48px;margin-bottom:12px;">💼</div>
+      <div style="font-size:13px;">Sin posiciones abiertas</div>
+      <a href="{% url 'trading:trading' %}" class="btn-nova btn-nova-primary" style="margin-top:16px;padding:8px 20px;font-size:12px;">Comenzar a operar</a>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- OPEN POSITIONS -->
+<div class="nova-card" style="margin-bottom:16px;">
+  <div class="nova-card-header">
+    <span class="nova-card-title"><i class="bi bi-briefcase-fill me-2"></i>Posiciones Abiertas</span>
+    <span style="font-size:12px;color:var(--nova-text-muted);">{{ positions.count }} activos</span>
+  </div>
+  {% if positions %}
+  <div style="overflow-x:auto;">
+    <table class="nova-table">
+      <thead>
+        <tr><th>Activo</th><th>Cantidad</th><th>Precio Promedio</th><th>Precio Actual</th><th>Valor</th><th>Costo</th><th>P&L</th><th>P&L %</th><th>Acción</th></tr>
+      </thead>
+      <tbody>
+        {% for pos in positions %}
+        <tr>
+          <td>
+            <div class="asset-cell">
+              <div class="asset-icon">
+                {% if pos.asset.image_url %}<img src="{{ pos.asset.image_url }}" onerror="this.style.display='none'">{% endif %}
+                {{ pos.asset.symbol|first }}
+              </div>
+              <div>
+                <div class="asset-name">{{ pos.asset.symbol }}</div>
+                <div class="asset-symbol">{{ pos.asset.name|truncatechars:12 }}</div>
+              </div>
+            </div>
+          </td>
+          <td class="price-mono">{{ pos.quantity|floatformat:6 }}</td>
+          <td class="price-mono">${{ pos.avg_buy_price|floatformat:4 }}</td>
+          <td class="price-mono">${{ pos.current_price|floatformat:4 }}</td>
+          <td class="price-mono" style="font-weight:700;color:#fff;">${{ pos.current_value|floatformat:2 }}</td>
+          <td class="price-mono" style="color:var(--nova-text-muted);">${{ pos.cost_basis|floatformat:2 }}</td>
+          <td class="price-mono" style="color:{% if pos.unrealized_pnl >= 0 %}var(--nova-success){% else %}var(--nova-danger){% endif %};">
+            {% if pos.unrealized_pnl >= 0 %}+{% endif %}${{ pos.unrealized_pnl|floatformat:2 }}
+          </td>
+          <td>
+            <span class="badge-{% if pos.unrealized_pnl_pct >= 0 %}positive{% else %}negative{% endif %}">
+              {% if pos.unrealized_pnl_pct >= 0 %}▲{% else %}▼{% endif %} {{ pos.unrealized_pnl_pct|floatformat:2 }}%
+            </span>
+          </td>
+          <td>
+            <a href="{% url 'trading:trading' %}?symbol={{ pos.asset.symbol }}" class="btn-nova btn-nova-primary" style="padding:4px 10px;font-size:11px;">Operar</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div style="text-align:center;padding:60px;color:var(--nova-text-muted);">
+    <div style="font-size:56px;margin-bottom:16px;">💼</div>
+    <div style="font-size:15px;font-weight:600;color:var(--nova-text);margin-bottom:8px;">Sin posiciones abiertas</div>
+    <div style="font-size:13px;margin-bottom:20px;">Comienza a operar para ver tu portafolio aquí</div>
+    <a href="{% url 'trading:trading' %}" class="btn-nova btn-nova-primary" style="padding:10px 24px;">
+      <i class="bi bi-graph-up-arrow"></i> Ir al Trading
+    </a>
+  </div>
+  {% endif %}
+</div>
+
+<!-- CLOSED POSITIONS -->
+{% if closed_positions %}
+<div class="nova-card">
+  <div class="nova-card-header">
+    <span class="nova-card-title"><i class="bi bi-check-circle me-2"></i>Posiciones Cerradas</span>
+  </div>
+  <div style="overflow-x:auto;">
+    <table class="nova-table">
+      <thead><tr><th>Activo</th><th>Cantidad</th><th>Precio Entrada</th><th>P&L Realizado</th><th>Fecha Cierre</th></tr></thead>
+      <tbody>
+        {% for pos in closed_positions %}
+        <tr>
+          <td><span style="font-weight:700;color:#fff;">{{ pos.asset.symbol }}</span></td>
+          <td class="price-mono">{{ pos.quantity|floatformat:6 }}</td>
+          <td class="price-mono">${{ pos.avg_buy_price|floatformat:4 }}</td>
+          <td class="price-mono" style="color:{% if pos.realized_pnl >= 0 %}var(--nova-success){% else %}var(--nova-danger){% endif %};">
+            {% if pos.realized_pnl >= 0 %}+{% endif %}${{ pos.realized_pnl|floatformat:2 }}
+          </td>
+          <td style="color:var(--nova-text-muted);font-size:12px;">{{ pos.closed_at|date:"d/m/Y H:i" }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const evolutionCtx = document.getElementById('evolutionChart');
+if (evolutionCtx) {
+  const labels = {{ snapshot_labels|safe }};
+  const values = {{ snapshot_values|safe }};
+  const l = labels.length ? labels : ['Sem 1','Sem 2','Sem 3','Sem 4'];
+  const v = values.length ? values : [0,0,0,0];
+  new Chart(evolutionCtx, {
+    type: 'line',
+    data: {
+      labels: l,
+      datasets: [{
+        label: 'Capital Total',
+        data: v,
+        borderColor: '#00D4AA',
+        backgroundColor: 'rgba(0,212,170,0.08)',
+        borderWidth: 2, fill: true, tension: 0.4,
+        pointRadius: 3, pointBackgroundColor: '#00D4AA',
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false }, tooltip: {
+        backgroundColor: '#0A1628', borderColor: 'rgba(0,212,170,0.3)', borderWidth: 1,
+        callbacks: { label: ctx => ' $' + ctx.parsed.y.toLocaleString('es', {minimumFractionDigits:2}) }
+      }},
+      scales: {
+        x: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#7A8BA8', font: { size: 11 } } },
+        y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#7A8BA8', font: { size: 11 }, callback: v => '$' + v.toLocaleString() } }
+      }
+    }
+  });
+}
+
+const distCtx = document.getElementById('distChart');
+if (distCtx) {
+  const dist = {{ distribution|safe }};
+  if (dist.length) {
+    const colors = ['#0066FF','#00D4AA','#FFB800','#FF3B5C','#7B61FF','#00C896'];
+    new Chart(distCtx, {
+      type: 'doughnut',
+      data: {
+        labels: dist.map(d => d.symbol),
+        datasets: [{ data: dist.map(d => d.value), backgroundColor: colors.slice(0, dist.length), borderWidth: 2, borderColor: '#0A1628' }]
+      },
+      options: {
+        responsive: false, cutout: '65%',
+        plugins: { legend: { display: false }, tooltip: {
+          backgroundColor: '#0A1628', borderColor: 'rgba(0,102,255,0.3)', borderWidth: 1,
+          callbacks: { label: ctx => ` ${ctx.label}: $${ctx.parsed.toLocaleString()} (${dist[ctx.dataIndex].pct}%)` }
+        }}
+      }
+    });
+  }
+}
+</script>
+{% endblock %}

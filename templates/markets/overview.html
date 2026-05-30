@@ -1,0 +1,224 @@
+{% extends 'base_app.html' %}
+{% load static %}
+{% block title %}Mercados{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="page-title">Mercados Globales</div>
+    <div class="page-subtitle">Precios en tiempo real · Actualización automática</div>
+  </div>
+  <div style="display:flex;align-items:center;gap:8px;">
+    <span style="width:8px;height:8px;border-radius:50%;background:var(--nova-success);animation:pulse-dot 2s infinite;display:inline-block;"></span>
+    <span style="font-size:12px;color:var(--nova-success);">Mercados abiertos</span>
+    <button onclick="refreshPrices()" class="btn-nova btn-nova-outline" style="padding:6px 14px;font-size:12px;"><i class="bi bi-arrow-clockwise"></i> Actualizar</button>
+  </div>
+</div>
+
+<!-- TABS -->
+<div style="display:flex;gap:4px;background:var(--nova-bg-card);border:1px solid var(--nova-border);border-radius:var(--nova-radius-sm);padding:4px;margin-bottom:20px;width:fit-content;">
+  {% for tab_id, tab_label, tab_icon in "crypto,Criptomonedas,₿|stocks,Acciones,📈|forex,Forex,💱|indices,Índices,📊"|split:"|" %}
+  {% endfor %}
+  <button onclick="switchTab('crypto')" id="tab-crypto" class="order-tab {% if active_tab == 'crypto' %}active buy{% endif %}" style="padding:8px 20px;font-size:13px;">₿ Criptomonedas</button>
+  <button onclick="switchTab('stocks')" id="tab-stocks" class="order-tab {% if active_tab == 'stocks' %}active buy{% endif %}" style="padding:8px 20px;font-size:13px;">📈 Acciones</button>
+  <button onclick="switchTab('forex')" id="tab-forex" class="order-tab {% if active_tab == 'forex' %}active buy{% endif %}" style="padding:8px 20px;font-size:13px;">💱 Forex</button>
+  <button onclick="switchTab('indices')" id="tab-indices" class="order-tab {% if active_tab == 'indices' %}active buy{% endif %}" style="padding:8px 20px;font-size:13px;">📊 Índices</button>
+</div>
+
+<!-- CRYPTO TAB -->
+<div id="panel-crypto" class="tab-panel" {% if active_tab != 'crypto' %}style="display:none;"{% endif %}>
+  <div class="nova-card">
+    <div class="nova-card-header">
+      <span class="nova-card-title"><i class="bi bi-currency-bitcoin me-2"></i>Criptomonedas · Top 50</span>
+      <div style="font-size:11px;color:var(--nova-text-muted);">Datos de CoinGecko</div>
+    </div>
+    <div style="overflow-x:auto;">
+      <table class="nova-table" id="cryptoTable">
+        <thead>
+          <tr>
+            <th>#</th><th>Activo</th><th>Precio</th><th>24h %</th><th>24h $</th>
+            <th>Volumen 24h</th><th>Cap. Mercado</th><th>Máx 24h</th><th>Mín 24h</th><th>Acción</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for asset in crypto %}
+          <tr>
+            <td style="color:var(--nova-text-muted);font-size:12px;">{{ asset.rank }}</td>
+            <td>
+              <div class="asset-cell">
+                <div class="asset-icon">
+                  {% if asset.image_url %}<img src="{{ asset.image_url }}" onerror="this.style.display='none'">{% endif %}
+                  <span style="font-size:10px;font-weight:700;">{{ asset.symbol|first }}</span>
+                </div>
+                <div>
+                  <div class="asset-name">{{ asset.symbol }}</div>
+                  <div class="asset-symbol">{{ asset.name|truncatechars:14 }}</div>
+                </div>
+              </div>
+            </td>
+            <td class="price-mono">${{ asset.current_price|floatformat:4 }}</td>
+            <td>
+              <span class="badge-{% if asset.price_change_pct_24h >= 0 %}positive{% else %}negative{% endif %}">
+                {% if asset.price_change_pct_24h >= 0 %}▲{% else %}▼{% endif %}
+                {{ asset.price_change_pct_24h|floatformat:2 }}%
+              </span>
+            </td>
+            <td class="price-mono" style="color:{% if asset.price_change_24h >= 0 %}var(--nova-success){% else %}var(--nova-danger){% endif %};">
+              {% if asset.price_change_24h >= 0 %}+{% endif %}${{ asset.price_change_24h|floatformat:4 }}
+            </td>
+            <td class="price-mono" style="color:var(--nova-text-muted);">${{ asset.volume_24h|floatformat:0 }}</td>
+            <td class="price-mono" style="color:var(--nova-text-muted);">${{ asset.market_cap|floatformat:0 }}</td>
+            <td class="price-mono" style="color:var(--nova-success);">${{ asset.high_24h|floatformat:4 }}</td>
+            <td class="price-mono" style="color:var(--nova-danger);">${{ asset.low_24h|floatformat:4 }}</td>
+            <td>
+              <div style="display:flex;gap:6px;">
+                <a href="{% url 'markets:asset_detail' asset.symbol %}" class="btn-nova btn-nova-ghost" style="padding:4px 10px;font-size:11px;"><i class="bi bi-eye"></i></a>
+                <a href="{% url 'trading:trading' %}?symbol={{ asset.symbol }}" class="btn-nova btn-nova-primary" style="padding:4px 10px;font-size:11px;">Operar</a>
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="10" style="text-align:center;padding:60px;color:var(--nova-text-muted);">
+            <div style="font-size:48px;margin-bottom:12px;">₿</div>
+            <div>No hay datos de criptomonedas.</div>
+            <button onclick="fetchData()" class="btn-nova btn-nova-primary" style="margin-top:16px;padding:8px 20px;font-size:12px;">Cargar datos</button>
+          </td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- STOCKS TAB -->
+<div id="panel-stocks" class="tab-panel" {% if active_tab != 'stocks' %}style="display:none;"{% endif %}>
+  <div class="nova-card">
+    <div class="nova-card-header">
+      <span class="nova-card-title"><i class="bi bi-building me-2"></i>Acciones · Principales Mercados</span>
+    </div>
+    {% if stocks %}
+    <div style="overflow-x:auto;">
+      <table class="nova-table">
+        <thead><tr><th>Símbolo</th><th>Empresa</th><th>Precio</th><th>Cambio 24h</th><th>Volumen</th><th>Acción</th></tr></thead>
+        <tbody>
+          {% for asset in stocks %}
+          <tr>
+            <td><span style="font-weight:700;color:#fff;">{{ asset.symbol }}</span></td>
+            <td style="color:var(--nova-text-muted);">{{ asset.name }}</td>
+            <td class="price-mono">${{ asset.current_price|floatformat:2 }}</td>
+            <td><span class="badge-{% if asset.price_change_pct_24h >= 0 %}positive{% else %}negative{% endif %}">{% if asset.price_change_pct_24h >= 0 %}▲{% else %}▼{% endif %} {{ asset.price_change_pct_24h|floatformat:2 }}%</span></td>
+            <td class="price-mono" style="color:var(--nova-text-muted);">{{ asset.volume_24h|floatformat:0 }}</td>
+            <td><a href="{% url 'trading:trading' %}?symbol={{ asset.symbol }}" class="btn-nova btn-nova-primary" style="padding:4px 10px;font-size:11px;">Operar</a></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div style="text-align:center;padding:60px;color:var(--nova-text-muted);">
+      <div style="font-size:48px;margin-bottom:12px;">📈</div>
+      <div>Datos de acciones próximamente</div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- FOREX TAB -->
+<div id="panel-forex" class="tab-panel" {% if active_tab != 'forex' %}style="display:none;"{% endif %}>
+  <div class="nova-card">
+    <div class="nova-card-header">
+      <span class="nova-card-title"><i class="bi bi-currency-exchange me-2"></i>Forex · Pares de Divisas</span>
+    </div>
+    {% if forex %}
+    <div style="overflow-x:auto;">
+      <table class="nova-table">
+        <thead><tr><th>Par</th><th>Precio</th><th>Cambio 24h</th><th>Máx</th><th>Mín</th><th>Acción</th></tr></thead>
+        <tbody>
+          {% for asset in forex %}
+          <tr>
+            <td><span style="font-weight:700;color:#fff;">{{ asset.symbol }}</span></td>
+            <td class="price-mono">{{ asset.current_price|floatformat:5 }}</td>
+            <td><span class="badge-{% if asset.price_change_pct_24h >= 0 %}positive{% else %}negative{% endif %}">{% if asset.price_change_pct_24h >= 0 %}▲{% else %}▼{% endif %} {{ asset.price_change_pct_24h|floatformat:4 }}%</span></td>
+            <td class="price-mono" style="color:var(--nova-success);">{{ asset.high_24h|floatformat:5 }}</td>
+            <td class="price-mono" style="color:var(--nova-danger);">{{ asset.low_24h|floatformat:5 }}</td>
+            <td><a href="{% url 'trading:trading' %}?symbol={{ asset.symbol }}" class="btn-nova btn-nova-primary" style="padding:4px 10px;font-size:11px;">Operar</a></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div style="text-align:center;padding:60px;color:var(--nova-text-muted);">
+      <div style="font-size:48px;margin-bottom:12px;">💱</div>
+      <div>Datos de Forex próximamente</div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- INDICES TAB -->
+<div id="panel-indices" class="tab-panel" {% if active_tab != 'indices' %}style="display:none;"{% endif %}>
+  <div class="nova-card">
+    <div class="nova-card-header">
+      <span class="nova-card-title"><i class="bi bi-bar-chart-fill me-2"></i>Índices Bursátiles</span>
+    </div>
+    {% if indices %}
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;">
+      {% for asset in indices %}
+      <div class="market-card">
+        <div class="mc-header">
+          <div class="mc-icon" style="background:rgba(0,102,255,0.15);font-size:18px;">📊</div>
+          <div><div class="mc-symbol">{{ asset.symbol }}</div><div class="mc-name">{{ asset.name|truncatechars:16 }}</div></div>
+        </div>
+        <div class="mc-price">${{ asset.current_price|floatformat:2 }}</div>
+        <div class="mc-change {% if asset.price_change_pct_24h >= 0 %}up{% else %}down{% endif %}">
+          {% if asset.price_change_pct_24h >= 0 %}▲{% else %}▼{% endif %} {{ asset.price_change_pct_24h|floatformat:2 }}%
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div style="text-align:center;padding:60px;color:var(--nova-text-muted);">
+      <div style="font-size:48px;margin-bottom:12px;">📊</div>
+      <div>Datos de índices próximamente</div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function switchTab(tab) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.style.display = 'none');
+  document.querySelectorAll('.order-tab').forEach(t => { t.classList.remove('active','buy'); });
+  document.getElementById('panel-' + tab).style.display = 'block';
+  const btn = document.getElementById('tab-' + tab);
+  btn.classList.add('active','buy');
+}
+
+function refreshPrices() {
+  fetch('{% url "markets:fetch_data" %}', {headers:{'X-CSRFToken': csrfToken}})
+    .then(r => r.json())
+    .then(d => { if(d.status === 'ok') location.reload(); });
+}
+
+// Auto-refresh every 60 seconds
+setInterval(() => {
+  fetch('{% url "markets:api_prices" %}?type=crypto')
+    .then(r => r.json())
+    .then(d => {
+      d.data.forEach(asset => {
+        const rows = document.querySelectorAll('#cryptoTable tbody tr');
+        rows.forEach(row => {
+          const sym = row.querySelector('.asset-name')?.textContent;
+          if (sym === asset.symbol) {
+            const cells = row.querySelectorAll('td');
+            if (cells[2]) cells[2].textContent = '$' + asset.price.toFixed(4);
+          }
+        });
+      });
+    }).catch(() => {});
+}, 60000);
+</script>
+{% endblock %}

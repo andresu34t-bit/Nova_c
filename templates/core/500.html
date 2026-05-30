@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block title %}500 - Error del servidor{% endblock %}
+{% block body %}
+<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--nova-bg-dark);position:relative;overflow:hidden;">
+  <div style="position:absolute;inset:0;background:radial-gradient(ellipse at center,rgba(255,59,92,0.06) 0%,transparent 70%);"></div>
+  <div style="text-align:center;position:relative;z-index:1;padding:40px;">
+    <div style="font-size:120px;font-weight:900;color:rgba(255,59,92,0.2);font-family:var(--nova-font-mono);line-height:1;margin-bottom:8px;">500</div>
+    <div style="font-size:28px;font-weight:700;color:#fff;margin-bottom:12px;">Error del servidor</div>
+    <div style="font-size:15px;color:var(--nova-text-muted);margin-bottom:32px;">Algo salió mal. Nuestro equipo ha sido notificado.</div>
+    <a href="/" class="btn-nova btn-nova-primary" style="padding:12px 28px;font-size:14px;"><i class="bi bi-house-fill"></i> Ir al Inicio</a>
+  </div>
+</div>
+{% endblock %}

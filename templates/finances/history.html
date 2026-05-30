@@ -1,0 +1,90 @@
+{% extends 'base_app.html' %}
+{% block title %}Historial de Transacciones{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="page-title">Historial Completo</div>
+    <div class="page-subtitle">Todas tus transacciones financieras</div>
+  </div>
+  <a href="{% url 'finances:finances' %}" class="btn-nova btn-nova-ghost"><i class="bi bi-arrow-left"></i> Volver</a>
+</div>
+
+<div class="nova-card">
+  <div class="nova-card-header">
+    <span class="nova-card-title"><i class="bi bi-clock-history me-2"></i>Transacciones</span>
+    <div style="display:flex;gap:8px;">
+      <select id="filterType" class="nova-select" style="width:auto;padding:6px 12px;font-size:12px;" onchange="filterTx()">
+        <option value="">Todos los tipos</option>
+        <option value="deposit">Depósitos</option>
+        <option value="withdrawal">Retiros</option>
+        <option value="trade_buy">Compras</option>
+        <option value="trade_sell">Ventas</option>
+        <option value="fee">Comisiones</option>
+      </select>
+      <select id="filterStatus" class="nova-select" style="width:auto;padding:6px 12px;font-size:12px;" onchange="filterTx()">
+        <option value="">Todos los estados</option>
+        <option value="completed">Completados</option>
+        <option value="pending">Pendientes</option>
+        <option value="processing">Procesando</option>
+        <option value="failed">Fallidos</option>
+      </select>
+    </div>
+  </div>
+  {% if transactions %}
+  <div style="overflow-x:auto;">
+    <table class="nova-table" id="txTable">
+      <thead>
+        <tr><th>Tipo</th><th>Monto</th><th>Método</th><th>Estado</th><th>Saldo Antes</th><th>Saldo Después</th><th>Descripción</th><th>Fecha</th></tr>
+      </thead>
+      <tbody>
+        {% for tx in transactions %}
+        <tr data-type="{{ tx.transaction_type }}" data-status="{{ tx.status }}">
+          <td>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span style="font-size:16px;">
+                {% if tx.transaction_type == 'deposit' %}📥
+                {% elif tx.transaction_type == 'withdrawal' %}📤
+                {% elif tx.transaction_type == 'trade_buy' %}📈
+                {% elif tx.transaction_type == 'trade_sell' %}📉
+                {% elif tx.transaction_type == 'fee' %}💸
+                {% else %}💱{% endif %}
+              </span>
+              <span style="font-size:12px;font-weight:600;color:#fff;">{{ tx.get_transaction_type_display }}</span>
+            </div>
+          </td>
+          <td class="price-mono" style="font-weight:700;color:{% if tx.is_credit %}var(--nova-success){% else %}var(--nova-danger){% endif %};">
+            {% if tx.is_credit %}+{% else %}-{% endif %}${{ tx.amount|floatformat:2 }}
+          </td>
+          <td style="color:var(--nova-text-muted);font-size:12px;">{{ tx.get_payment_method_display }}</td>
+          <td><span class="status-badge {{ tx.status }}">{{ tx.get_status_display }}</span></td>
+          <td class="price-mono" style="color:var(--nova-text-muted);font-size:11px;">${{ tx.balance_before|floatformat:2 }}</td>
+          <td class="price-mono" style="color:var(--nova-text);font-size:11px;">${{ tx.balance_after|floatformat:2 }}</td>
+          <td style="color:var(--nova-text-muted);font-size:11px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ tx.description|default:"—" }}</td>
+          <td style="color:var(--nova-text-muted);font-size:11px;white-space:nowrap;">{{ tx.created_at|date:"d/m/Y H:i" }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div style="text-align:center;padding:80px;color:var(--nova-text-muted);">
+    <div style="font-size:56px;margin-bottom:16px;">📊</div>
+    <div style="font-size:16px;font-weight:600;color:#fff;margin-bottom:8px;">Sin transacciones</div>
+    <a href="{% url 'finances:deposit' %}" class="btn-nova btn-nova-success" style="padding:10px 24px;margin-top:8px;">Hacer primer depósito</a>
+  </div>
+  {% endif %}
+</div>
+
+<script>
+function filterTx() {
+  const type = document.getElementById('filterType').value;
+  const status = document.getElementById('filterStatus').value;
+  document.querySelectorAll('#txTable tbody tr').forEach(row => {
+    const matchType = !type || row.dataset.type === type;
+    const matchStatus = !status || row.dataset.status === status;
+    row.style.display = matchType && matchStatus ? '' : 'none';
+  });
+}
+</script>
+{% endblock %}

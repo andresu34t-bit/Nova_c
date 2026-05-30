@@ -1,0 +1,355 @@
+{% extends 'base_app.html' %}
+{% load static %}
+{% block title %}Trading - {{ asset.symbol|default:"Terminal" }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="page-title">Terminal de Trading</div>
+    <div class="page-subtitle">Operaciones simuladas en tiempo real</div>
+  </div>
+  <div style="display:flex;gap:8px;align-items:center;">
+    <span style="font-size:12px;color:var(--nova-text-muted);">Saldo:</span>
+    <span style="font-size:14px;font-weight:700;color:var(--nova-success);font-family:var(--nova-font-mono);" id="userBalance">${{ user_balance|floatformat:2 }}</span>
+    <a href="{% url 'finances:deposit' %}" class="btn-nova btn-nova-success" style="padding:6px 14px;font-size:12px;"><i class="bi bi-plus-circle"></i> Depositar</a>
+  </div>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 320px;gap:16px;min-height:calc(100vh - 180px);">
+
+  <!-- LEFT: Chart + Asset Selector -->
+  <div style="display:flex;flex-direction:column;gap:16px;">
+
+    <!-- Asset Header -->
+    {% if asset %}
+    <div class="nova-card" style="padding:16px 20px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+        <div style="display:flex;align-items:center;gap:14px;">
+          <div style="width:44px;height:44px;border-radius:50%;background:var(--nova-bg-hover);display:flex;align-items:center;justify-content:center;overflow:hidden;">
+            {% if asset.image_url %}
+            <img src="{{ asset.image_url }}" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'">
+            {% else %}
+            <span style="font-size:18px;font-weight:700;color:var(--nova-primary-light);">{{ asset.symbol|first }}</span>
+            {% endif %}
+          </div>
+          <div>
+            <div style="font-size:20px;font-weight:800;color:#fff;">{{ asset.symbol }}/USD</div>
+            <div style="font-size:12px;color:var(--nova-text-muted);">{{ asset.name }} · {{ asset.get_asset_type_display }}</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:24px;flex-wrap:wrap;">
+          <div>
+            <div style="font-size:28px;font-weight:800;color:#fff;font-family:var(--nova-font-mono);" id="livePrice">${{ asset.current_price|floatformat:4 }}</div>
+            <div style="font-size:13px;font-weight:600;{% if asset.price_change_pct_24h >= 0 %}color:var(--nova-success){% else %}color:var(--nova-danger){% endif %};" id="livePctChange">
+              {% if asset.price_change_pct_24h >= 0 %}▲{% else %}▼{% endif %} {{ asset.price_change_pct_24h|floatformat:2 }}%
+            </div>
+          </div>
+          <div style="text-align:center;">
+            <div style="font-size:11px;color:var(--nova-text-muted);">Máx 24h</div>
+            <div style="font-size:13px;font-weight:600;color:var(--nova-success);font-family:var(--nova-font-mono);">${{ asset.high_24h|floatformat:4 }}</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="font-size:11px;color:var(--nova-text-muted);">Mín 24h</div>
+            <div style="font-size:13px;font-weight:600;color:var(--nova-danger);font-family:var(--nova-font-mono);">${{ asset.low_24h|floatformat:4 }}</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="font-size:11px;color:var(--nova-text-muted);">Volumen 24h</div>
+            <div style="font-size:13px;font-weight:600;color:var(--nova-text);font-family:var(--nova-font-mono);">${{ asset.volume_24h|floatformat:0 }}</div>
+          </div>
+          <button onclick="toggleWatchlistBtn()" id="watchlistBtn" class="btn-nova {% if in_watchlist %}btn-nova-primary{% else %}btn-nova-outline{% endif %}" style="padding:6px 14px;font-size:12px;">
+            <i class="bi bi-star{% if in_watchlist %}-fill{% endif %}"></i>
+            {% if in_watchlist %}En Watchlist{% else %}Añadir{% endif %}
+          </button>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- TradingView Chart -->
+    <div class="nova-card" style="padding:0;overflow:hidden;flex:1;min-height:450px;">
+      <div id="tradingview_chart" style="width:100%;height:100%;min-height:450px;"></div>
+    </div>
+
+    <!-- Recent Orders -->
+    <div class="nova-card">
+      <div class="nova-card-header">
+        <span class="nova-card-title"><i class="bi bi-list-ul me-2"></i>Órdenes Recientes</span>
+        <a href="{% url 'trading:order_history' %}" style="font-size:12px;color:var(--nova-primary-light);">Ver historial →</a>
+      </div>
+      {% if recent_orders %}
+      <div style="overflow-x:auto;">
+        <table class="nova-table">
+          <thead><tr><th>Activo</th><th>Lado</th><th>Cantidad</th><th>Precio</th><th>Total</th><th>Fecha</th></tr></thead>
+          <tbody>
+            {% for order in recent_orders %}
+            <tr>
+              <td><span style="font-weight:700;color:#fff;">{{ order.asset.symbol }}</span></td>
+              <td><span class="badge-{% if order.side == 'buy' %}positive{% else %}negative{% endif %}">{% if order.side == 'buy' %}▲ COMPRA{% else %}▼ VENTA{% endif %}</span></td>
+              <td class="price-mono">{{ order.quantity|floatformat:4 }}</td>
+              <td class="price-mono">${{ order.filled_price|floatformat:4 }}</td>
+              <td class="price-mono">${{ order.total_value|floatformat:2 }}</td>
+              <td style="color:var(--nova-text-muted);font-size:11px;">{{ order.created_at|date:"d/m H:i" }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div style="text-align:center;padding:30px;color:var(--nova-text-muted);">
+        <div style="font-size:36px;margin-bottom:8px;">📋</div>
+        <div style="font-size:13px;">No hay órdenes recientes</div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- RIGHT: Order Panel -->
+  <div style="display:flex;flex-direction:column;gap:16px;">
+
+    <!-- Asset Search -->
+    <div class="nova-card" style="padding:14px;">
+      <div style="position:relative;">
+        <i class="bi bi-search" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--nova-text-muted);font-size:13px;"></i>
+        <input type="text" id="assetSearch" placeholder="Buscar activo..." class="nova-input" style="padding-left:32px;font-size:12px;" oninput="filterAssets(this.value)">
+      </div>
+      <div id="assetList" style="max-height:200px;overflow-y:auto;margin-top:8px;">
+        {% for a in all_assets|slice:":30" %}
+        <a href="{% url 'trading:trading' %}?symbol={{ a.symbol }}" style="display:flex;align-items:center;justify-content:space-between;padding:7px 4px;border-bottom:1px solid var(--nova-border-light);text-decoration:none;" class="asset-row">
+          <div style="display:flex;align-items:center;gap:8px;">
+            {% if a.image_url %}<img src="{{ a.image_url }}" style="width:20px;height:20px;border-radius:50%;" onerror="this.style.display='none'">{% endif %}
+            <span style="font-size:12px;font-weight:600;color:#fff;">{{ a.symbol }}</span>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:11px;font-family:var(--nova-font-mono);color:var(--nova-text);">${{ a.current_price|floatformat:2 }}</div>
+            <div style="font-size:10px;{% if a.price_change_pct_24h >= 0 %}color:var(--nova-success){% else %}color:var(--nova-danger){% endif %};">{{ a.price_change_pct_24h|floatformat:2 }}%</div>
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Order Form -->
+    {% if asset %}
+    <div class="nova-card order-panel" style="padding:20px;">
+      <div class="order-tabs">
+        <button class="order-tab active buy" id="buyTab" onclick="setOrderSide('buy')">▲ COMPRAR</button>
+        <button class="order-tab sell" id="sellTab" onclick="setOrderSide('sell')">▼ VENDER</button>
+      </div>
+
+      <div class="order-price-display">
+        <div class="current-price" id="orderPrice">${{ asset.current_price|floatformat:4 }}</div>
+        <div class="price-change {% if asset.price_change_pct_24h >= 0 %}text-positive{% else %}text-negative{% endif %}">
+          {{ asset.symbol }}/USD · {% if asset.price_change_pct_24h >= 0 %}+{% endif %}{{ asset.price_change_pct_24h|floatformat:2 }}%
+        </div>
+      </div>
+
+      <div>
+        <label class="nova-label">Tipo de Orden</label>
+        <select class="nova-select" id="orderType">
+          <option value="market">Mercado (Inmediata)</option>
+          <option value="limit">Límite</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="nova-label">Cantidad ({{ asset.symbol }})</label>
+        <input type="number" class="nova-input" id="orderQty" placeholder="0.00" step="0.0001" min="0.0001" oninput="calcTotal()">
+      </div>
+
+      <div>
+        <label class="nova-label">Valor Estimado (USD)</label>
+        <input type="text" class="nova-input" id="orderTotal" placeholder="$0.00" readonly style="background:var(--nova-bg-card2);">
+      </div>
+
+      <!-- Quick amounts -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;">
+        {% for pct in "25,50,75,100"|split:"," %}
+        <button onclick="setPercent({{ pct }})" class="btn-nova btn-nova-ghost" style="padding:6px;font-size:11px;justify-content:center;">{{ pct }}%</button>
+        {% endfor %}
+      </div>
+
+      <div style="background:var(--nova-bg-dark);border-radius:var(--nova-radius-sm);padding:12px;font-size:12px;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+          <span style="color:var(--nova-text-muted);">Comisión (0.1%)</span>
+          <span style="color:var(--nova-text);font-family:var(--nova-font-mono);" id="orderFee">$0.00</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;">
+          <span style="color:var(--nova-text-muted);">Saldo disponible</span>
+          <span style="color:var(--nova-success);font-family:var(--nova-font-mono);" id="availableBalance">${{ user_balance|floatformat:2 }}</span>
+        </div>
+      </div>
+
+      <button id="placeOrderBtn" onclick="placeOrder()" class="btn-nova btn-nova-success w-100" style="padding:13px;font-size:14px;justify-content:center;">
+        <i class="bi bi-check-circle-fill"></i> <span id="orderBtnText">Comprar {{ asset.symbol }}</span>
+      </button>
+
+      <div id="orderMessage" style="display:none;"></div>
+    </div>
+    {% endif %}
+
+    <!-- Watchlist -->
+    <div class="nova-card">
+      <div class="nova-card-header">
+        <span class="nova-card-title"><i class="bi bi-star-fill me-2" style="color:var(--nova-accent);"></i>Watchlist</span>
+        <a href="{% url 'trading:watchlist' %}" style="font-size:11px;color:var(--nova-primary-light);">Ver todo</a>
+      </div>
+      {% if watchlist %}
+      {% for item in watchlist|slice:":8" %}
+      <a href="{% url 'trading:trading' %}?symbol={{ item.asset.symbol }}" style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--nova-border-light);text-decoration:none;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          {% if item.asset.image_url %}<img src="{{ item.asset.image_url }}" style="width:22px;height:22px;border-radius:50%;" onerror="this.style.display='none'">{% endif %}
+          <span style="font-size:12px;font-weight:600;color:#fff;">{{ item.asset.symbol }}</span>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:12px;font-family:var(--nova-font-mono);color:var(--nova-text);">${{ item.asset.current_price|floatformat:2 }}</div>
+          <div style="font-size:10px;{% if item.asset.price_change_pct_24h >= 0 %}color:var(--nova-success){% else %}color:var(--nova-danger){% endif %};">{{ item.asset.price_change_pct_24h|floatformat:2 }}%</div>
+        </div>
+      </a>
+      {% endfor %}
+      {% else %}
+      <div style="text-align:center;padding:20px;color:var(--nova-text-muted);">
+        <div style="font-size:28px;margin-bottom:8px;">⭐</div>
+        <div style="font-size:12px;">Añade activos a tu watchlist</div>
+      </div>
+      {% endif %}
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- TradingView Widget -->
+<script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+<script>
+const ASSET_SYMBOL = '{{ asset.symbol|default:"BTC" }}';
+const ASSET_PRICE = {{ asset.current_price|default:0 }};
+let currentSide = 'buy';
+
+// TradingView Chart
+new TradingView.widget({
+  container_id: 'tradingview_chart',
+  symbol: 'BINANCE:' + ASSET_SYMBOL + 'USDT',
+  interval: '60',
+  timezone: 'America/Bogota',
+  theme: 'dark',
+  style: '1',
+  locale: 'es',
+  toolbar_bg: '#0A1628',
+  enable_publishing: false,
+  hide_top_toolbar: false,
+  hide_legend: false,
+  save_image: false,
+  backgroundColor: '#050B18',
+  gridColor: 'rgba(0,102,255,0.05)',
+  width: '100%',
+  height: '100%',
+  studies: ['RSI@tv-basicstudies', 'MACD@tv-basicstudies'],
+});
+
+function setOrderSide(side) {
+  currentSide = side;
+  const buyTab = document.getElementById('buyTab');
+  const sellTab = document.getElementById('sellTab');
+  const btn = document.getElementById('placeOrderBtn');
+  const btnText = document.getElementById('orderBtnText');
+  if (side === 'buy') {
+    buyTab.classList.add('active','buy'); buyTab.classList.remove('sell');
+    sellTab.classList.remove('active','buy','sell');
+    btn.className = 'btn-nova btn-nova-success w-100';
+    btnText.textContent = 'Comprar ' + ASSET_SYMBOL;
+  } else {
+    sellTab.classList.add('active','sell'); sellTab.classList.remove('buy');
+    buyTab.classList.remove('active','buy','sell');
+    btn.className = 'btn-nova btn-nova-danger w-100';
+    btnText.textContent = 'Vender ' + ASSET_SYMBOL;
+  }
+  btn.style.cssText = 'padding:13px;font-size:14px;justify-content:center;';
+}
+
+function calcTotal() {
+  const qty = parseFloat(document.getElementById('orderQty').value) || 0;
+  const total = qty * ASSET_PRICE;
+  const fee = total * 0.001;
+  document.getElementById('orderTotal').value = '$' + total.toFixed(2);
+  document.getElementById('orderFee').textContent = '$' + fee.toFixed(4);
+}
+
+function setPercent(pct) {
+  const balance = parseFloat('{{ user_balance }}') || 0;
+  const price = ASSET_PRICE || 1;
+  const qty = (balance * pct / 100) / price;
+  document.getElementById('orderQty').value = qty.toFixed(6);
+  calcTotal();
+}
+
+function placeOrder() {
+  const qty = parseFloat(document.getElementById('orderQty').value);
+  if (!qty || qty <= 0) { showOrderMsg('error', 'Ingresa una cantidad válida.'); return; }
+  const btn = document.getElementById('placeOrderBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Procesando...';
+
+  const formData = new FormData();
+  formData.append('symbol', ASSET_SYMBOL);
+  formData.append('side', currentSide);
+  formData.append('order_type', document.getElementById('orderType').value);
+  formData.append('quantity', qty);
+  formData.append('csrfmiddlewaretoken', csrfToken);
+
+  fetch('{% url "trading:place_order" %}', { method: 'POST', body: formData })
+    .then(r => r.json())
+    .then(d => {
+      if (d.success) {
+        showOrderMsg('success', d.message);
+        document.getElementById('orderQty').value = '';
+        document.getElementById('orderTotal').value = '$0.00';
+        document.getElementById('orderFee').textContent = '$0.00';
+        document.getElementById('userBalance').textContent = '$' + d.new_balance.toFixed(2);
+        document.getElementById('availableBalance').textContent = '$' + d.new_balance.toFixed(2);
+      } else {
+        showOrderMsg('error', d.error || 'Error al procesar la orden.');
+      }
+    })
+    .catch(() => showOrderMsg('error', 'Error de conexión.'))
+    .finally(() => {
+      btn.disabled = false;
+      setOrderSide(currentSide);
+    });
+}
+
+function showOrderMsg(type, msg) {
+  const el = document.getElementById('orderMessage');
+  el.style.display = 'block';
+  el.className = 'nova-alert ' + (type === 'success' ? 'success' : 'error');
+  el.innerHTML = `<i class="bi bi-${type === 'success' ? 'check-circle' : 'x-circle'}"></i> ${msg}`;
+  setTimeout(() => { el.style.display = 'none'; }, 5000);
+}
+
+function toggleWatchlistBtn() {
+  const formData = new FormData();
+  formData.append('symbol', ASSET_SYMBOL);
+  formData.append('csrfmiddlewaretoken', csrfToken);
+  fetch('{% url "trading:toggle_watchlist" %}', { method: 'POST', body: formData })
+    .then(r => r.json())
+    .then(d => {
+      const btn = document.getElementById('watchlistBtn');
+      if (d.status === 'added') {
+        btn.className = 'btn-nova btn-nova-primary';
+        btn.innerHTML = '<i class="bi bi-star-fill"></i> En Watchlist';
+      } else {
+        btn.className = 'btn-nova btn-nova-outline';
+        btn.innerHTML = '<i class="bi bi-star"></i> Añadir';
+      }
+    });
+}
+
+function filterAssets(query) {
+  const rows = document.querySelectorAll('.asset-row');
+  rows.forEach(row => {
+    const sym = row.querySelector('span')?.textContent?.toLowerCase() || '';
+    row.style.display = sym.includes(query.toLowerCase()) ? 'flex' : 'none';
+  });
+}
+</script>
+{% endblock %}

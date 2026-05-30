@@ -1,0 +1,248 @@
+{% extends 'base_app.html' %}
+{% load static %}
+{% block title %}Mi Perfil{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="page-title">Mi Perfil</div>
+    <div class="page-subtitle">Información personal y configuración de cuenta</div>
+  </div>
+  <a href="{% url 'accounts:profile_update' %}" class="btn-nova btn-nova-primary">
+    <i class="bi bi-pencil-fill"></i> Editar Perfil
+  </a>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 2fr;gap:20px;">
+
+  <!-- Profile Card -->
+  <div style="display:flex;flex-direction:column;gap:16px;">
+    <div class="nova-card" style="text-align:center;padding:32px 20px;">
+      <div style="width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--nova-primary),var(--nova-secondary));display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:700;color:#fff;margin:0 auto 16px;overflow:hidden;border:3px solid var(--nova-border);">
+        {% if user.avatar %}
+        <img src="{{ user.avatar.url }}" style="width:100%;height:100%;object-fit:cover;">
+        {% else %}
+        {{ user.first_name|first|upper }}{{ user.last_name|first|upper }}
+        {% endif %}
+      </div>
+      <div style="font-size:20px;font-weight:700;color:#fff;margin-bottom:4px;">{{ user.get_full_name }}</div>
+      <div style="font-size:13px;color:var(--nova-text-muted);margin-bottom:12px;">{{ user.email }}</div>
+      <div style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap;">
+        <span style="padding:4px 12px;border-radius:20px;font-size:11px;font-weight:600;background:rgba(0,102,255,0.15);color:var(--nova-primary-light);">
+          <i class="bi bi-person-badge me-1"></i>{{ user.get_account_type_display }}
+        </span>
+        <span style="padding:4px 12px;border-radius:20px;font-size:11px;font-weight:600;
+          {% if user.verification_status == 'verified' %}background:rgba(0,200,150,0.15);color:var(--nova-success);
+          {% elif user.verification_status == 'pending' %}background:rgba(255,184,0,0.15);color:var(--nova-warning);
+          {% else %}background:rgba(122,139,168,0.15);color:var(--nova-text-muted);{% endif %}">
+          {% if user.verification_status == 'verified' %}<i class="bi bi-patch-check-fill me-1"></i>{% else %}<i class="bi bi-shield-exclamation me-1"></i>{% endif %}
+          {{ user.get_verification_status_display }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Balance Card -->
+    <div class="nova-card">
+      <div class="nova-card-title" style="margin-bottom:16px;"><i class="bi bi-wallet2 me-2"></i>Resumen Financiero</div>
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span style="font-size:12px;color:var(--nova-text-muted);">Saldo Disponible</span>
+          <span style="font-size:14px;font-weight:700;color:var(--nova-success);font-family:var(--nova-font-mono);">${{ user.balance|floatformat:2 }}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span style="font-size:12px;color:var(--nova-text-muted);">Valor Portafolio</span>
+          <span style="font-size:14px;font-weight:700;color:#fff;font-family:var(--nova-font-mono);">${{ portfolio_value|floatformat:2 }}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span style="font-size:12px;color:var(--nova-text-muted);">P&L Total</span>
+          <span style="font-size:14px;font-weight:700;font-family:var(--nova-font-mono);color:{% if total_pnl >= 0 %}var(--nova-success){% else %}var(--nova-danger){% endif %};">
+            {% if total_pnl >= 0 %}+{% endif %}${{ total_pnl|floatformat:2 }}
+          </span>
+        </div>
+        <div style="border-top:1px solid var(--nova-border);padding-top:12px;display:flex;justify-content:space-between;align-items:center;">
+          <span style="font-size:12px;color:var(--nova-text-muted);">Total Depositado</span>
+          <span style="font-size:13px;font-weight:600;color:var(--nova-text);font-family:var(--nova-font-mono);">${{ user.total_deposited|floatformat:2 }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Security Status -->
+    <div class="nova-card">
+      <div class="nova-card-title" style="margin-bottom:16px;"><i class="bi bi-shield-lock-fill me-2"></i>Estado de Seguridad</div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <span style="font-size:12px;color:var(--nova-text-muted);">Email verificado</span>
+          {% if user.email_verified %}
+          <span style="color:var(--nova-success);font-size:13px;"><i class="bi bi-check-circle-fill"></i></span>
+          {% else %}
+          <span style="color:var(--nova-danger);font-size:13px;"><i class="bi bi-x-circle-fill"></i></span>
+          {% endif %}
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <span style="font-size:12px;color:var(--nova-text-muted);">2FA activado</span>
+          {% if user.two_factor_enabled %}
+          <span style="color:var(--nova-success);font-size:13px;"><i class="bi bi-check-circle-fill"></i></span>
+          {% else %}
+          <span style="color:var(--nova-warning);font-size:13px;"><i class="bi bi-exclamation-circle-fill"></i></span>
+          {% endif %}
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <span style="font-size:12px;color:var(--nova-text-muted);">Identidad verificada</span>
+          {% if user.verification_status == 'verified' %}
+          <span style="color:var(--nova-success);font-size:13px;"><i class="bi bi-check-circle-fill"></i></span>
+          {% else %}
+          <span style="color:var(--nova-text-dim);font-size:13px;"><i class="bi bi-dash-circle"></i></span>
+          {% endif %}
+        </div>
+        <a href="{% url 'accounts:security' %}" class="btn-nova btn-nova-outline w-100" style="padding:8px;font-size:12px;justify-content:center;margin-top:8px;">
+          <i class="bi bi-shield-lock"></i> Gestionar Seguridad
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Column -->
+  <div style="display:flex;flex-direction:column;gap:16px;">
+
+    <!-- Personal Info -->
+    <div class="nova-card">
+      <div class="nova-card-header">
+        <span class="nova-card-title"><i class="bi bi-person-lines-fill me-2"></i>Información Personal</span>
+        <a href="{% url 'accounts:profile_update' %}" style="font-size:12px;color:var(--nova-primary-light);">Editar →</a>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+        {% for label, value in "Nombre,"|add:user.first_name|add:"|Apellido,"|add:user.last_name|add:"|Email,"|add:user.email|add:"|Teléfono,"|add:user.phone|add:"|País,"|add:user.country|add:"|Ciudad,"|add:user.city|split:"|" %}
+        {% endfor %}
+        <div>
+          <div style="font-size:11px;color:var(--nova-text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">Nombre</div>
+          <div style="font-size:14px;color:#fff;font-weight:500;">{{ user.first_name|default:"—" }}</div>
+        </div>
+        <div>
+          <div style="font-size:11px;color:var(--nova-text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">Apellido</div>
+          <div style="font-size:14px;color:#fff;font-weight:500;">{{ user.last_name|default:"—" }}</div>
+        </div>
+        <div>
+          <div style="font-size:11px;color:var(--nova-text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">Email</div>
+          <div style="font-size:14px;color:#fff;font-weight:500;">{{ user.email }}</div>
+        </div>
+        <div>
+          <div style="font-size:11px;color:var(--nova-text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">Teléfono</div>
+          <div style="font-size:14px;color:#fff;font-weight:500;">{{ user.phone|default:"—" }}</div>
+        </div>
+        <div>
+          <div style="font-size:11px;color:var(--nova-text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">País</div>
+          <div style="font-size:14px;color:#fff;font-weight:500;">{{ user.country|default:"—" }}</div>
+        </div>
+        <div>
+          <div style="font-size:11px;color:var(--nova-text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">Ciudad</div>
+          <div style="font-size:14px;color:#fff;font-weight:500;">{{ user.city|default:"—" }}</div>
+        </div>
+        <div>
+          <div style="font-size:11px;color:var(--nova-text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">Fecha de Nacimiento</div>
+          <div style="font-size:14px;color:#fff;font-weight:500;">{{ user.date_of_birth|date:"d/m/Y"|default:"—" }}</div>
+        </div>
+        <div>
+          <div style="font-size:11px;color:var(--nova-text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">Miembro desde</div>
+          <div style="font-size:14px;color:#fff;font-weight:500;">{{ user.created_at|date:"d/m/Y" }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- KYC Documents -->
+    <div class="nova-card">
+      <div class="nova-card-header">
+        <span class="nova-card-title"><i class="bi bi-file-earmark-check-fill me-2"></i>Verificación de Identidad (KYC)</span>
+      </div>
+      {% if kyc_docs %}
+      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;">
+        {% for doc in kyc_docs %}
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px;background:var(--nova-bg-dark);border-radius:var(--nova-radius-sm);border:1px solid var(--nova-border);">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="font-size:20px;">📄</span>
+            <div>
+              <div style="font-size:13px;font-weight:600;color:#fff;">{{ doc.get_document_type_display }}</div>
+              <div style="font-size:11px;color:var(--nova-text-muted);">{{ doc.uploaded_at|date:"d/m/Y" }}</div>
+            </div>
+          </div>
+          <span class="status-badge {{ doc.status }}">{{ doc.get_status_display }}</span>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+      <form method="post" action="{% url 'accounts:upload_kyc' %}" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+          <div>
+            <label class="nova-label">Tipo de Documento</label>
+            <select name="document_type" class="nova-select">
+              <option value="passport">Pasaporte</option>
+              <option value="id_card">Cédula de Identidad</option>
+              <option value="drivers_license">Licencia de Conducir</option>
+              <option value="utility_bill">Factura de Servicios</option>
+              <option value="bank_statement">Estado de Cuenta</option>
+            </select>
+          </div>
+          <div>
+            <label class="nova-label">Archivo</label>
+            <input type="file" name="document_file" class="nova-input" accept=".pdf,.jpg,.jpeg,.png" required>
+          </div>
+        </div>
+        <button type="submit" class="btn-nova btn-nova-primary" style="padding:8px 20px;font-size:12px;">
+          <i class="bi bi-upload"></i> Subir Documento
+        </button>
+      </form>
+    </div>
+
+    <!-- Activity Log -->
+    <div class="nova-card">
+      <div class="nova-card-header">
+        <span class="nova-card-title"><i class="bi bi-clock-history me-2"></i>Actividad Reciente</span>
+        <a href="{% url 'accounts:security' %}" style="font-size:12px;color:var(--nova-primary-light);">Ver todo →</a>
+      </div>
+      {% if activity_logs %}
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        {% for log in activity_logs|slice:":8" %}
+        <div style="display:flex;align-items:center;gap:12px;padding:10px;background:var(--nova-bg-dark);border-radius:var(--nova-radius-sm);">
+          <div style="width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;
+            {% if log.action == 'login' %}background:rgba(0,102,255,0.15);
+            {% elif log.action == 'logout' %}background:rgba(122,139,168,0.15);
+            {% elif log.action == 'trade' %}background:rgba(0,200,150,0.15);
+            {% elif log.action == 'deposit' %}background:rgba(0,200,150,0.15);
+            {% elif log.action == 'withdrawal' %}background:rgba(255,184,0,0.15);
+            {% elif log.action == 'login_failed' %}background:rgba(255,59,92,0.15);
+            {% else %}background:rgba(0,102,255,0.1);{% endif %}">
+            {% if log.action == 'login' %}🔐
+            {% elif log.action == 'logout' %}🚪
+            {% elif log.action == 'trade' %}📊
+            {% elif log.action == 'deposit' %}💰
+            {% elif log.action == 'withdrawal' %}💸
+            {% elif log.action == 'login_failed' %}⚠️
+            {% elif log.action == 'password_change' %}🔑
+            {% else %}📋{% endif %}
+          </div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:12px;font-weight:600;color:#fff;">{{ log.get_action_display }}</div>
+            {% if log.description %}
+            <div style="font-size:11px;color:var(--nova-text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ log.description }}</div>
+            {% endif %}
+          </div>
+          <div style="text-align:right;flex-shrink:0;">
+            <div style="font-size:10px;color:var(--nova-text-dim);">{{ log.created_at|date:"d/m H:i" }}</div>
+            {% if log.ip_address %}
+            <div style="font-size:10px;color:var(--nova-text-dim);">{{ log.ip_address }}</div>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div style="text-align:center;padding:30px;color:var(--nova-text-muted);">
+        <div style="font-size:36px;margin-bottom:8px;">📋</div>
+        <div style="font-size:13px;">Sin actividad registrada</div>
+      </div>
+      {% endif %}
+    </div>
+
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block title %}Términos de Servicio{% endblock %}
+{% block body %}
+<div style="min-height:100vh;background:var(--nova-bg-dark);padding:80px 40px;">
+  <div style="max-width:800px;margin:0 auto;">
+    <a href="/" style="display:flex;align-items:center;gap:10px;margin-bottom:40px;text-decoration:none;">
+      <div style="width:32px;height:32px;background:linear-gradient(135deg,#0066FF,#00D4AA);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:900;color:#fff;">N</div>
+      <span style="font-size:13px;font-weight:700;color:#fff;">NOVA CAPITAL GROUP</span>
+    </a>
+    <h1 style="font-size:32px;font-weight:800;color:#fff;margin-bottom:8px;">Términos de Servicio</h1>
+    <p style="color:var(--nova-text-muted);margin-bottom:40px;">Última actualización: Enero 2024</p>
+    <div style="display:flex;flex-direction:column;gap:24px;">
+      {% for title, content in "Aceptación de Términos,Al acceder y utilizar Nova Capital Group, aceptas estar sujeto a estos Términos de Servicio. Si no estás de acuerdo con alguna parte de estos términos, no podrás acceder al servicio.|Descripción del Servicio,Nova Capital Group es una plataforma de simulación de inversiones y trading. Los datos mostrados son para fines educativos e informativos. No constituye asesoramiento financiero real.|Aviso de Riesgo,Las inversiones en mercados financieros conllevan riesgo de pérdida. El rendimiento pasado no garantiza resultados futuros. Esta plataforma es únicamente para simulación.|Uso Aceptable,Te comprometes a usar la plataforma de manera legal y ética. Está prohibido el uso para actividades fraudulentas, lavado de dinero o cualquier actividad ilegal.|Privacidad y Datos,Recopilamos y procesamos tus datos personales de acuerdo con nuestra Política de Privacidad. Implementamos medidas de seguridad para proteger tu información.|Modificaciones,Nos reservamos el derecho de modificar estos términos en cualquier momento. Los cambios entrarán en vigor inmediatamente después de su publicación."|split:"|" %}
+      {% endfor %}
+      <div class="nova-card">
+        <h3 style="font-size:16px;font-weight:700;color:#fff;margin-bottom:8px;">1. Aceptación de Términos</h3>
+        <p style="font-size:13px;color:var(--nova-text-muted);line-height:1.7;">Al acceder y utilizar Nova Capital Group, aceptas estar sujeto a estos Términos de Servicio. Si no estás de acuerdo con alguna parte de estos términos, no podrás acceder al servicio.</p>
+      </div>
+      <div class="nova-card">
+        <h3 style="font-size:16px;font-weight:700;color:#fff;margin-bottom:8px;">2. Descripción del Servicio</h3>
+        <p style="font-size:13px;color:var(--nova-text-muted);line-height:1.7;">Nova Capital Group es una plataforma de simulación de inversiones y trading. Los datos mostrados son para fines educativos e informativos. No constituye asesoramiento financiero real ni una oferta de servicios de inversión regulados.</p>
+      </div>
+      <div class="nova-card" style="border-color:rgba(255,184,0,0.3);">
+        <h3 style="font-size:16px;font-weight:700;color:var(--nova-warning);margin-bottom:8px;">⚠️ 3. Aviso de Riesgo</h3>
+        <p style="font-size:13px;color:var(--nova-text-muted);line-height:1.7;">Las inversiones en mercados financieros conllevan riesgo de pérdida del capital invertido. El rendimiento pasado no garantiza resultados futuros. Esta plataforma es únicamente para simulación y educación financiera.</p>
+      </div>
+      <div class="nova-card">
+        <h3 style="font-size:16px;font-weight:700;color:#fff;margin-bottom:8px;">4. Uso Aceptable</h3>
+        <p style="font-size:13px;color:var(--nova-text-muted);line-height:1.7;">Te comprometes a usar la plataforma de manera legal y ética. Está prohibido el uso para actividades fraudulentas, lavado de dinero o cualquier actividad ilegal o contraria a la normativa vigente.</p>
+      </div>
+      <div class="nova-card">
+        <h3 style="font-size:16px;font-weight:700;color:#fff;margin-bottom:8px;">5. Privacidad y Datos</h3>
+        <p style="font-size:13px;color:var(--nova-text-muted);line-height:1.7;">Recopilamos y procesamos tus datos personales de acuerdo con nuestra Política de Privacidad. Implementamos medidas de seguridad de nivel bancario para proteger tu información.</p>
+      </div>
+    </div>
+    <div style="margin-top:40px;text-align:center;">
+      <a href="/" class="btn-nova btn-nova-primary" style="padding:12px 28px;">Volver al Inicio</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

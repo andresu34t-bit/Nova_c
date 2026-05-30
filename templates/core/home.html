@@ -1,0 +1,190 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Inversiones de Clase Mundial{% endblock %}
+
+{% block body %}
+<!-- NAVBAR -->
+<nav class="landing-nav">
+  <div style="display:flex;align-items:center;gap:12px;">
+    <div style="width:36px;height:36px;background:linear-gradient(135deg,#0066FF,#00D4AA);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:900;color:#fff;font-size:16px;">N</div>
+    <div>
+      <div style="font-size:13px;font-weight:700;color:#fff;letter-spacing:0.5px;">NOVA CAPITAL</div>
+      <div style="font-size:9px;color:var(--nova-text-muted);letter-spacing:2px;text-transform:uppercase;">GROUP</div>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:8px;">
+    <a href="{% url 'core:about' %}" style="color:var(--nova-text-muted);font-size:13px;padding:8px 16px;">Nosotros</a>
+    <a href="{% url 'core:contact' %}" style="color:var(--nova-text-muted);font-size:13px;padding:8px 16px;">Contacto</a>
+    <a href="{% url 'two_factor:login' %}" class="btn-nova btn-nova-outline" style="padding:8px 20px;font-size:13px;">Iniciar Sesión</a>
+    <a href="{% url 'accounts:register' %}" class="btn-nova btn-nova-primary" style="padding:8px 20px;font-size:13px;">Comenzar Gratis</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="landing-hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-content animate-fade-up">
+    <div class="hero-badge">
+      <span class="badge-dot"></span>
+      Plataforma Activa · Mercados en Tiempo Real
+    </div>
+    <h1 class="hero-title">
+      Invierte con<br>
+      <span class="gradient-text">Inteligencia Institucional</span>
+    </h1>
+    <p class="hero-subtitle">
+      Nova Capital Group te da acceso a mercados globales de criptomonedas, acciones, forex e índices con herramientas de nivel profesional y seguridad de clase bancaria.
+    </p>
+    <div class="hero-actions">
+      <a href="{% url 'accounts:register' %}" class="btn-nova btn-nova-primary" style="padding:14px 32px;font-size:15px;">
+        <i class="bi bi-rocket-takeoff-fill"></i> Abrir Cuenta Gratis
+      </a>
+      <a href="{% url 'two_factor:login' %}" class="btn-nova btn-nova-outline" style="padding:14px 32px;font-size:15px;">
+        <i class="bi bi-play-circle"></i> Ver Demo
+      </a>
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <div class="stat-num">$2.4B+</div>
+        <div class="stat-label">Volumen Operado</div>
+      </div>
+      <div class="hero-stat">
+        <div class="stat-num">150K+</div>
+        <div class="stat-label">Inversores Activos</div>
+      </div>
+      <div class="hero-stat">
+        <div class="stat-num">500+</div>
+        <div class="stat-label">Activos Disponibles</div>
+      </div>
+      <div class="hero-stat">
+        <div class="stat-num">99.9%</div>
+        <div class="stat-label">Uptime Garantizado</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating market cards -->
+  <div style="position:absolute;right:5%;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:12px;z-index:1;" class="d-none d-xl-flex">
+    {% for asset in top_crypto|slice:":4" %}
+    <div style="background:var(--nova-bg-card);border:1px solid var(--nova-border);border-radius:12px;padding:14px 18px;min-width:200px;backdrop-filter:blur(10px);">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          {% if asset.image_url %}
+          <img src="{{ asset.image_url }}" style="width:28px;height:28px;border-radius:50%;" onerror="this.style.display='none'">
+          {% else %}
+          <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#0066FF,#00D4AA);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;">{{ asset.symbol|first }}</div>
+          {% endif %}
+          <div>
+            <div style="font-weight:700;color:#fff;font-size:13px;">{{ asset.symbol }}</div>
+            <div style="font-size:10px;color:var(--nova-text-muted);">{{ asset.name|truncatechars:12 }}</div>
+          </div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-family:var(--nova-font-mono);font-weight:700;color:#fff;font-size:13px;">${{ asset.current_price|floatformat:2 }}</div>
+          <div style="font-size:11px;font-weight:600;{% if asset.price_change_pct_24h >= 0 %}color:var(--nova-success){% else %}color:var(--nova-danger){% endif %};">
+            {% if asset.price_change_pct_24h >= 0 %}▲{% else %}▼{% endif %}
+            {{ asset.price_change_pct_24h|floatformat:2 }}%
+          </div>
+        </div>
+      </div>
+    </div>
+    {% empty %}
+    {% for item in "BTC,ETH,BNB,SOL"|split:"," %}
+    <div style="background:var(--nova-bg-card);border:1px solid var(--nova-border);border-radius:12px;padding:14px 18px;min-width:200px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#0066FF,#00D4AA);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;">{{ item|first }}</div>
+          <div><div style="font-weight:700;color:#fff;font-size:13px;">{{ item }}</div></div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-family:var(--nova-font-mono);font-weight:700;color:#fff;font-size:13px;">$--,---</div>
+          <div style="font-size:11px;font-weight:600;color:var(--nova-success);">▲ --%</div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+    {% endfor %}
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features-section" style="background:var(--nova-bg-card);border-top:1px solid var(--nova-border);border-bottom:1px solid var(--nova-border);">
+  <div style="max-width:1200px;margin:0 auto;">
+    <div class="section-header">
+      <div class="section-tag">¿Por qué Nova Capital?</div>
+      <h2 class="section-title">Todo lo que necesitas para invertir</h2>
+      <p class="section-subtitle">Herramientas institucionales al alcance de cualquier inversor</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(0,102,255,0.15);">🛡️</div>
+        <div class="feature-title">Seguridad Bancaria</div>
+        <div class="feature-desc">Autenticación 2FA, encriptación AES-256, protección contra fuerza bruta y monitoreo antifraude 24/7.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(0,200,150,0.15);">📊</div>
+        <div class="feature-title">Trading Avanzado</div>
+        <div class="feature-desc">Gráficos profesionales estilo TradingView, órdenes de mercado y límite, historial completo de operaciones.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(255,184,0,0.15);">⚡</div>
+        <div class="feature-title">Datos en Tiempo Real</div>
+        <div class="feature-desc">Precios actualizados al instante de criptomonedas, acciones, forex e índices de los principales mercados globales.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(255,59,92,0.15);">💼</div>
+        <div class="feature-title">Gestión de Portafolio</div>
+        <div class="feature-desc">Visualiza tu distribución de activos, rendimiento histórico, ganancias y pérdidas en tiempo real.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(0,212,170,0.15);">🌐</div>
+        <div class="feature-title">Mercados Globales</div>
+        <div class="feature-desc">Accede a más de 500 activos: Bitcoin, Ethereum, S&P 500, EUR/USD, oro, petróleo y mucho más.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(0,102,255,0.15);">📰</div>
+        <div class="feature-title">Noticias Financieras</div>
+        <div class="feature-desc">Mantente informado con noticias del mercado en tiempo real, análisis y calendario económico.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section style="padding:100px 40px;text-align:center;position:relative;overflow:hidden;">
+  <div style="position:absolute;inset:0;background:radial-gradient(ellipse at center,rgba(0,102,255,0.1) 0%,transparent 70%);"></div>
+  <div style="position:relative;z-index:1;max-width:600px;margin:0 auto;">
+    <h2 style="font-size:40px;font-weight:800;color:#fff;margin-bottom:16px;">Comienza a invertir hoy</h2>
+    <p style="font-size:16px;color:var(--nova-text-muted);margin-bottom:36px;">Crea tu cuenta gratuita en menos de 2 minutos y accede a los mercados financieros globales.</p>
+    <a href="{% url 'accounts:register' %}" class="btn-nova btn-nova-primary" style="padding:16px 48px;font-size:16px;">
+      <i class="bi bi-rocket-takeoff-fill"></i> Crear Cuenta Gratuita
+    </a>
+    <div style="margin-top:20px;font-size:12px;color:var(--nova-text-dim);">
+      Sin tarjeta de crédito · Sin comisiones ocultas · Cancela cuando quieras
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer style="background:var(--nova-bg-card);border-top:1px solid var(--nova-border);padding:40px;">
+  <div style="max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px;">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div style="width:32px;height:32px;background:linear-gradient(135deg,#0066FF,#00D4AA);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:900;color:#fff;">N</div>
+      <div>
+        <div style="font-size:12px;font-weight:700;color:#fff;">NOVA CAPITAL GROUP</div>
+        <div style="font-size:10px;color:var(--nova-text-muted);">© 2024 Todos los derechos reservados</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:24px;flex-wrap:wrap;">
+      <a href="{% url 'core:terms' %}" style="font-size:12px;color:var(--nova-text-muted);">Términos</a>
+      <a href="{% url 'core:privacy' %}" style="font-size:12px;color:var(--nova-text-muted);">Privacidad</a>
+      <a href="{% url 'core:contact' %}" style="font-size:12px;color:var(--nova-text-muted);">Contacto</a>
+    </div>
+    <div style="font-size:11px;color:var(--nova-text-dim);max-width:400px;text-align:right;">
+      ⚠️ Aviso de riesgo: Las inversiones conllevan riesgo de pérdida. Esta plataforma es para fines educativos y de simulación.
+    </div>
+  </div>
+</footer>
+{% endblock %}

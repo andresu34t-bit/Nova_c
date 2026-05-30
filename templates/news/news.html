@@ -1,0 +1,179 @@
+{% extends 'base_app.html' %}
+{% load static %}
+{% block title %}Noticias Financieras{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="page-title">Noticias Financieras</div>
+    <div class="page-subtitle">Mantente informado con las últimas noticias del mercado</div>
+  </div>
+  <button onclick="fetchNews()" class="btn-nova btn-nova-outline" style="padding:8px 16px;font-size:12px;">
+    <i class="bi bi-arrow-clockwise"></i> Actualizar
+  </button>
+</div>
+
+<!-- CATEGORY TABS -->
+<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;">
+  <a href="?category=all" class="btn-nova {% if active_category == 'all' %}btn-nova-primary{% else %}btn-nova-ghost{% endif %}" style="padding:7px 16px;font-size:12px;">🌐 Todas</a>
+  <a href="?category=crypto" class="btn-nova {% if active_category == 'crypto' %}btn-nova-primary{% else %}btn-nova-ghost{% endif %}" style="padding:7px 16px;font-size:12px;">₿ Cripto</a>
+  <a href="?category=stocks" class="btn-nova {% if active_category == 'stocks' %}btn-nova-primary{% else %}btn-nova-ghost{% endif %}" style="padding:7px 16px;font-size:12px;">📈 Acciones</a>
+  <a href="?category=forex" class="btn-nova {% if active_category == 'forex' %}btn-nova-primary{% else %}btn-nova-ghost{% endif %}" style="padding:7px 16px;font-size:12px;">💱 Forex</a>
+  <a href="?category=economy" class="btn-nova {% if active_category == 'economy' %}btn-nova-primary{% else %}btn-nova-ghost{% endif %}" style="padding:7px 16px;font-size:12px;">🏦 Economía</a>
+  <a href="?category=technology" class="btn-nova {% if active_category == 'technology' %}btn-nova-primary{% else %}btn-nova-ghost{% endif %}" style="padding:7px 16px;font-size:12px;">💻 Tecnología</a>
+</div>
+
+<div style="display:grid;grid-template-columns:2fr 1fr;gap:20px;">
+
+  <!-- MAIN NEWS -->
+  <div>
+    <!-- Featured -->
+    {% if featured %}
+    <div class="nova-card" style="margin-bottom:20px;">
+      <div class="nova-card-header">
+        <span class="nova-card-title"><i class="bi bi-star-fill me-2" style="color:var(--nova-accent);"></i>Destacadas</span>
+      </div>
+      <div style="display:grid;gap:16px;">
+        {% for article in featured %}
+        <a href="{{ article.source_url }}" target="_blank" style="text-decoration:none;display:flex;gap:16px;padding:12px;background:var(--nova-bg-dark);border-radius:var(--nova-radius-sm);border:1px solid var(--nova-border);transition:var(--nova-transition);" onmouseover="this.style.borderColor='var(--nova-primary)'" onmouseout="this.style.borderColor='var(--nova-border)'">
+          {% if article.image_url %}
+          <img src="{{ article.image_url }}" style="width:100px;height:70px;object-fit:cover;border-radius:8px;flex-shrink:0;" onerror="this.style.display='none'">
+          {% else %}
+          <div style="width:100px;height:70px;background:linear-gradient(135deg,var(--nova-bg-card2),var(--nova-bg-hover));border-radius:8px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:28px;">📰</div>
+          {% endif %}
+          <div>
+            <div style="font-size:10px;font-weight:700;color:var(--nova-primary-light);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">{{ article.get_category_display }}</div>
+            <div style="font-size:14px;font-weight:600;color:#fff;line-height:1.4;margin-bottom:6px;">{{ article.title|truncatechars:100 }}</div>
+            <div style="font-size:11px;color:var(--nova-text-muted);">{{ article.source }} · {{ article.published_at|timesince }} ago</div>
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- All Articles -->
+    {% if articles %}
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;">
+      {% for article in articles %}
+      <a href="{{ article.source_url }}" target="_blank" style="text-decoration:none;">
+        <div class="news-card">
+          {% if article.image_url %}
+          <img src="{{ article.image_url }}" class="news-image" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+          <div class="news-image-placeholder" style="display:none;">
+            {% if article.category == 'crypto' %}₿{% elif article.category == 'stocks' %}📈{% elif article.category == 'forex' %}💱{% elif article.category == 'economy' %}🏦{% else %}📰{% endif %}
+          </div>
+          {% else %}
+          <div class="news-image-placeholder">
+            {% if article.category == 'crypto' %}₿{% elif article.category == 'stocks' %}📈{% elif article.category == 'forex' %}💱{% elif article.category == 'economy' %}🏦{% else %}📰{% endif %}
+          </div>
+          {% endif %}
+          <div class="news-body">
+            <div class="news-category">{{ article.get_category_display }}</div>
+            <div class="news-title">{{ article.title }}</div>
+            {% if article.summary %}
+            <div class="news-summary">{{ article.summary }}</div>
+            {% endif %}
+            <div class="news-footer">
+              <span class="news-source"><i class="bi bi-newspaper me-1"></i>{{ article.source }}</span>
+              <span class="news-date">{{ article.published_at|timesince }} ago</span>
+            </div>
+          </div>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="nova-card" style="text-align:center;padding:80px 40px;">
+      <div style="font-size:64px;margin-bottom:20px;">📰</div>
+      <div style="font-size:18px;font-weight:700;color:#fff;margin-bottom:8px;">Sin noticias disponibles</div>
+      <div style="font-size:14px;color:var(--nova-text-muted);margin-bottom:24px;">Configura tu API key de NewsAPI para ver noticias en tiempo real</div>
+      <button onclick="fetchNews()" class="btn-nova btn-nova-primary" style="padding:10px 24px;">
+        <i class="bi bi-arrow-clockwise"></i> Cargar Noticias
+      </button>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- SIDEBAR: Economic Calendar -->
+  <div>
+    <div class="nova-card" style="margin-bottom:16px;">
+      <div class="nova-card-header">
+        <span class="nova-card-title"><i class="bi bi-calendar-event me-2"></i>Calendario Económico</span>
+      </div>
+      {% if upcoming_events %}
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        {% for event in upcoming_events %}
+        <div style="padding:12px;background:var(--nova-bg-dark);border-radius:var(--nova-radius-sm);border-left:3px solid {% if event.impact == 'high' %}var(--nova-danger){% elif event.impact == 'medium' %}var(--nova-warning){% else %}var(--nova-success){% endif %};">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+            <span style="font-size:12px;font-weight:600;color:#fff;">{{ event.title|truncatechars:40 }}</span>
+            <span style="font-size:10px;padding:2px 6px;border-radius:10px;font-weight:600;
+              {% if event.impact == 'high' %}background:rgba(255,59,92,0.15);color:var(--nova-danger);
+              {% elif event.impact == 'medium' %}background:rgba(255,184,0,0.15);color:var(--nova-warning);
+              {% else %}background:rgba(0,200,150,0.15);color:var(--nova-success);{% endif %}">
+              {{ event.get_impact_display }}
+            </span>
+          </div>
+          <div style="font-size:11px;color:var(--nova-text-muted);">
+            <i class="bi bi-flag me-1"></i>{{ event.country }} · {{ event.currency }}
+          </div>
+          <div style="font-size:11px;color:var(--nova-text-muted);margin-top:2px;">
+            <i class="bi bi-clock me-1"></i>{{ event.event_date|date:"d/m H:i" }}
+          </div>
+          {% if event.forecast %}
+          <div style="font-size:11px;color:var(--nova-text-muted);margin-top:4px;">
+            Prev: <span style="color:var(--nova-text);">{{ event.previous }}</span> · 
+            Est: <span style="color:var(--nova-primary-light);">{{ event.forecast }}</span>
+          </div>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div style="text-align:center;padding:40px 20px;color:var(--nova-text-muted);">
+        <div style="font-size:40px;margin-bottom:12px;">📅</div>
+        <div style="font-size:13px;">Sin eventos próximos</div>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Market Sentiment -->
+    <div class="nova-card">
+      <div class="nova-card-header">
+        <span class="nova-card-title"><i class="bi bi-activity me-2"></i>Sentimiento del Mercado</span>
+      </div>
+      <div style="text-align:center;padding:20px 0;">
+        <div style="font-size:48px;margin-bottom:8px;">😐</div>
+        <div style="font-size:16px;font-weight:700;color:#fff;margin-bottom:4px;">Neutral</div>
+        <div style="font-size:12px;color:var(--nova-text-muted);">Índice de Miedo y Codicia</div>
+        <div style="margin-top:16px;background:var(--nova-bg-dark);border-radius:20px;height:8px;overflow:hidden;">
+          <div style="width:52%;height:100%;background:linear-gradient(90deg,var(--nova-danger),var(--nova-warning),var(--nova-success));border-radius:20px;"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:10px;color:var(--nova-text-dim);">
+          <span>Miedo Extremo</span><span>Codicia Extrema</span>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;">
+        <div style="background:var(--nova-bg-dark);border-radius:var(--nova-radius-sm);padding:10px;text-align:center;">
+          <div style="font-size:18px;font-weight:700;color:var(--nova-success);">62%</div>
+          <div style="font-size:10px;color:var(--nova-text-muted);">Alcistas</div>
+        </div>
+        <div style="background:var(--nova-bg-dark);border-radius:var(--nova-radius-sm);padding:10px;text-align:center;">
+          <div style="font-size:18px;font-weight:700;color:var(--nova-danger);">38%</div>
+          <div style="font-size:10px;color:var(--nova-text-muted);">Bajistas</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function fetchNews() {
+  fetch('{% url "news:fetch_news" %}', { headers: { 'X-CSRFToken': csrfToken } })
+    .then(r => r.json())
+    .then(d => { if (d.status === 'ok') location.reload(); });
+}
+</script>
+{% endblock %}

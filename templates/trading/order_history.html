@@ -1,0 +1,121 @@
+{% extends 'base_app.html' %}
+{% load static %}
+{% block title %}Historial de Órdenes{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="page-title">Historial de Órdenes</div>
+    <div class="page-subtitle">Todas tus operaciones de trading</div>
+  </div>
+  <a href="{% url 'trading:trading' %}" class="btn-nova btn-nova-primary">
+    <i class="bi bi-graph-up-arrow"></i> Nueva Operación
+  </a>
+</div>
+
+<!-- STATS -->
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin-bottom:24px;">
+  <div class="stat-card">
+    <div class="stat-icon" style="background:rgba(0,102,255,0.15);">📋</div>
+    <div class="stat-label">Total Órdenes</div>
+    <div class="stat-value">{{ orders.count }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon" style="background:rgba(0,200,150,0.15);">▲</div>
+    <div class="stat-label">Compras</div>
+    <div class="stat-value" style="color:var(--nova-success);">{{ orders|length }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon" style="background:rgba(255,59,92,0.15);">▼</div>
+    <div class="stat-label">Ventas</div>
+    <div class="stat-value" style="color:var(--nova-danger);">—</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon" style="background:rgba(255,184,0,0.15);">✅</div>
+    <div class="stat-label">Ejecutadas</div>
+    <div class="stat-value">—</div>
+  </div>
+</div>
+
+<div class="nova-card">
+  <div class="nova-card-header">
+    <span class="nova-card-title"><i class="bi bi-list-ul me-2"></i>Todas las Órdenes</span>
+    <div style="display:flex;gap:8px;">
+      <select id="filterSide" class="nova-select" style="width:auto;padding:6px 12px;font-size:12px;" onchange="filterOrders()">
+        <option value="">Todos los lados</option>
+        <option value="buy">Compras</option>
+        <option value="sell">Ventas</option>
+      </select>
+      <select id="filterStatus" class="nova-select" style="width:auto;padding:6px 12px;font-size:12px;" onchange="filterOrders()">
+        <option value="">Todos los estados</option>
+        <option value="filled">Ejecutadas</option>
+        <option value="pending">Pendientes</option>
+        <option value="cancelled">Canceladas</option>
+      </select>
+    </div>
+  </div>
+  {% if orders %}
+  <div style="overflow-x:auto;">
+    <table class="nova-table" id="ordersTable">
+      <thead>
+        <tr>
+          <th>Activo</th><th>Tipo</th><th>Lado</th><th>Cantidad</th>
+          <th>Precio</th><th>Total</th><th>Comisión</th><th>Estado</th><th>Fecha</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for order in orders %}
+        <tr data-side="{{ order.side }}" data-status="{{ order.status }}">
+          <td>
+            <div class="asset-cell">
+              <div class="asset-icon">
+                {% if order.asset.image_url %}<img src="{{ order.asset.image_url }}" onerror="this.style.display='none'">{% endif %}
+                {{ order.asset.symbol|first }}
+              </div>
+              <div>
+                <div class="asset-name">{{ order.asset.symbol }}</div>
+                <div class="asset-symbol">{{ order.asset.name|truncatechars:12 }}</div>
+              </div>
+            </div>
+          </td>
+          <td style="color:var(--nova-text-muted);font-size:12px;">{{ order.get_order_type_display }}</td>
+          <td>
+            <span class="badge-{% if order.side == 'buy' %}positive{% else %}negative{% endif %}">
+              {% if order.side == 'buy' %}▲ COMPRA{% else %}▼ VENTA{% endif %}
+            </span>
+          </td>
+          <td class="price-mono">{{ order.quantity|floatformat:6 }}</td>
+          <td class="price-mono">${{ order.filled_price|floatformat:4 }}</td>
+          <td class="price-mono" style="font-weight:700;color:#fff;">${{ order.total_value|floatformat:2 }}</td>
+          <td class="price-mono" style="color:var(--nova-text-muted);">${{ order.fee|floatformat:4 }}</td>
+          <td><span class="status-badge {{ order.status }}">{{ order.get_status_display }}</span></td>
+          <td style="color:var(--nova-text-muted);font-size:11px;">{{ order.created_at|date:"d/m/Y H:i" }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div style="text-align:center;padding:80px 40px;color:var(--nova-text-muted);">
+    <div style="font-size:64px;margin-bottom:20px;">📊</div>
+    <div style="font-size:18px;font-weight:700;color:#fff;margin-bottom:8px;">Sin órdenes registradas</div>
+    <div style="font-size:14px;margin-bottom:24px;">Realiza tu primera operación en el terminal de trading</div>
+    <a href="{% url 'trading:trading' %}" class="btn-nova btn-nova-primary" style="padding:12px 28px;font-size:14px;">
+      <i class="bi bi-graph-up-arrow"></i> Ir al Trading
+    </a>
+  </div>
+  {% endif %}
+</div>
+
+<script>
+function filterOrders() {
+  const side = document.getElementById('filterSide').value;
+  const status = document.getElementById('filterStatus').value;
+  document.querySelectorAll('#ordersTable tbody tr').forEach(row => {
+    const matchSide = !side || row.dataset.side === side;
+    const matchStatus = !status || row.dataset.status === status;
+    row.style.display = matchSide && matchStatus ? '' : 'none';
+  });
+}
+</script>
+{% endblock %}

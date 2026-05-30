@@ -1,0 +1,79 @@
+{% extends 'base_app.html' %}
+{% block title %}Watchlist{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="page-title">Mi Watchlist</div>
+    <div class="page-subtitle">Activos que estás siguiendo</div>
+  </div>
+  <a href="{% url 'markets:overview' %}" class="btn-nova btn-nova-primary">
+    <i class="bi bi-plus-circle-fill"></i> Explorar Mercados
+  </a>
+</div>
+
+{% if watchlist %}
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;">
+  {% for item in watchlist %}
+  <div class="market-card">
+    <div class="mc-header">
+      <div class="mc-icon">
+        {% if item.asset.image_url %}
+        <img src="{{ item.asset.image_url }}" onerror="this.style.display='none'">
+        {% else %}
+        <span style="font-size:14px;font-weight:700;color:var(--nova-primary-light);">{{ item.asset.symbol|first }}</span>
+        {% endif %}
+      </div>
+      <div>
+        <div class="mc-symbol">{{ item.asset.symbol }}</div>
+        <div class="mc-name">{{ item.asset.name|truncatechars:14 }}</div>
+      </div>
+      <button onclick="removeFromWatchlist('{{ item.asset.symbol }}')" style="margin-left:auto;background:none;border:none;color:var(--nova-text-muted);cursor:pointer;font-size:16px;" title="Eliminar">
+        <i class="bi bi-star-fill" style="color:var(--nova-accent);"></i>
+      </button>
+    </div>
+    <div class="mc-price">${{ item.asset.current_price|floatformat:4 }}</div>
+    <div class="mc-change {% if item.asset.price_change_pct_24h >= 0 %}up{% else %}down{% endif %}">
+      {% if item.asset.price_change_pct_24h >= 0 %}▲{% else %}▼{% endif %}
+      {{ item.asset.price_change_pct_24h|floatformat:2 }}%
+      <span style="font-size:10px;color:var(--nova-text-muted);margin-left:4px;">${{ item.asset.price_change_24h|floatformat:4 }}</span>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid var(--nova-border-light);">
+      <div style="text-align:center;">
+        <div style="font-size:10px;color:var(--nova-text-muted);">Vol 24h</div>
+        <div style="font-size:11px;font-weight:600;color:var(--nova-text);">${{ item.asset.volume_24h|floatformat:0 }}</div>
+      </div>
+      <div style="text-align:center;">
+        <div style="font-size:10px;color:var(--nova-text-muted);">Cap. Mkt</div>
+        <div style="font-size:11px;font-weight:600;color:var(--nova-text);">${{ item.asset.market_cap|floatformat:0 }}</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:12px;">
+      <a href="{% url 'markets:asset_detail' item.asset.symbol %}" class="btn-nova btn-nova-ghost" style="flex:1;padding:7px;font-size:11px;justify-content:center;"><i class="bi bi-eye"></i> Ver</a>
+      <a href="{% url 'trading:trading' %}?symbol={{ item.asset.symbol }}" class="btn-nova btn-nova-primary" style="flex:1;padding:7px;font-size:11px;justify-content:center;"><i class="bi bi-graph-up-arrow"></i> Operar</a>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="nova-card" style="text-align:center;padding:80px 40px;">
+  <div style="font-size:64px;margin-bottom:20px;">⭐</div>
+  <div style="font-size:20px;font-weight:700;color:#fff;margin-bottom:8px;">Tu watchlist está vacía</div>
+  <div style="font-size:14px;color:var(--nova-text-muted);margin-bottom:24px;">Añade activos desde los mercados para seguirlos aquí</div>
+  <a href="{% url 'markets:overview' %}" class="btn-nova btn-nova-primary" style="padding:12px 28px;font-size:14px;">
+    <i class="bi bi-bar-chart-line-fill"></i> Explorar Mercados
+  </a>
+</div>
+{% endif %}
+
+<script>
+function removeFromWatchlist(symbol) {
+  const formData = new FormData();
+  formData.append('symbol', symbol);
+  formData.append('csrfmiddlewaretoken', csrfToken);
+  fetch('{% url "trading:toggle_watchlist" %}', { method: 'POST', body: formData })
+    .then(r => r.json())
+    .then(d => { if (d.status === 'removed') location.reload(); });
+}
+</script>
+{% endblock %}

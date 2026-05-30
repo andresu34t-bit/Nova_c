@@ -1,0 +1,171 @@
+{% extends 'base_app.html' %}
+{% load static %}
+{% block title %}Seguridad{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="page-title">Centro de Seguridad</div>
+    <div class="page-subtitle">Gestiona la seguridad de tu cuenta</div>
+  </div>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;">
+
+  <!-- Password -->
+  <div class="nova-card">
+    <div class="nova-card-header">
+      <span class="nova-card-title"><i class="bi bi-key-fill me-2" style="color:var(--nova-accent);"></i>Contraseña</span>
+      <span class="status-badge completed">Activa</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;">
+      <div style="width:48px;height:48px;background:rgba(255,184,0,0.15);border-radius:var(--nova-radius-sm);display:flex;align-items:center;justify-content:center;font-size:22px;">🔑</div>
+      <div>
+        <div style="font-size:14px;font-weight:600;color:#fff;">Contraseña de acceso</div>
+        <div style="font-size:12px;color:var(--nova-text-muted);">Última actualización: {{ user.updated_at|date:"d/m/Y" }}</div>
+      </div>
+    </div>
+    <a href="{% url 'accounts:change_password' %}" class="btn-nova btn-nova-outline w-100" style="padding:10px;font-size:13px;justify-content:center;">
+      <i class="bi bi-pencil-fill"></i> Cambiar Contraseña
+    </a>
+  </div>
+
+  <!-- 2FA -->
+  <div class="nova-card">
+    <div class="nova-card-header">
+      <span class="nova-card-title"><i class="bi bi-shield-lock-fill me-2" style="color:var(--nova-primary-light);"></i>Autenticación 2FA</span>
+      {% if user.two_factor_enabled %}
+      <span class="status-badge completed">Activo</span>
+      {% else %}
+      <span class="status-badge pending">Inactivo</span>
+      {% endif %}
+    </div>
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;">
+      <div style="width:48px;height:48px;background:rgba(0,102,255,0.15);border-radius:var(--nova-radius-sm);display:flex;align-items:center;justify-content:center;font-size:22px;">🛡️</div>
+      <div>
+        <div style="font-size:14px;font-weight:600;color:#fff;">Autenticación de dos factores</div>
+        <div style="font-size:12px;color:var(--nova-text-muted);">
+          {% if user.two_factor_enabled %}Protección adicional activada{% else %}Añade una capa extra de seguridad{% endif %}
+        </div>
+      </div>
+    </div>
+    {% if not user.two_factor_enabled %}
+    <div class="nova-alert warning" style="margin-bottom:12px;">
+      <i class="bi bi-exclamation-triangle-fill"></i>
+      Activa 2FA para proteger mejor tu cuenta
+    </div>
+    {% endif %}
+    <a href="{% url 'two_factor:setup' %}" class="btn-nova {% if user.two_factor_enabled %}btn-nova-outline{% else %}btn-nova-primary{% endif %} w-100" style="padding:10px;font-size:13px;justify-content:center;">
+      <i class="bi bi-{% if user.two_factor_enabled %}gear{% else %}shield-plus{% endif %}"></i>
+      {% if user.two_factor_enabled %}Gestionar 2FA{% else %}Activar 2FA{% endif %}
+    </a>
+  </div>
+
+  <!-- Email Verification -->
+  <div class="nova-card">
+    <div class="nova-card-header">
+      <span class="nova-card-title"><i class="bi bi-envelope-check-fill me-2" style="color:var(--nova-success);"></i>Email</span>
+      {% if user.email_verified %}
+      <span class="status-badge completed">Verificado</span>
+      {% else %}
+      <span class="status-badge failed">Sin verificar</span>
+      {% endif %}
+    </div>
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;">
+      <div style="width:48px;height:48px;background:rgba(0,200,150,0.15);border-radius:var(--nova-radius-sm);display:flex;align-items:center;justify-content:center;font-size:22px;">✉️</div>
+      <div>
+        <div style="font-size:14px;font-weight:600;color:#fff;">{{ user.email }}</div>
+        <div style="font-size:12px;color:var(--nova-text-muted);">
+          {% if user.email_verified %}Email verificado correctamente{% else %}Verifica tu correo electrónico{% endif %}
+        </div>
+      </div>
+    </div>
+    {% if not user.email_verified %}
+    <button class="btn-nova btn-nova-primary w-100" style="padding:10px;font-size:13px;justify-content:center;">
+      <i class="bi bi-send-fill"></i> Reenviar Verificación
+    </button>
+    {% else %}
+    <div class="nova-alert success">
+      <i class="bi bi-check-circle-fill"></i> Email verificado correctamente
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Sessions -->
+  <div class="nova-card">
+    <div class="nova-card-header">
+      <span class="nova-card-title"><i class="bi bi-laptop me-2" style="color:var(--nova-secondary);"></i>Sesión Activa</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;">
+      <div style="width:48px;height:48px;background:rgba(0,212,170,0.15);border-radius:var(--nova-radius-sm);display:flex;align-items:center;justify-content:center;font-size:22px;">💻</div>
+      <div>
+        <div style="font-size:14px;font-weight:600;color:#fff;">Sesión actual</div>
+        <div style="font-size:12px;color:var(--nova-text-muted);">
+          IP: {{ user.last_login_ip|default:"Desconocida" }}
+        </div>
+        <div style="font-size:11px;color:var(--nova-text-dim);">
+          Última actividad: {{ user.last_activity|date:"d/m/Y H:i"|default:"—" }}
+        </div>
+      </div>
+    </div>
+    <a href="{% url 'accounts:logout' %}" class="btn-nova btn-nova-outline w-100" style="padding:10px;font-size:13px;justify-content:center;border-color:var(--nova-danger);color:var(--nova-danger);">
+      <i class="bi bi-box-arrow-left"></i> Cerrar Sesión
+    </a>
+  </div>
+</div>
+
+<!-- Activity Log -->
+<div class="nova-card">
+  <div class="nova-card-header">
+    <span class="nova-card-title"><i class="bi bi-shield-exclamation me-2"></i>Registro de Actividad de Seguridad</span>
+    <span style="font-size:12px;color:var(--nova-text-muted);">Últimas 50 acciones</span>
+  </div>
+  {% if activity_logs %}
+  <div style="overflow-x:auto;">
+    <table class="nova-table">
+      <thead>
+        <tr><th>Acción</th><th>Descripción</th><th>IP</th><th>Fecha</th></tr>
+      </thead>
+      <tbody>
+        {% for log in activity_logs %}
+        <tr>
+          <td>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span style="font-size:16px;">
+                {% if log.action == 'login' %}🔐
+                {% elif log.action == 'logout' %}🚪
+                {% elif log.action == 'login_failed' %}⚠️
+                {% elif log.action == 'password_change' %}🔑
+                {% elif log.action == 'trade' %}📊
+                {% elif log.action == 'deposit' %}💰
+                {% elif log.action == 'withdrawal' %}💸
+                {% elif log.action == '2fa_enabled' %}🛡️
+                {% elif log.action == 'email_verified' %}✉️
+                {% elif log.action == 'suspicious' %}🚨
+                {% else %}📋{% endif %}
+              </span>
+              <span style="font-size:12px;font-weight:600;color:{% if log.action == 'login_failed' or log.action == 'suspicious' %}var(--nova-danger){% else %}#fff{% endif %};">
+                {{ log.get_action_display }}
+              </span>
+            </div>
+          </td>
+          <td style="color:var(--nova-text-muted);font-size:12px;max-width:250px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+            {{ log.description|default:"—" }}
+          </td>
+          <td style="font-family:var(--nova-font-mono);font-size:11px;color:var(--nova-text-muted);">
+            {{ log.ip_address|default:"—" }}
+          </td>
+          <td style="font-size:11px;color:var(--nova-text-muted);">{{ log.created_at|date:"d/m/Y H:i:s" }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div style="text-align:center;padding:60px;color:var(--nova-text-muted);">
+    <div style="font-size:48px;margin-bottom:12px;">🛡️</div>
+    <div style="font-size:14px;">Sin actividad registrada</div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

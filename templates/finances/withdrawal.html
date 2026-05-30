@@ -1,0 +1,49 @@
+{% extends 'base_app.html' %}
+{% block title %}Retirar Fondos{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="page-title">Solicitar Retiro</div>
+    <div class="page-subtitle">Retira fondos de tu cuenta</div>
+  </div>
+  <a href="{% url 'finances:finances' %}" class="btn-nova btn-nova-ghost"><i class="bi bi-arrow-left"></i> Volver</a>
+</div>
+
+<div style="max-width:480px;">
+  <div class="nova-card">
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:24px;padding-bottom:20px;border-bottom:1px solid var(--nova-border);">
+      <div style="width:52px;height:52px;background:rgba(255,184,0,0.15);border-radius:var(--nova-radius);display:flex;align-items:center;justify-content:center;font-size:24px;">💸</div>
+      <div>
+        <div style="font-size:16px;font-weight:700;color:#fff;">Retiro de Fondos</div>
+        <div style="font-size:12px;color:var(--nova-text-muted);">Disponible: <span style="color:var(--nova-success);font-weight:600;">${{ request.user.balance|floatformat:2 }}</span></div>
+      </div>
+    </div>
+    <form method="post" action="{% url 'finances:withdrawal' %}">
+      {% csrf_token %}
+      <div class="nova-form-group">
+        <label class="nova-label">Monto a Retirar (USD)</label>
+        <div style="position:relative;">
+          <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--nova-text-muted);font-weight:700;font-size:16px;">$</span>
+          <input type="number" name="amount" class="nova-input" placeholder="0.00" min="10" max="{{ request.user.balance }}" step="0.01" style="padding-left:32px;font-size:18px;font-family:var(--nova-font-mono);" required>
+        </div>
+      </div>
+      <div class="nova-form-group">
+        <label class="nova-label">Método de Retiro</label>
+        <select name="payment_method" class="nova-select">
+          <option value="bank_transfer">🏦 Transferencia Bancaria</option>
+          <option value="crypto">₿ Criptomoneda</option>
+          <option value="paypal">🅿️ PayPal</option>
+        </select>
+      </div>
+      <div class="nova-alert warning" style="margin-bottom:16px;">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+        Los retiros se procesan en 1-3 días hábiles.
+      </div>
+      <button type="submit" class="btn-nova w-100" style="padding:13px;font-size:15px;justify-content:center;background:linear-gradient(135deg,var(--nova-warning),#CC8800);color:#000;font-weight:700;">
+        <i class="bi bi-arrow-up-circle-fill"></i> Confirmar Retiro
+      </button>
+    </form>
+  </div>
+</div>
+{% endblock %}

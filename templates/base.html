@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Nova Capital Group - Plataforma de inversión y trading de clase mundial">
+  <meta name="csrf-token" content="{{ csrf_token }}">
+  <title>{% block title %}Nova Capital Group{% endblock %} | Nova Capital Group</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+
+  <!-- Nova CSS -->
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'css/nova.css' %}">
+
+  {% block extra_css %}{% endblock %}
+
+  <style>
+    body { background: var(--nova-bg-dark); color: var(--nova-text); font-family: var(--nova-font); }
+    .dropdown-menu { background: var(--nova-bg-card2); border: 1px solid var(--nova-border); border-radius: var(--nova-radius-sm); }
+    .dropdown-item { color: var(--nova-text-muted); font-size: 13px; padding: 8px 16px; }
+    .dropdown-item:hover { background: var(--nova-bg-hover); color: var(--nova-text); }
+    .dropdown-divider { border-color: var(--nova-border); }
+  </style>
+</head>
+<body>
+
+{% if messages %}
+<div id="messages-container" style="position:fixed;top:80px;right:20px;z-index:9999;min-width:300px;">
+  {% for message in messages %}
+  <div class="nova-alert {% if message.tags == 'error' %}error{% elif message.tags == 'success' %}success{% elif message.tags == 'warning' %}warning{% else %}info{% endif %} mb-2" style="animation:fadeInUp 0.3s ease;">
+    <i class="bi {% if message.tags == 'error' %}bi-x-circle{% elif message.tags == 'success' %}bi-check-circle{% elif message.tags == 'warning' %}bi-exclamation-triangle{% else %}bi-info-circle{% endif %}"></i>
+    {{ message }}
+    <button onclick="this.parentElement.remove()" style="margin-left:auto;background:none;border:none;color:inherit;cursor:pointer;font-size:16px;">&times;</button>
+  </div>
+  {% endfor %}
+</div>
+<script>setTimeout(()=>{const c=document.getElementById('messages-container');if(c)c.style.opacity='0';setTimeout(()=>{if(c)c.remove();},500);},5000);</script>
+{% endif %}
+
+{% block body %}{% endblock %}
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+<!-- Nova JS -->
+<script>
+  // CSRF helper
+  function getCookie(name) {
+    let v = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
+    return v ? v[2] : null;
+  }
+  const csrfToken = getCookie('csrftoken') || document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
+
+  // Sidebar toggle
+  function toggleSidebar() {
+    const sidebar = document.getElementById('novaSidebar');
+    const main = document.getElementById('novaMain');
+    if (window.innerWidth <= 768) {
+      sidebar?.classList.toggle('mobile-open');
+    } else {
+      sidebar?.classList.toggle('collapsed');
+      main?.classList.toggle('expanded');
+    }
+  }
+
+  // Auto-close messages
+  document.addEventListener('DOMContentLoaded', () => {
+    // Tooltips
+    const tooltips = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    tooltips.forEach(el => new bootstrap.Tooltip(el));
+  });
+</script>
+
+{% block extra_js %}{% endblock %}
+</body>
+</html>
