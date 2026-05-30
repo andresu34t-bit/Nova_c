@@ -184,7 +184,9 @@ CACHES = {
     }
 }
 
-# Logging
+# Logging — usa solo consola en producción (Render no permite escribir archivos)
+import sys
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -195,14 +197,9 @@ LOGGING = {
         },
     },
     'handlers': {
-        'file': {
-            'level': 'INFO',
-            'class': 'logging.FileHandler',
-            'filename': BASE_DIR / 'logs' / 'nova_capital.log',
-            'formatter': 'verbose',
-        },
         'console': {
             'class': 'logging.StreamHandler',
+            'stream': sys.stdout,
             'formatter': 'verbose',
         },
     },
@@ -212,12 +209,12 @@ LOGGING = {
     },
     'loggers': {
         'django': {
-            'handlers': ['file', 'console'],
+            'handlers': ['console'],
             'level': 'INFO',
             'propagate': False,
         },
         'apps': {
-            'handlers': ['file', 'console'],
+            'handlers': ['console'],
             'level': 'DEBUG',
             'propagate': False,
         },
