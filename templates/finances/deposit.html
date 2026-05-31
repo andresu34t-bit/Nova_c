@@ -1,59 +1,166 @@
 {% extends 'base_app.html' %}
-{% block title %}Depositar{% endblock %}
+{% load static humanize %}
+{% block title %}Solicitar Depósito{% endblock %}
 
 {% block content %}
 <div class="page-header">
   <div>
-    <div class="page-title">Realizar Depósito</div>
-    <div class="page-subtitle">Añade fondos a tu cuenta</div>
+    <div class="page-title">Solicitar Depósito</div>
+    <div class="page-subtitle">Tu depósito será revisado y aprobado por el equipo</div>
   </div>
-  <a href="{% url 'finances:finances' %}" class="btn-nova btn-nova-ghost"><i class="bi bi-arrow-left"></i> Volver</a>
+  <a href="{% url 'finances:finances' %}" class="btn-nova btn-nova-ghost">
+    <i class="bi bi-arrow-left"></i> Volver
+  </a>
 </div>
 
-<div style="max-width:480px;">
+<div style="max-width:560px;">
+
+  <!-- Info de proceso -->
+  <div class="nova-alert info" style="margin-bottom:20px;">
+    <i class="bi bi-info-circle-fill"></i>
+    <div>
+      <strong>¿Cómo funciona?</strong><br>
+      <span style="font-size:12px;">
+        1. Completa el formulario con los datos de tu transferencia<br>
+        2. Realiza la transferencia bancaria a nuestra cuenta<br>
+        3. El equipo revisará y aprobará tu depósito en pocas horas
+      </span>
+    </div>
+  </div>
+
+  <!-- Datos bancarios de la empresa -->
+  <div class="nova-card" style="margin-bottom:20px;border-color:rgba(0,102,255,0.3);">
+    <div class="nova-card-header">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div class="icon-circle blue"><i class="bi bi-bank"></i></div>
+        <span class="nova-card-title">Datos para tu Transferencia</span>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <div style="display:flex;justify-content:space-between;padding:10px;background:var(--nova-bg-dark);border-radius:var(--nova-radius-sm);">
+        <span style="font-size:12px;color:var(--nova-text-muted);">Banco</span>
+        <span style="font-size:13px;font-weight:600;color:#fff;">Nova Capital Bank</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:10px;background:var(--nova-bg-dark);border-radius:var(--nova-radius-sm);">
+        <span style="font-size:12px;color:var(--nova-text-muted);">Beneficiario</span>
+        <span style="font-size:13px;font-weight:600;color:#fff;">Nova Capital Group S.A.</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:10px;background:var(--nova-bg-dark);border-radius:var(--nova-radius-sm);">
+        <span style="font-size:12px;color:var(--nova-text-muted);">Número de Cuenta</span>
+        <span style="font-size:13px;font-weight:600;color:#fff;font-family:var(--nova-font-mono);">0012-3456-7890-1234</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:10px;background:var(--nova-bg-dark);border-radius:var(--nova-radius-sm);">
+        <span style="font-size:12px;color:var(--nova-text-muted);">SWIFT / BIC</span>
+        <span style="font-size:13px;font-weight:600;color:#fff;font-family:var(--nova-font-mono);">NOVCAPXX</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:10px;background:var(--nova-bg-dark);border-radius:var(--nova-radius-sm);">
+        <span style="font-size:12px;color:var(--nova-text-muted);">Concepto / Referencia</span>
+        <span style="font-size:13px;font-weight:600;color:var(--nova-primary-light);font-family:var(--nova-font-mono);">
+          DEP-{{ request.user.id|stringformat:"s"|slice:":8"|upper }}
+        </span>
+      </div>
+    </div>
+    <div class="nova-alert warning" style="margin-top:12px;">
+      <i class="bi bi-exclamation-triangle-fill"></i>
+      Incluye tu referencia en el concepto de la transferencia para agilizar la aprobación.
+    </div>
+  </div>
+
+  <!-- Formulario de solicitud -->
   <div class="nova-card">
     <div style="display:flex;align-items:center;gap:16px;margin-bottom:24px;padding-bottom:20px;border-bottom:1px solid var(--nova-border);">
       <div style="width:52px;height:52px;background:rgba(0,200,150,0.15);border-radius:var(--nova-radius);display:flex;align-items:center;justify-content:center;">
         <i class="bi bi-arrow-down-circle-fill" style="font-size:24px;color:var(--nova-success);"></i>
       </div>
       <div>
-        <div style="font-size:16px;font-weight:700;color:#fff;">Depósito de Fondos</div>
-        <div style="font-size:12px;color:var(--nova-text-muted);">Saldo actual: <span style="color:var(--nova-success);font-weight:600;">${{ request.user.balance|floatformat:2 }}</span></div>
+        <div style="font-size:16px;font-weight:700;color:#fff;">Notificar Depósito</div>
+        <div style="font-size:12px;color:var(--nova-text-muted);">
+          Saldo actual: <span style="color:var(--nova-success);font-weight:600;">${{ request.user.balance|floatformat:2 }}</span>
+        </div>
       </div>
     </div>
+
     <form method="post" action="{% url 'finances:deposit' %}">
       {% csrf_token %}
+
       <div class="nova-form-group">
         <label class="nova-label">Monto a Depositar (USD)</label>
         <div style="position:relative;">
           <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--nova-text-muted);font-weight:700;font-size:16px;">$</span>
-          <input type="number" name="amount" class="nova-input" placeholder="0.00" min="10" step="0.01" style="padding-left:32px;font-size:18px;font-family:var(--nova-font-mono);" required>
+          <input type="number" name="amount" class="nova-input" placeholder="0.00"
+                 min="10" step="0.01" style="padding-left:32px;font-size:18px;font-family:var(--nova-font-mono);" required>
         </div>
       </div>
+
+      <!-- Montos rápidos -->
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px;">
-        <button type="button" onclick="document.querySelector('[name=amount]').value='100'" class="btn-nova btn-nova-ghost" style="padding:8px;font-size:13px;justify-content:center;">$100</button>
-        <button type="button" onclick="document.querySelector('[name=amount]').value='500'" class="btn-nova btn-nova-ghost" style="padding:8px;font-size:13px;justify-content:center;">$500</button>
-        <button type="button" onclick="document.querySelector('[name=amount]').value='1000'" class="btn-nova btn-nova-ghost" style="padding:8px;font-size:13px;justify-content:center;">$1000</button>
-        <button type="button" onclick="document.querySelector('[name=amount]').value='5000'" class="btn-nova btn-nova-ghost" style="padding:8px;font-size:13px;justify-content:center;">$5000</button>
+        <button type="button" onclick="setAmount(100)" class="btn-nova btn-nova-ghost" style="padding:8px;font-size:13px;justify-content:center;">$100</button>
+        <button type="button" onclick="setAmount(500)" class="btn-nova btn-nova-ghost" style="padding:8px;font-size:13px;justify-content:center;">$500</button>
+        <button type="button" onclick="setAmount(1000)" class="btn-nova btn-nova-ghost" style="padding:8px;font-size:13px;justify-content:center;">$1,000</button>
+        <button type="button" onclick="setAmount(5000)" class="btn-nova btn-nova-ghost" style="padding:8px;font-size:13px;justify-content:center;">$5,000</button>
       </div>
+
       <div class="nova-form-group">
         <label class="nova-label">Método de Pago</label>
-        <select name="payment_method" class="nova-select">
+        <select name="payment_method" class="nova-select" id="paymentMethod" onchange="toggleBankFields()">
           <option value="bank_transfer">Transferencia Bancaria</option>
-          <option value="credit_card">Tarjeta de Crédito</option>
-          <option value="debit_card">Tarjeta de Débito</option>
           <option value="crypto">Criptomoneda</option>
           <option value="paypal">PayPal</option>
+          <option value="credit_card">Tarjeta de Crédito</option>
+          <option value="debit_card">Tarjeta de Débito</option>
         </select>
       </div>
-      <div class="nova-alert info" style="margin-bottom:16px;">
-        <i class="bi bi-info-circle"></i>
-        Los depósitos se acreditan instantáneamente en modo simulación.
+
+      <!-- Campos bancarios -->
+      <div id="bankFields">
+        <div class="nova-form-group">
+          <label class="nova-label">Nombre de tu Banco</label>
+          <input type="text" name="bank_name" class="nova-input" placeholder="Ej: Bancolombia, BBVA, Chase...">
+        </div>
+        <div class="nova-form-group">
+          <label class="nova-label">Número de Referencia / Comprobante</label>
+          <input type="text" name="bank_reference" class="nova-input"
+                 placeholder="Número de transacción o comprobante"
+                 style="font-family:var(--nova-font-mono);">
+          <div style="font-size:11px;color:var(--nova-text-muted);margin-top:4px;">
+            <i class="bi bi-info-circle me-1"></i>
+            El número de referencia que aparece en tu comprobante de transferencia
+          </div>
+        </div>
       </div>
+
+      <div class="nova-form-group">
+        <label class="nova-label">Notas adicionales (opcional)</label>
+        <textarea name="notes" class="nova-input" rows="2"
+                  placeholder="Información adicional para el equipo..."></textarea>
+      </div>
+
+      <div class="nova-alert info" style="margin-bottom:16px;">
+        <i class="bi bi-clock-fill"></i>
+        <div>
+          <strong>Tiempo de aprobación:</strong> 1-4 horas hábiles<br>
+          <span style="font-size:11px;">Recibirás una notificación cuando tu depósito sea aprobado.</span>
+        </div>
+      </div>
+
       <button type="submit" class="btn-nova btn-nova-success w-100" style="padding:13px;font-size:15px;justify-content:center;">
-        <i class="bi bi-plus-circle-fill"></i> Confirmar Depósito
+        <i class="bi bi-send-fill"></i> Enviar Solicitud de Depósito
       </button>
     </form>
   </div>
 </div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function setAmount(val) {
+  document.querySelector('[name=amount]').value = val;
+}
+function toggleBankFields() {
+  const method = document.getElementById('paymentMethod').value;
+  const fields = document.getElementById('bankFields');
+  fields.style.display = method === 'bank_transfer' ? 'block' : 'none';
+}
+</script>
 {% endblock %}
