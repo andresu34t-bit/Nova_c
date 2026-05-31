@@ -13,12 +13,17 @@ def home_view(request):
         from django.shortcuts import redirect
         return redirect('dashboard:index')
     
-    # Get top assets for display
-    top_crypto = Asset.objects.filter(asset_type='crypto', is_active=True).order_by('rank')[:6]
-    top_stocks = Asset.objects.filter(asset_type='stock', is_active=True).order_by('rank')[:6]
-    latest_news = NewsArticle.objects.order_by('-published_at')[:3]
+    # Get top assets — tolerante a errores de BD
+    try:
+        top_crypto = Asset.objects.filter(asset_type='crypto', is_active=True).order_by('rank')[:6]
+        top_stocks = Asset.objects.filter(asset_type='stock', is_active=True).order_by('rank')[:6]
+        latest_news = NewsArticle.objects.order_by('-published_at')[:3]
+    except Exception:
+        top_crypto = []
+        top_stocks = []
+        latest_news = []
     
-    # Demo assets shown when DB is empty (no split filter needed)
+    # Demo assets shown when DB is empty
     demo_assets = [
         ('BTC', 'Bitcoin',  '67,500', '▲ +2.45%', 'var(--nova-success)'),
         ('ETH', 'Ethereum', '3,850',  '▲ +1.82%', 'var(--nova-success)'),
@@ -57,3 +62,15 @@ def handler404(request, exception):
 
 def handler500(request):
     return render(request, 'core/500.html', status=500)
+
+
+def health_check(request):
+    """Health check endpoint para Render."""
+    import django
+    import sys
+    return JsonResponse({
+        'status': 'ok',
+        'django': django.__version__,
+        'python': sys.version,
+        'debug': django.conf.settings.DEBUG,
+    })
