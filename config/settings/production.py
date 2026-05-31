@@ -24,16 +24,20 @@ else:
     }
 
 # Seguridad
-SECURE_SSL_REDIRECT = True
-SECURE_HSTS_SECONDS = 31536000
-SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-SECURE_HSTS_PRELOAD = True
+SECURE_SSL_REDIRECT = False  # Render maneja HTTPS en el proxy, no necesitamos redirigir
+SECURE_HSTS_SECONDS = 0
+SECURE_HSTS_INCLUDE_SUBDOMAINS = False
+SECURE_HSTS_PRELOAD = False
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 CSRF_COOKIE_HTTPONLY = False  # Necesario para fetch() con CSRF en JS
 
-# Hosts permitidos
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='.onrender.com').split(',')
+# Hosts permitidos — incluye todos los subdominios de onrender.com
+_allowed = config('ALLOWED_HOSTS', default='.onrender.com')
+ALLOWED_HOSTS = [h.strip() for h in _allowed.split(',')]
+# Siempre incluir localhost para health checks
+if 'localhost' not in ALLOWED_HOSTS:
+    ALLOWED_HOSTS += ['localhost', '127.0.0.1']
 
 # Cache en memoria
 CACHES = {
