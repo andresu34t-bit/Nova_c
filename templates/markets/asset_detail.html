@@ -66,7 +66,7 @@
 </div>
 
 <!-- CHART -->
-<div class="nova-card" style="padding:0;overflow:hidden;margin-bottom:20px;">
+<div class="nova-card" style="padding:0;overflow:hidden;margin-bottom:20px;height:500px;">
   <div id="tv_chart" style="width:100%;height:500px;"></div>
 </div>
 
@@ -110,22 +110,51 @@
   </div>
 </div>
 
-<script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+<script type="text/javascript" src="https://s3.tradingview.com/tv.js"
+  onload="initDetailChart()"
+  onerror="document.getElementById('tv_chart').innerHTML='<div style=\'display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:12px;padding:24px;\'><i class=\'bi bi-graph-up\' style=\'font-size:40px;color:var(--nova-primary-light);\'></i><div style=\'color:var(--nova-text-muted);font-size:13px;\'>Gráfico no disponible — verifica tu conexión</div></div>'">
+</script>
 <script>
-new TradingView.widget({
-  container_id: 'tv_chart',
-  symbol: 'BINANCE:{{ asset.symbol }}USDT',
-  interval: 'D',
-  timezone: 'America/Bogota',
-  theme: 'dark',
-  style: '1',
-  locale: 'es',
-  toolbar_bg: '#0A1628',
-  enable_publishing: false,
-  backgroundColor: '#050B18',
-  width: '100%',
-  height: '100%',
-});
+function initDetailChart() {
+  const sym = '{{ asset.symbol }}';
+  const assetType = '{{ asset.asset_type }}';
+  const cryptoMap = {
+    'BTC':'BINANCE:BTCUSDT','ETH':'BINANCE:ETHUSDT','BNB':'BINANCE:BNBUSDT',
+    'SOL':'BINANCE:SOLUSDT','ADA':'BINANCE:ADAUSDT','XRP':'BINANCE:XRPUSDT',
+    'DOT':'BINANCE:DOTUSDT','DOGE':'BINANCE:DOGEUSDT','AVAX':'BINANCE:AVAXUSDT',
+    'MATIC':'BINANCE:MATICUSDT','LINK':'BINANCE:LINKUSDT','LTC':'BINANCE:LTCUSDT',
+  };
+  let tvSymbol;
+  if (assetType === 'crypto') tvSymbol = cryptoMap[sym] || ('BINANCE:' + sym + 'USDT');
+  else if (assetType === 'stock') tvSymbol = 'NASDAQ:' + sym;
+  else if (assetType === 'forex') tvSymbol = 'FX:' + sym.replace('/', '').replace('-', '');
+  else tvSymbol = 'BINANCE:' + sym + 'USDT';
+
+  const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
+
+  try {
+    if (typeof TradingView === 'undefined') throw new Error('TradingView not loaded');
+    new TradingView.widget({
+      container_id:      'tv_chart',
+      symbol:            tvSymbol,
+      interval:          'D',
+      timezone:          'America/Bogota',
+      theme:             isDark ? 'dark' : 'light',
+      style:             '1',
+      locale:            'es',
+      toolbar_bg:        isDark ? '#0A1628' : '#FFFFFF',
+      enable_publishing: false,
+      backgroundColor:   isDark ? '#050B18' : '#FFFFFF',
+      width:             '100%',
+      height:            '100%',
+      allow_symbol_change: true,
+      studies:           ['RSI@tv-basicstudies', 'Volume@tv-basicstudies'],
+    });
+  } catch(e) {
+    const el = document.getElementById('tv_chart');
+    if (el) el.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:12px;"><i class="bi bi-graph-up" style="font-size:40px;color:var(--nova-primary-light);"></i><div style="color:var(--nova-text-muted);font-size:13px;">Gráfico no disponible</div><a href="https://www.tradingview.com/chart/?symbol=' + tvSymbol + '" target="_blank" class="btn-nova btn-nova-primary" style="padding:8px 16px;font-size:12px;"><i class="bi bi-box-arrow-up-right"></i> Ver en TradingView</a></div>';
+  }
+}
 
 function toggleWL() {
   const formData = new FormData();

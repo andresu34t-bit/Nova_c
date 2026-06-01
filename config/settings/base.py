@@ -59,7 +59,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django_otp.middleware.OTPMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # XFrameOptionsMiddleware eliminado — SecurityHeadersMiddleware lo gestiona
+    # con lógica diferenciada para permitir TradingView en /trading y /markets
     'axes.middleware.AxesMiddleware',
     'apps.core.middleware.SecurityHeadersMiddleware',
     'apps.core.middleware.ActivityLogMiddleware',
@@ -162,7 +163,8 @@ CSRF_COOKIE_SAMESITE = 'Lax'
 # Security Headers
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
-X_FRAME_OPTIONS = 'DENY'
+# X_FRAME_OPTIONS se gestiona por SecurityHeadersMiddleware (permite TradingView en /trading y /markets)
+X_FRAME_OPTIONS = 'SAMEORIGIN'
 SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
 
 # Two Factor Auth

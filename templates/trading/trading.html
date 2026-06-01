@@ -294,6 +294,7 @@
 .interval-btn.active { background: var(--nova-primary); border-color: var(--nova-primary); color: #fff; }
 </style>
 <script type="text/javascript" src="https://s3.tradingview.com/tv.js"
+  onload="initChart('60')"
   onerror="showChartFallback()"></script>
 <script>
 const ASSET_SYMBOL = '{{ asset.symbol|default:"BTC" }}';
@@ -402,10 +403,15 @@ function changeInterval(interval) {
   initChart(interval);
 }
 
-// Inicializar al cargar
-document.addEventListener('DOMContentLoaded', function() {
-  initChart('60');
-});
+// Inicializar al cargar — el onload del script ya llama initChart('60')
+// Este fallback cubre el caso en que el script cargue antes del DOM
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', function() {
+    if (typeof TradingView !== 'undefined' && !tvWidget) {
+      initChart('60');
+    }
+  });
+}
 
 
 function setOrderSide(side) {
