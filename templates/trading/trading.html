@@ -72,8 +72,27 @@
     {% endif %}
 
     <!-- TradingView Chart -->
-    <div class="nova-card" style="padding:0;overflow:hidden;flex:1;min-height:450px;">
-      <div id="tradingview_chart" style="width:100%;height:100%;min-height:450px;"></div>
+    <div class="nova-card" style="padding:0;overflow:hidden;height:520px;">
+      <!-- Toolbar de temporalidades -->
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:var(--nova-bg-card2);border-bottom:1px solid var(--nova-border);">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span style="font-size:11px;color:var(--nova-text-muted);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Temporalidad:</span>
+          <div style="display:flex;gap:3px;" id="intervalBtns">
+            <button onclick="changeInterval('1')"   class="interval-btn" data-interval="1">1m</button>
+            <button onclick="changeInterval('5')"   class="interval-btn" data-interval="5">5m</button>
+            <button onclick="changeInterval('15')"  class="interval-btn" data-interval="15">15m</button>
+            <button onclick="changeInterval('60')"  class="interval-btn active" data-interval="60">1H</button>
+            <button onclick="changeInterval('240')" class="interval-btn" data-interval="240">4H</button>
+            <button onclick="changeInterval('D')"   class="interval-btn" data-interval="D">1D</button>
+            <button onclick="changeInterval('W')"   class="interval-btn" data-interval="W">1S</button>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span class="pulse-live" style="font-size:11px;">EN VIVO</span>
+          <span style="font-size:11px;color:var(--nova-text-muted);" id="chartSymbolLabel">{{ asset.symbol|default:"BTC" }}/USD</span>
+        </div>
+      </div>
+      <div id="tradingview_chart" style="width:100%;height:calc(520px - 45px);"></div>
     </div>
 
     <!-- Recent Orders -->
@@ -261,48 +280,133 @@
 {% endblock %}
 
 {% block extra_js %}
-<script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+<style>
+.interval-btn {
+  background: var(--nova-bg-dark);
+  border: 1px solid var(--nova-border);
+  border-radius: 5px;
+  color: var(--nova-text-muted);
+  font-size: 11px; font-weight: 600;
+  padding: 3px 8px; cursor: pointer;
+  transition: all 0.2s ease;
+}
+.interval-btn:hover { border-color: var(--nova-primary); color: var(--nova-primary-light); }
+.interval-btn.active { background: var(--nova-primary); border-color: var(--nova-primary); color: #fff; }
+</style>
+<script type="text/javascript" src="https://s3.tradingview.com/tv.js"
+  onerror="showChartFallback()"></script>
 <script>
 const ASSET_SYMBOL = '{{ asset.symbol|default:"BTC" }}';
-const ASSET_PRICE  = {{ asset.current_price|default:0 }};
+const ASSET_PRICE  = parseFloat('{{ asset.current_price|default:0 }}') || 0;
 const ASSET_TYPE   = '{{ asset.asset_type|default:"crypto" }}';
-const FEE_RATE     = {{ fee_rate|default:"0.002" }};
+const FEE_RATE     = parseFloat('{{ fee_rate|default:"0.002" }}') || 0.002;
 let currentSide    = 'buy';
+let tvWidget       = null;
+let currentInterval = '60';
+
+function getTVSymbol(symbol, assetType) {
+  if (assetType === 'crypto') {
+    // Mapeo de símbolos comunes
+    const cryptoMap = {
+      'BTC': 'BINANCE:BTCUSDT', 'ETH': 'BINANCE:ETHUSDT',
+      'BNB': 'BINANCE:BNBUSDT', 'SOL': 'BINANCE:SOLUSDT',
+      'ADA': 'BINANCE:ADAUSDT', 'XRP': 'BINANCE:XRPUSDT',
+      'DOT': 'BINANCE:DOTUSDT', 'DOGE': 'BINANCE:DOGEUSDT',
+      'AVAX': 'BINANCE:AVAXUSDT', 'MATIC': 'BINANCE:MATICUSDT',
+      'LINK': 'BINANCE:LINKUSDT', 'UNI': 'BINANCE:UNIUSDT',
+      'LTC': 'BINANCE:LTCUSDT', 'ATOM': 'BINANCE:ATOMUSDT',
+    };
+    return cryptoMap[symbol] || ('BINANCE:' + symbol + 'USDT');
+  } else if (assetType === 'stock') {
+    return 'NASDAQ:' + symbol;
+  } else if (assetType === 'forex') {
+    return 'FX:' + symbol.replace('/', '').replace('-', '');
+  } else if (assetType === 'index') {
+    const m = { 'SP500':'SP:SPX', 'NASDAQ':'NASDAQ:NDX', 'DJI':'DJ:DJI', 'FTSE':'SPREADEX:FTSE', 'DAX':'XETR:DAX' };
+    return m[symbol] || 'SP:SPX';
+  }
+  return 'BINANCE:' + symbol + 'USDT';
+}
+
+function showChartFallback() {
+  const el = document.getElementById('tradingview_chart');
+  if (!el) return;
+  el.innerHTML = `
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:16px;padding:24px;">
+      <div style="width:64px;height:64px;background:rgba(0,102,255,0.1);border-radius:16px;display:flex;align-items:center;justify-content:center;">
+        <i class="bi bi-graph-up" style="font-size:28px;color:var(--nova-primary-light);"></i>
+      </div>
+      <div style="text-align:center;">
+        <div style="font-size:15px;font-weight:700;color:#fff;margin-bottom:6px;">Gráfico TradingView</div>
+        <div style="font-size:12px;color:var(--nova-text-muted);max-width:280px;">
+          El gráfico requiere conexión a internet. Verifica tu conexión o desactiva bloqueadores de anuncios.
+        </div>
+      </div>
+      <a href="https://www.tradingview.com/chart/?symbol=${getTVSymbol(ASSET_SYMBOL, ASSET_TYPE)}" 
+         target="_blank" class="btn-nova btn-nova-primary" style="padding:8px 20px;font-size:12px;">
+        <i class="bi bi-box-arrow-up-right"></i> Ver en TradingView
+      </a>
+    </div>`;
+}
 
 // ── TradingView Chart ──
-(function() {
-  let tvSymbol;
-  if      (ASSET_TYPE === 'crypto') tvSymbol = 'BINANCE:' + ASSET_SYMBOL + 'USDT';
-  else if (ASSET_TYPE === 'stock')  tvSymbol = 'NASDAQ:' + ASSET_SYMBOL;
-  else if (ASSET_TYPE === 'forex')  tvSymbol = 'FX:' + ASSET_SYMBOL.replace('/', '');
-  else if (ASSET_TYPE === 'index') {
-    const m = { SP500:'SP:SPX', NASDAQ:'NASDAQ:NDX', DJI:'DJ:DJI' };
-    tvSymbol = m[ASSET_SYMBOL] || 'SP:SPX';
-  } else {
-    tvSymbol = 'BINANCE:' + ASSET_SYMBOL + 'USDT';
-  }
+function initChart(interval) {
+  const tvSymbol = getTVSymbol(ASSET_SYMBOL, ASSET_TYPE);
+  const container = document.getElementById('tradingview_chart');
+  if (!container) return;
+
+  // Limpiar widget anterior
+  container.innerHTML = '';
+
+  const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
+
   try {
-    new TradingView.widget({
-      container_id: 'tradingview_chart',
-      symbol: tvSymbol,
-      interval: '60',
-      timezone: 'America/Bogota',
-      theme: 'dark',
-      style: '1',
-      locale: 'es',
-      toolbar_bg: '#0A1628',
+    if (typeof TradingView === 'undefined') {
+      showChartFallback();
+      return;
+    }
+    tvWidget = new TradingView.widget({
+      container_id:      'tradingview_chart',
+      symbol:            tvSymbol,
+      interval:          interval || '60',
+      timezone:          'America/Bogota',
+      theme:             isDark ? 'dark' : 'light',
+      style:             '1',
+      locale:            'es',
+      toolbar_bg:        isDark ? '#0A1628' : '#FFFFFF',
       enable_publishing: false,
-      backgroundColor: '#050B18',
-      gridColor: 'rgba(0,102,255,0.05)',
-      width: '100%',
-      height: '100%',
-      studies: ['RSI@tv-basicstudies', 'MACD@tv-basicstudies'],
+      backgroundColor:   isDark ? '#050B18' : '#FFFFFF',
+      gridColor:         'rgba(0,102,255,0.05)',
+      width:             '100%',
+      height:            '100%',
+      hide_side_toolbar: false,
+      allow_symbol_change: true,
+      save_image:        false,
+      studies:           ['RSI@tv-basicstudies', 'MACD@tv-basicstudies', 'Volume@tv-basicstudies'],
+      show_popup_button: false,
+      withdateranges:    true,
+      hide_volume:       false,
     });
   } catch(e) {
-    const el = document.getElementById('tradingview_chart');
-    if (el) el.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--nova-text-muted);font-size:13px;gap:12px;"><i class="bi bi-graph-up" style="font-size:32px;color:var(--nova-primary-light);"></i>Gráfico no disponible</div>';
+    showChartFallback();
   }
-})();
+}
+
+function changeInterval(interval) {
+  currentInterval = interval;
+  // Actualizar botones activos
+  document.querySelectorAll('.interval-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.interval === String(interval));
+  });
+  // Reinicializar el widget con la nueva temporalidad
+  initChart(interval);
+}
+
+// Inicializar al cargar
+document.addEventListener('DOMContentLoaded', function() {
+  initChart('60');
+});
+
 
 function setOrderSide(side) {
   currentSide = side;
@@ -326,7 +430,8 @@ function setOrderSide(side) {
 
 function calcTotal() {
   const qty   = parseFloat(document.getElementById('orderQty').value) || 0;
-  const total = qty * ASSET_PRICE;
+  const price = parseFloat(document.getElementById('orderPrice')?.textContent?.replace(/[$,]/g,'')) || ASSET_PRICE;
+  const total = qty * price;
   const fee   = total * FEE_RATE;
   document.getElementById('orderTotal').value = '$' + total.toFixed(2);
   document.getElementById('orderFee').textContent = '$' + fee.toFixed(4);
@@ -334,42 +439,62 @@ function calcTotal() {
 
 function setPercent(pct) {
   const balance = parseFloat('{{ user_balance }}') || 0;
-  const qty     = (balance * pct / 100) / (ASSET_PRICE || 1);
+  const price   = parseFloat(document.getElementById('orderPrice')?.textContent?.replace(/[$,]/g,'')) || ASSET_PRICE;
+  const qty     = (balance * pct / 100) / (price || 1);
   document.getElementById('orderQty').value = qty.toFixed(6);
   calcTotal();
 }
 
 function placeOrder() {
-  const qty = parseFloat(document.getElementById('orderQty').value);
-  if (!qty || qty <= 0) { showOrderMsg('error', 'Ingresa una cantidad válida.'); return; }
+  const qtyInput = document.getElementById('orderQty');
+  const qty = parseFloat(qtyInput.value);
+  if (!qty || qty <= 0) {
+    showOrderMsg('error', 'Ingresa una cantidad válida mayor a 0.');
+    qtyInput.focus();
+    return;
+  }
 
-  const btn = document.getElementById('placeOrderBtn');
-  btn.disabled = true;
+  const btn     = document.getElementById('placeOrderBtn');
+  const btnText = document.getElementById('orderBtnText');
+  btn.disabled  = true;
   btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Procesando...';
 
   const fd = new FormData();
   fd.append('symbol',              ASSET_SYMBOL);
   fd.append('side',                currentSide);
   fd.append('order_type',          document.getElementById('orderType').value);
-  fd.append('quantity',            qty);
+  fd.append('quantity',            qty.toString());
   fd.append('csrfmiddlewaretoken', getCSRF());
 
   fetch('{% url "trading:place_order" %}', { method: 'POST', body: fd })
-    .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .then(r => r.json())
     .then(d => {
       if (d.success) {
         showOrderMsg('success', d.message);
+        // Limpiar formulario
         document.getElementById('orderQty').value   = '';
         document.getElementById('orderTotal').value = '$0.00';
         document.getElementById('orderFee').textContent = '$0.00';
-        const fmt = '$' + parseFloat(d.new_balance).toLocaleString('es', {minimumFractionDigits:2});
-        document.querySelectorAll('#userBalance,#availableBalance,[data-balance]').forEach(el => el.textContent = fmt);
+        // Actualizar saldo en todos los elementos
+        const newBal = parseFloat(d.new_balance);
+        const fmt = '$' + newBal.toLocaleString('es', {minimumFractionDigits:2, maximumFractionDigits:2});
+        document.querySelectorAll('#userBalance, #availableBalance, [data-balance]').forEach(el => el.textContent = fmt);
+        // Actualizar balance chip en topbar
+        const balChip = document.querySelector('.balance-chip');
+        if (balChip) balChip.innerHTML = `<i class="bi bi-wallet2" style="font-size:12px;"></i> ${fmt}`;
+        // Recargar órdenes recientes después de 1.5s
+        setTimeout(() => location.reload(), 2500);
       } else {
         showOrderMsg('error', d.error || 'Error al procesar la orden.');
       }
     })
-    .catch(err => showOrderMsg('error', 'Error: ' + err.message))
-    .finally(() => { btn.disabled = false; setOrderSide(currentSide); });
+    .catch(err => {
+      showOrderMsg('error', 'Error de conexión: ' + err.message);
+    })
+    .finally(() => {
+      btn.disabled = false;
+      setOrderSide(currentSide);
+    });
 }
 
 function showOrderMsg(type, msg) {
@@ -378,7 +503,9 @@ function showOrderMsg(type, msg) {
   el.style.display = 'block';
   el.className = 'nova-alert ' + (type === 'success' ? 'success' : 'error');
   el.innerHTML = `<i class="bi bi-${type==='success'?'check-circle-fill':'x-circle-fill'}"></i> ${msg}`;
-  setTimeout(() => { el.style.display = 'none'; }, 6000);
+  if (type === 'success') {
+    setTimeout(() => { el.style.display = 'none'; }, 8000);
+  }
 }
 
 function toggleWatchlistBtn() {
@@ -397,7 +524,8 @@ function toggleWatchlistBtn() {
         btn.className = 'btn-nova btn-nova-outline';
         btn.innerHTML = '<i class="bi bi-star"></i> Añadir';
       }
-    });
+    })
+    .catch(() => {});
 }
 
 function filterAssets(q) {
@@ -414,10 +542,13 @@ setInterval(() => {
     .then(d => {
       const a = d.data.find(x => x.symbol === ASSET_SYMBOL);
       if (!a) return;
+      const price = Number(a.price);
       const p = document.getElementById('livePrice');
-      if (p) p.textContent = '$' + Number(a.price).toFixed(4);
+      if (p) p.textContent = '$' + price.toFixed(4);
       const op = document.getElementById('orderPrice');
-      if (op) op.textContent = '$' + Number(a.price).toFixed(4);
+      if (op) op.textContent = '$' + price.toFixed(4);
+      // Recalcular total si hay cantidad ingresada
+      if (document.getElementById('orderQty')?.value) calcTotal();
     }).catch(() => {});
 }, 30000);
 </script>
