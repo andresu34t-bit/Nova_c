@@ -141,6 +141,77 @@
   </div>
 </div>
 
+<!-- ── HISTORIAL DE SESIONES ── -->
+<div class="nova-card" style="margin-bottom:20px;">
+  <div class="nova-card-header">
+    <div style="display:flex;align-items:center;gap:8px;">
+      <div class="icon-circle blue"><i class="bi bi-laptop"></i></div>
+      <span class="nova-card-title">Historial de Sesiones</span>
+    </div>
+    <span style="font-size:12px;color:var(--nova-text-muted);">Últimos 10 accesos</span>
+  </div>
+  {% with logins=activity_logs|dictsortreversed:"created_at" %}
+  {% for log in activity_logs %}
+  {% if log.action == 'login' %}
+  <div style="display:flex;align-items:center;gap:14px;padding:12px;background:var(--nova-bg-dark);border-radius:var(--nova-radius-sm);margin-bottom:8px;{% if forloop.first %}border:1px solid rgba(0,200,150,0.2);{% endif %}">
+    <!-- Icono dispositivo -->
+    <div style="width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;
+      {% if forloop.first %}background:rgba(0,200,150,0.15);{% else %}background:rgba(0,102,255,0.1);{% endif %}">
+      {% if 'Mobile' in log.user_agent or 'Android' in log.user_agent or 'iPhone' in log.user_agent %}
+        <i class="bi bi-phone-fill" style="font-size:18px;{% if forloop.first %}color:var(--nova-success);{% else %}color:var(--nova-primary-light);{% endif %}"></i>
+      {% elif 'Tablet' in log.user_agent or 'iPad' in log.user_agent %}
+        <i class="bi bi-tablet-fill" style="font-size:18px;{% if forloop.first %}color:var(--nova-success);{% else %}color:var(--nova-primary-light);{% endif %}"></i>
+      {% else %}
+        <i class="bi bi-laptop" style="font-size:18px;{% if forloop.first %}color:var(--nova-success);{% else %}color:var(--nova-primary-light);{% endif %}"></i>
+      {% endif %}
+    </div>
+    <!-- Info -->
+    <div style="flex:1;min-width:0;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;">
+        <span style="font-size:13px;font-weight:600;color:#fff;">
+          {% if 'Chrome' in log.user_agent %}Chrome
+          {% elif 'Firefox' in log.user_agent %}Firefox
+          {% elif 'Safari' in log.user_agent %}Safari
+          {% elif 'Edge' in log.user_agent %}Edge
+          {% else %}Navegador desconocido{% endif %}
+        </span>
+        {% if forloop.first %}
+        <span style="background:rgba(0,200,150,0.15);color:var(--nova-success);padding:1px 8px;border-radius:10px;font-size:10px;font-weight:700;">
+          <i class="bi bi-circle-fill me-1" style="font-size:6px;"></i>Sesión actual
+        </span>
+        {% endif %}
+      </div>
+      <div style="font-size:11px;color:var(--nova-text-muted);display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+        {% if log.ip_address %}
+        <span><i class="bi bi-geo-alt me-1"></i>{{ log.ip_address }}</span>
+        {% endif %}
+        {% if log.user_agent %}
+        <span>
+          {% if 'Windows' in log.user_agent %}Windows
+          {% elif 'Mac' in log.user_agent %}macOS
+          {% elif 'Linux' in log.user_agent %}Linux
+          {% elif 'Android' in log.user_agent %}Android
+          {% elif 'iOS' in log.user_agent or 'iPhone' in log.user_agent %}iOS
+          {% else %}Sistema desconocido{% endif %}
+        </span>
+        {% endif %}
+        <span><i class="bi bi-clock me-1"></i>{{ log.created_at|date:"d/m/Y H:i" }}</span>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+  {% endfor %}
+  {% endwith %}
+  {% if not activity_logs %}
+  <div class="empty-state" style="padding:30px;">
+    <div class="empty-icon" style="background:rgba(0,102,255,0.1);">
+      <i class="bi bi-laptop" style="color:var(--nova-primary-light);"></i>
+    </div>
+    <p>Sin sesiones registradas</p>
+  </div>
+  {% endif %}
+</div>
+
 <!-- ── ACTIVITY LOG ── -->
 <div class="nova-card">
   <div class="nova-card-header">

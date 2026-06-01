@@ -27,7 +27,7 @@ class SecurityHeadersMiddleware(MiddlewareMixin):
 
 
 class ActivityLogMiddleware(MiddlewareMixin):
-    """Track user last activity."""
+    """Track user last activity and log logins."""
 
     def process_request(self, request):
         if request.user.is_authenticated:

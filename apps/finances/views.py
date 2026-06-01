@@ -77,8 +77,8 @@ def deposit_view(request):
 
         try:
             amount = float(amount_str)
-            if amount <= 0:
-                messages.error(request, 'El monto debe ser mayor a 0.')
+            if amount < 0.01:
+                messages.error(request, 'El monto mínimo de depósito es $0.01.')
                 return redirect('finances:deposit')
 
             # Convertir a USD
