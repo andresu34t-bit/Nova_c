@@ -1,6 +1,6 @@
 """
 Nova Capital Group - Finances Views
-Sistema de depósitos con aprobación manual del administrador
+Depósitos instantáneos con soporte multi-moneda
 """
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, user_passes_test
@@ -8,6 +8,7 @@ from django.contrib import messages
 from django.http import JsonResponse
 from django.utils import timezone
 from django.db import transaction as db_transaction
+from django.db.models import Sum
 from .models import Transaction, BankAccount
 from apps.accounts.emails import (
     send_deposit_approved_email, send_deposit_rejected_email,
@@ -16,6 +17,20 @@ from apps.accounts.emails import (
 import logging
 
 logger = logging.getLogger('apps')
+
+# Tasas de cambio aproximadas a USD (se actualizan manualmente)
+EXCHANGE_RATES = {
+    'USD': 1.0,    'EUR': 0.92,  'GBP': 0.79,   'COP': 4100.0,
+    'MXN': 17.2,   'ARS': 890.0, 'BRL': 5.0,    'CLP': 950.0,
+    'PEN': 3.75,   'CAD': 1.36,  'AUD': 1.53,   'JPY': 149.0,
+    'CHF': 0.90,   'BTC': 0.000015, 'ETH': 0.00026, 'USDT': 1.0,
+}
+
+DEPOSIT_LIMITS = {
+    'standard':      10_000,
+    'premium':      100_000,
+    'institutional':      0,   # Sin límite
+}
 
 
 def is_admin(user):
@@ -52,71 +67,76 @@ def finances_view(request):
 @login_required
 def deposit_view(request):
     """
-    Depósito queda en estado PENDING hasta que el admin lo apruebe.
-    El saldo NO se acredita hasta la aprobación.
+    Depósito instantáneo en modo simulación.
+    Soporta múltiples monedas con conversión automática a USD.
     """
     if request.method == 'POST':
-        amount_str = request.POST.get('amount', '0')
+        amount_str     = request.POST.get('amount', '0')
         payment_method = request.POST.get('payment_method', 'bank_transfer')
-        bank_reference = request.POST.get('bank_reference', '').strip()
-        bank_name = request.POST.get('bank_name', '').strip()
-        notes = request.POST.get('notes', '').strip()
+        currency       = request.POST.get('currency', 'USD').upper()
 
         try:
             amount = float(amount_str)
             if amount <= 0:
                 messages.error(request, 'El monto debe ser mayor a 0.')
                 return redirect('finances:deposit')
-            if amount > 1_000_000:
-                messages.error(request, 'El monto máximo por depósito es $1,000,000.')
+
+            # Convertir a USD
+            rate       = EXCHANGE_RATES.get(currency, 1.0)
+            amount_usd = round(amount / rate, 2)
+
+            if amount_usd > 1_000_000:
+                messages.error(request, 'El monto máximo por depósito es $1,000,000 USD.')
                 return redirect('finances:deposit')
 
             user = request.user
 
-            # Verificar límite diario por tipo de cuenta
-            DEPOSIT_LIMITS = {'standard': 10_000, 'premium': 100_000, 'institutional': 0}
+            # Verificar límite diario
             daily_limit = DEPOSIT_LIMITS.get(user.account_type, 10_000)
             if daily_limit > 0:
-                from django.utils import timezone as tz
-                from django.db.models import Sum
-                today_start = tz.now().replace(hour=0, minute=0, second=0, microsecond=0)
+                today_start = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
                 deposited_today = Transaction.objects.filter(
                     user=user, transaction_type='deposit',
-                    status__in=['pending', 'completed'],
-                    created_at__gte=today_start
+                    status='completed', created_at__gte=today_start
                 ).aggregate(total=Sum('amount'))['total'] or 0
-                if float(deposited_today) + amount > daily_limit:
+                if float(deposited_today) + amount_usd > daily_limit:
                     remaining = max(0, daily_limit - float(deposited_today))
-                    messages.error(request, f'Límite diario de depósito: ${daily_limit:,.0f}. Disponible hoy: ${remaining:,.2f}. Actualiza tu cuenta para límites mayores.')
+                    messages.error(request, f'Límite diario: ${daily_limit:,.0f} USD. Disponible hoy: ${remaining:,.2f} USD.')
                     return redirect('finances:deposit')
-            tx = Transaction.objects.create(
-                user=user,
-                transaction_type='deposit',
-                amount=amount,
-                status='pending',
-                payment_method=payment_method,
-                reference=bank_reference,
-                description=f'Depósito via {payment_method}'
-                            + (f' | Banco: {bank_name}' if bank_name else '')
-                            + (f' | Ref: {bank_reference}' if bank_reference else '')
-                            + (f' | Nota: {notes}' if notes else ''),
-                balance_before=float(user.balance),
-                balance_after=float(user.balance),  # No cambia hasta aprobación
-                metadata={
-                    'bank_name': bank_name,
-                    'bank_reference': bank_reference,
-                    'notes': notes,
-                    'requested_at': timezone.now().isoformat(),
-                }
-            )
 
-            messages.success(
-                request,
-                f'✓ Solicitud de depósito de ${amount:,.2f} USD enviada correctamente. '
-                f'Tu depósito será revisado y aprobado por el equipo en las próximas horas. '
-                f'Referencia: {str(tx.id)[:8].upper()}'
-            )
-            logger.info(f"Deposit request: user={user.email} amount={amount} method={payment_method}")
+            # Acreditar saldo instantáneamente
+            with db_transaction.atomic():
+                balance_before = float(user.balance)
+                user.balance = balance_before + amount_usd
+                user.total_deposited = float(user.total_deposited) + amount_usd
+                user.save(update_fields=['balance', 'total_deposited'])
+
+                currency_display = f'{amount:,.2f} {currency}' if currency != 'USD' else f'${amount_usd:,.2f} USD'
+                Transaction.objects.create(
+                    user=user,
+                    transaction_type='deposit',
+                    amount=amount_usd,
+                    currency='USD',
+                    status='completed',
+                    payment_method=payment_method,
+                    description=f'Depósito {currency_display} via {payment_method}',
+                    balance_before=balance_before,
+                    balance_after=float(user.balance),
+                    completed_at=timezone.now(),
+                    metadata={
+                        'original_amount':   amount,
+                        'original_currency': currency,
+                        'exchange_rate':     rate,
+                        'amount_usd':        amount_usd,
+                    }
+                )
+
+            if currency != 'USD':
+                messages.success(request, f'Depósito de {amount:,.2f} {currency} (≈ ${amount_usd:,.2f} USD) procesado exitosamente.')
+            else:
+                messages.success(request, f'Depósito de ${amount_usd:,.2f} USD procesado exitosamente.')
+
+            logger.info(f"Deposit: user={user.email} amount_usd={amount_usd} currency={currency}")
 
         except ValueError:
             messages.error(request, 'Monto inválido.')
@@ -128,20 +148,13 @@ def deposit_view(request):
 
 @login_required
 def withdrawal_view(request):
-    """
-    Retiro queda en estado PROCESSING hasta que el admin lo apruebe.
-    El saldo se descuenta inmediatamente (reservado).
-    """
     if request.method == 'POST':
-        amount_str = request.POST.get('amount', '0')
+        amount_str     = request.POST.get('amount', '0')
         payment_method = request.POST.get('payment_method', 'bank_transfer')
-        bank_name = request.POST.get('bank_name', '').strip()
-        account_number = request.POST.get('account_number', '').strip()
-        notes = request.POST.get('notes', '').strip()
 
         try:
             amount = float(amount_str)
-            user = request.user
+            user   = request.user
 
             if amount <= 0:
                 messages.error(request, 'El monto debe ser mayor a 0.')
@@ -152,33 +165,21 @@ def withdrawal_view(request):
 
             with db_transaction.atomic():
                 balance_before = float(user.balance)
-                user.balance = balance_before - amount
+                user.balance   = balance_before - amount
                 user.save(update_fields=['balance'])
 
-                tx = Transaction.objects.create(
+                Transaction.objects.create(
                     user=user,
                     transaction_type='withdrawal',
                     amount=amount,
                     status='processing',
                     payment_method=payment_method,
-                    description=f'Retiro via {payment_method}'
-                                + (f' | Banco: {bank_name}' if bank_name else '')
-                                + (f' | Cuenta: {account_number}' if account_number else '')
-                                + (f' | Nota: {notes}' if notes else ''),
+                    description=f'Retiro via {payment_method}',
                     balance_before=balance_before,
                     balance_after=float(user.balance),
-                    metadata={
-                        'bank_name': bank_name,
-                        'account_number': account_number,
-                        'notes': notes,
-                    }
                 )
 
-            messages.success(
-                request,
-                f'✓ Solicitud de retiro de ${amount:,.2f} USD enviada. '
-                f'Se procesará en 1-3 días hábiles. Ref: {str(tx.id)[:8].upper()}'
-            )
+            messages.success(request, f'Solicitud de retiro de ${amount:,.2f} USD enviada. Procesamiento en 1-3 días hábiles.')
 
         except ValueError:
             messages.error(request, 'Monto inválido.')
@@ -195,13 +196,12 @@ def transaction_history(request):
 
 
 # ══════════════════════════════════════════════════════════════
-# VISTAS DE ADMINISTRACIÓN — Solo para staff/superuser
+# PANEL ADMIN — Solo staff/superuser
 # ══════════════════════════════════════════════════════════════
 
 @login_required
 @user_passes_test(is_admin)
 def admin_transactions_view(request):
-    """Panel admin de transacciones pendientes."""
     pending_deposits    = Transaction.objects.filter(
         transaction_type='deposit', status='pending'
     ).select_related('user').order_by('-created_at')
@@ -213,10 +213,10 @@ def admin_transactions_view(request):
     all_transactions = Transaction.objects.select_related('user').order_by('-created_at')[:100]
 
     context = {
-        'pending_deposits': pending_deposits,
+        'pending_deposits':    pending_deposits,
         'pending_withdrawals': pending_withdrawals,
-        'all_transactions': all_transactions,
-        'pending_count': pending_deposits.count() + pending_withdrawals.count(),
+        'all_transactions':    all_transactions,
+        'pending_count':       pending_deposits.count() + pending_withdrawals.count(),
     }
     return render(request, 'finances/admin_transactions.html', context)
 
@@ -224,7 +224,6 @@ def admin_transactions_view(request):
 @login_required
 @user_passes_test(is_admin)
 def approve_transaction(request, tx_id):
-    """Aprobar un depósito o retiro pendiente."""
     if request.method != 'POST':
         return JsonResponse({'error': 'Method not allowed'}, status=405)
 
@@ -240,16 +239,13 @@ def approve_transaction(request, tx_id):
 
             tx.status = 'completed'
             tx.balance_before = balance_before
-            tx.balance_after = float(user.balance)
-            tx.completed_at = timezone.now()
+            tx.balance_after  = float(user.balance)
+            tx.completed_at   = timezone.now()
             tx.metadata['approved_by'] = request.user.email
             tx.metadata['approved_at'] = timezone.now().isoformat()
             tx.save()
 
-        logger.info(f"Deposit APPROVED: {tx.user.email} ${tx.amount} by {request.user.email}")
-        # Enviar email al usuario
         send_deposit_approved_email(tx.user, float(tx.amount), tx.id)
-        # Notificación WebSocket en tiempo real
         try:
             from channels.layers import get_channel_layer
             from asgiref.sync import async_to_sync
@@ -257,17 +253,18 @@ def approve_transaction(request, tx_id):
             async_to_sync(channel_layer.group_send)(
                 f'user_{tx.user.id}',
                 {
-                    'type': 'deposit_approved',
-                    'amount': str(tx.amount),
+                    'type':        'deposit_approved',
+                    'amount':      str(tx.amount),
                     'new_balance': str(tx.user.balance),
-                    'message': f'Tu depósito de ${float(tx.amount):,.2f} ha sido aprobado.',
+                    'message':     f'Tu depósito de ${float(tx.amount):,.2f} ha sido aprobado.',
                 }
             )
         except Exception:
             pass
+
         return JsonResponse({
             'success': True,
-            'message': f'Depósito de ${float(tx.amount):,.2f} aprobado. Saldo acreditado a {tx.user.email}',
+            'message': f'Depósito de ${float(tx.amount):,.2f} aprobado para {tx.user.email}',
             'new_balance': float(tx.user.balance),
         })
 
@@ -278,11 +275,8 @@ def approve_transaction(request, tx_id):
             tx.user.total_withdrawn = float(tx.user.total_withdrawn) + float(tx.amount)
             tx.user.save(update_fields=['total_withdrawn'])
             tx.metadata['approved_by'] = request.user.email
-            tx.metadata['approved_at'] = timezone.now().isoformat()
             tx.save()
 
-        logger.info(f"Withdrawal APPROVED: {tx.user.email} ${tx.amount} by {request.user.email}")
-        # Enviar email al usuario
         send_withdrawal_approved_email(tx.user, float(tx.amount), tx.id)
         return JsonResponse({
             'success': True,
@@ -295,24 +289,18 @@ def approve_transaction(request, tx_id):
 @login_required
 @user_passes_test(is_admin)
 def reject_transaction(request, tx_id):
-    """Rechazar un depósito o retiro pendiente."""
     if request.method != 'POST':
         return JsonResponse({'error': 'Method not allowed'}, status=405)
 
-    tx = get_object_or_404(Transaction, id=tx_id)
+    tx     = get_object_or_404(Transaction, id=tx_id)
     reason = request.POST.get('reason', 'Rechazado por el administrador')
 
     if tx.transaction_type == 'deposit' and tx.status == 'pending':
         tx.status = 'failed'
-        tx.metadata['rejected_by'] = request.user.email
-        tx.metadata['rejected_at'] = timezone.now().isoformat()
+        tx.metadata['rejected_by']     = request.user.email
         tx.metadata['rejection_reason'] = reason
         tx.save()
-
-        logger.info(f"Deposit REJECTED: {tx.user.email} ${tx.amount} by {request.user.email}")
-        # Enviar email al usuario
         send_deposit_rejected_email(tx.user, float(tx.amount), reason, tx.id)
-        # Notificación WebSocket
         try:
             from channels.layers import get_channel_layer
             from asgiref.sync import async_to_sync
@@ -320,38 +308,29 @@ def reject_transaction(request, tx_id):
             async_to_sync(channel_layer.group_send)(
                 f'user_{tx.user.id}',
                 {
-                    'type': 'deposit_rejected',
-                    'amount': str(tx.amount),
-                    'reason': reason,
+                    'type':    'deposit_rejected',
+                    'amount':  str(tx.amount),
+                    'reason':  reason,
                     'message': f'Tu depósito de ${float(tx.amount):,.2f} fue rechazado: {reason}',
                 }
             )
         except Exception:
             pass
-        return JsonResponse({
-            'success': True,
-            'message': f'Depósito de ${float(tx.amount):,.2f} rechazado.',
-        })
+        return JsonResponse({'success': True, 'message': f'Depósito rechazado.'})
 
     elif tx.transaction_type == 'withdrawal' and tx.status == 'processing':
         with db_transaction.atomic():
-            # Devolver el saldo al usuario
             user = tx.user
             user.balance = float(user.balance) + float(tx.amount)
             user.save(update_fields=['balance'])
-
-            tx.status = 'failed'
+            tx.status       = 'failed'
             tx.balance_after = float(user.balance)
-            tx.metadata['rejected_by'] = request.user.email
-            tx.metadata['rejected_at'] = timezone.now().isoformat()
+            tx.metadata['rejected_by']     = request.user.email
             tx.metadata['rejection_reason'] = reason
             tx.save()
-
-        logger.info(f"Withdrawal REJECTED: {tx.user.email} ${tx.amount} by {request.user.email}")
         return JsonResponse({
             'success': True,
             'message': f'Retiro rechazado. ${float(tx.amount):,.2f} devuelto a {tx.user.email}',
-            'refunded_balance': float(tx.user.balance),
         })
 
     return JsonResponse({'error': 'Transacción no válida o ya procesada.'}, status=400)

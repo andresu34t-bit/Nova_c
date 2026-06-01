@@ -1,34 +1,41 @@
 {% extends 'base_app.html' %}
 {% load static humanize %}
-{% block title %}Solicitar Depósito{% endblock %}
+{% block title %}Depositar{% endblock %}
 
 {% block content %}
 <div class="page-header">
   <div>
-    <div class="page-title">Solicitar Depósito</div>
-    <div class="page-subtitle">Tu depósito será revisado y aprobado por el equipo</div>
+    <div class="page-title">Realizar Depósito</div>
+    <div class="page-subtitle">Añade fondos a tu cuenta de simulación</div>
   </div>
   <a href="{% url 'finances:finances' %}" class="btn-nova btn-nova-ghost">
     <i class="bi bi-arrow-left"></i> Volver
   </a>
 </div>
 
-<div style="max-width:560px;">
+<div style="max-width:520px;">
 
-  <!-- Info de proceso -->
-  <div class="nova-alert info" style="margin-bottom:20px;">
-    <i class="bi bi-info-circle-fill"></i>
-    <div>
-      <strong>¿Cómo funciona?</strong><br>
-      <span style="font-size:12px;">
-        1. Completa el formulario con los datos de tu transferencia<br>
-        2. Realiza la transferencia bancaria a nuestra cuenta<br>
-        3. El equipo revisará y aprobará tu depósito en pocas horas
-      </span>
+  <!-- Saldo actual -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;">
+    <div class="stat-card green nova-card-hover">
+      <div class="stat-icon" style="background:rgba(0,200,150,0.15);">
+        <i class="bi bi-wallet2" style="color:var(--nova-success);"></i>
+      </div>
+      <div class="stat-label">Saldo Disponible</div>
+      <div class="stat-value" style="color:var(--nova-success);">${{ request.user.balance|floatformat:2 }}</div>
+      <div class="stat-change positive"><i class="bi bi-currency-dollar"></i> USD</div>
+    </div>
+    <div class="stat-card blue nova-card-hover">
+      <div class="stat-icon" style="background:rgba(0,102,255,0.15);">
+        <i class="bi bi-arrow-down-circle-fill" style="color:var(--nova-primary-light);"></i>
+      </div>
+      <div class="stat-label">Total Depositado</div>
+      <div class="stat-value">${{ request.user.total_deposited|floatformat:2 }}</div>
+      <div class="stat-change positive"><i class="bi bi-clock-history"></i> Histórico</div>
     </div>
   </div>
 
-  <!-- Límite de depósito -->
+  <!-- Límite por tipo de cuenta -->
   <div style="background:var(--nova-bg-card);border:1px solid var(--nova-border);border-radius:var(--nova-radius-sm);padding:12px 16px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;">
     <div style="font-size:12px;color:var(--nova-text-muted);">
       <i class="bi bi-shield-fill me-1" style="color:var(--nova-primary-light);"></i>
@@ -41,123 +48,88 @@
     </div>
   </div>
 
-  <!-- Datos bancarios de la empresa -->
-  <div class="nova-card" style="margin-bottom:20px;border-color:rgba(0,102,255,0.3);">
-    <div class="nova-card-header">
-      <div style="display:flex;align-items:center;gap:8px;">
-        <div class="icon-circle blue"><i class="bi bi-bank"></i></div>
-        <span class="nova-card-title">Datos para tu Transferencia</span>
-      </div>
-    </div>
-    <div style="display:flex;flex-direction:column;gap:10px;">
-      <div style="display:flex;justify-content:space-between;padding:10px;background:var(--nova-bg-dark);border-radius:var(--nova-radius-sm);">
-        <span style="font-size:12px;color:var(--nova-text-muted);">Banco</span>
-        <span style="font-size:13px;font-weight:600;color:#fff;">Nova Capital Bank</span>
-      </div>
-      <div style="display:flex;justify-content:space-between;padding:10px;background:var(--nova-bg-dark);border-radius:var(--nova-radius-sm);">
-        <span style="font-size:12px;color:var(--nova-text-muted);">Beneficiario</span>
-        <span style="font-size:13px;font-weight:600;color:#fff;">Nova Capital Group S.A.</span>
-      </div>
-      <div style="display:flex;justify-content:space-between;padding:10px;background:var(--nova-bg-dark);border-radius:var(--nova-radius-sm);">
-        <span style="font-size:12px;color:var(--nova-text-muted);">Número de Cuenta</span>
-        <span style="font-size:13px;font-weight:600;color:#fff;font-family:var(--nova-font-mono);">0012-3456-7890-1234</span>
-      </div>
-      <div style="display:flex;justify-content:space-between;padding:10px;background:var(--nova-bg-dark);border-radius:var(--nova-radius-sm);">
-        <span style="font-size:12px;color:var(--nova-text-muted);">SWIFT / BIC</span>
-        <span style="font-size:13px;font-weight:600;color:#fff;font-family:var(--nova-font-mono);">NOVCAPXX</span>
-      </div>
-      <div style="display:flex;justify-content:space-between;padding:10px;background:var(--nova-bg-dark);border-radius:var(--nova-radius-sm);">
-        <span style="font-size:12px;color:var(--nova-text-muted);">Concepto / Referencia</span>
-        <span style="font-size:13px;font-weight:600;color:var(--nova-primary-light);font-family:var(--nova-font-mono);">
-          DEP-{{ request.user.id|stringformat:"s"|slice:":8"|upper }}
-        </span>
-      </div>
-    </div>
-    <div class="nova-alert warning" style="margin-top:12px;">
-      <i class="bi bi-exclamation-triangle-fill"></i>
-      Incluye tu referencia en el concepto de la transferencia para agilizar la aprobación.
-    </div>
-  </div>
-
-  <!-- Formulario de solicitud -->
+  <!-- Formulario de depósito -->
   <div class="nova-card">
     <div style="display:flex;align-items:center;gap:16px;margin-bottom:24px;padding-bottom:20px;border-bottom:1px solid var(--nova-border);">
       <div style="width:52px;height:52px;background:rgba(0,200,150,0.15);border-radius:var(--nova-radius);display:flex;align-items:center;justify-content:center;">
         <i class="bi bi-arrow-down-circle-fill" style="font-size:24px;color:var(--nova-success);"></i>
       </div>
       <div>
-        <div style="font-size:16px;font-weight:700;color:#fff;">Notificar Depósito</div>
-        <div style="font-size:12px;color:var(--nova-text-muted);">
-          Saldo actual: <span style="color:var(--nova-success);font-weight:600;">${{ request.user.balance|floatformat:2 }}</span>
-        </div>
+        <div style="font-size:16px;font-weight:700;color:#fff;">Depósito de Fondos</div>
+        <div style="font-size:12px;color:var(--nova-text-muted);">Los fondos se acreditan instantáneamente</div>
       </div>
     </div>
 
-    <form method="post" action="{% url 'finances:deposit' %}">
+    <form method="post" action="{% url 'finances:deposit' %}" id="depositForm">
       {% csrf_token %}
 
+      <!-- Moneda -->
       <div class="nova-form-group">
-        <label class="nova-label">Monto a Depositar (USD)</label>
+        <label class="nova-label">Moneda</label>
+        <select name="currency" class="nova-select" id="currencySelect" onchange="updateCurrencySymbol()">
+          <option value="USD" data-symbol="$" data-rate="1">🇺🇸 USD — Dólar Estadounidense</option>
+          <option value="EUR" data-symbol="€" data-rate="0.92">🇪🇺 EUR — Euro</option>
+          <option value="GBP" data-symbol="£" data-rate="0.79">🇬🇧 GBP — Libra Esterlina</option>
+          <option value="COP" data-symbol="$" data-rate="4100">🇨🇴 COP — Peso Colombiano</option>
+          <option value="MXN" data-symbol="$" data-rate="17.2">🇲🇽 MXN — Peso Mexicano</option>
+          <option value="ARS" data-symbol="$" data-rate="890">🇦🇷 ARS — Peso Argentino</option>
+          <option value="BRL" data-symbol="R$" data-rate="5.0">🇧🇷 BRL — Real Brasileño</option>
+          <option value="CLP" data-symbol="$" data-rate="950">🇨🇱 CLP — Peso Chileno</option>
+          <option value="PEN" data-symbol="S/" data-rate="3.75">🇵🇪 PEN — Sol Peruano</option>
+          <option value="CAD" data-symbol="C$" data-rate="1.36">🇨🇦 CAD — Dólar Canadiense</option>
+          <option value="AUD" data-symbol="A$" data-rate="1.53">🇦🇺 AUD — Dólar Australiano</option>
+          <option value="JPY" data-symbol="¥" data-rate="149">🇯🇵 JPY — Yen Japonés</option>
+          <option value="CHF" data-symbol="Fr" data-rate="0.90">🇨🇭 CHF — Franco Suizo</option>
+          <option value="BTC" data-symbol="₿" data-rate="0.000015">₿ BTC — Bitcoin</option>
+          <option value="ETH" data-symbol="Ξ" data-rate="0.00026">Ξ ETH — Ethereum</option>
+          <option value="USDT" data-symbol="₮" data-rate="1">₮ USDT — Tether</option>
+        </select>
+      </div>
+
+      <!-- Monto -->
+      <div class="nova-form-group">
+        <label class="nova-label">Monto a Depositar</label>
         <div style="position:relative;">
-          <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--nova-text-muted);font-weight:700;font-size:16px;">$</span>
-          <input type="number" name="amount" class="nova-input" placeholder="0.00"
-                 min="10" step="0.01" style="padding-left:32px;font-size:18px;font-family:var(--nova-font-mono);" required>
+          <span id="currencySymbolDisplay" style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--nova-text-muted);font-weight:700;font-size:16px;">$</span>
+          <input type="number" name="amount" id="amountInput" class="nova-input"
+                 placeholder="0.00" min="0.01" step="0.01"
+                 style="padding-left:32px;font-size:18px;font-family:var(--nova-font-mono);"
+                 oninput="updateUSDPreview()" required>
+        </div>
+        <!-- Preview en USD -->
+        <div id="usdPreview" style="font-size:12px;color:var(--nova-text-muted);margin-top:6px;display:none;">
+          <i class="bi bi-arrow-right me-1"></i>
+          Equivale a: <span id="usdAmount" style="color:var(--nova-success);font-weight:600;font-family:var(--nova-font-mono);"></span> USD
         </div>
       </div>
 
       <!-- Montos rápidos -->
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px;">
-        <button type="button" onclick="setAmount(100)" class="btn-nova btn-nova-ghost" style="padding:8px;font-size:13px;justify-content:center;">$100</button>
-        <button type="button" onclick="setAmount(500)" class="btn-nova btn-nova-ghost" style="padding:8px;font-size:13px;justify-content:center;">$500</button>
-        <button type="button" onclick="setAmount(1000)" class="btn-nova btn-nova-ghost" style="padding:8px;font-size:13px;justify-content:center;">$1,000</button>
-        <button type="button" onclick="setAmount(5000)" class="btn-nova btn-nova-ghost" style="padding:8px;font-size:13px;justify-content:center;">$5,000</button>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px;" id="quickAmounts">
+        <button type="button" onclick="setAmount(100)" class="btn-nova btn-nova-ghost" style="padding:8px;font-size:12px;justify-content:center;" data-usd="100">$100</button>
+        <button type="button" onclick="setAmount(500)" class="btn-nova btn-nova-ghost" style="padding:8px;font-size:12px;justify-content:center;" data-usd="500">$500</button>
+        <button type="button" onclick="setAmount(1000)" class="btn-nova btn-nova-ghost" style="padding:8px;font-size:12px;justify-content:center;" data-usd="1000">$1,000</button>
+        <button type="button" onclick="setAmount(5000)" class="btn-nova btn-nova-ghost" style="padding:8px;font-size:12px;justify-content:center;" data-usd="5000">$5,000</button>
       </div>
 
+      <!-- Método de pago -->
       <div class="nova-form-group">
         <label class="nova-label">Método de Pago</label>
-        <select name="payment_method" class="nova-select" id="paymentMethod" onchange="toggleBankFields()">
+        <select name="payment_method" class="nova-select">
           <option value="bank_transfer">Transferencia Bancaria</option>
-          <option value="crypto">Criptomoneda</option>
-          <option value="paypal">PayPal</option>
           <option value="credit_card">Tarjeta de Crédito</option>
           <option value="debit_card">Tarjeta de Débito</option>
+          <option value="crypto">Criptomoneda</option>
+          <option value="paypal">PayPal</option>
         </select>
       </div>
 
-      <!-- Campos bancarios -->
-      <div id="bankFields">
-        <div class="nova-form-group">
-          <label class="nova-label">Nombre de tu Banco</label>
-          <input type="text" name="bank_name" class="nova-input" placeholder="Ej: Bancolombia, BBVA, Chase...">
-        </div>
-        <div class="nova-form-group">
-          <label class="nova-label">Número de Referencia / Comprobante</label>
-          <input type="text" name="bank_reference" class="nova-input"
-                 placeholder="Número de transacción o comprobante"
-                 style="font-family:var(--nova-font-mono);">
-          <div style="font-size:11px;color:var(--nova-text-muted);margin-top:4px;">
-            <i class="bi bi-info-circle me-1"></i>
-            El número de referencia que aparece en tu comprobante de transferencia
-          </div>
-        </div>
-      </div>
-
-      <div class="nova-form-group">
-        <label class="nova-label">Notas adicionales (opcional)</label>
-        <textarea name="notes" class="nova-input" rows="2"
-                  placeholder="Información adicional para el equipo..."></textarea>
-      </div>
-
       <div class="nova-alert info" style="margin-bottom:16px;">
-        <i class="bi bi-clock-fill"></i>
-        <div>
-          <strong>Tiempo de aprobación:</strong> 1-4 horas hábiles<br>
-          <span style="font-size:11px;">Recibirás una notificación cuando tu depósito sea aprobado.</span>
-        </div>
+        <i class="bi bi-info-circle-fill"></i>
+        Los depósitos se acreditan instantáneamente en modo simulación.
       </div>
 
       <button type="submit" class="btn-nova btn-nova-success w-100" style="padding:13px;font-size:15px;justify-content:center;">
-        <i class="bi bi-send-fill"></i> Enviar Solicitud de Depósito
+        <i class="bi bi-plus-circle-fill"></i> Confirmar Depósito
       </button>
     </form>
   </div>
@@ -167,13 +139,67 @@
 
 {% block extra_js %}
 <script>
+// Tasas de cambio aproximadas a USD
+const RATES = {
+  USD: 1, EUR: 0.92, GBP: 0.79, COP: 4100, MXN: 17.2,
+  ARS: 890, BRL: 5.0, CLP: 950, PEN: 3.75, CAD: 1.36,
+  AUD: 1.53, JPY: 149, CHF: 0.90, BTC: 0.000015, ETH: 0.00026, USDT: 1
+};
+
+const QUICK_AMOUNTS_USD = [100, 500, 1000, 5000];
+
+function getSelectedCurrency() {
+  const sel = document.getElementById('currencySelect');
+  const opt = sel.options[sel.selectedIndex];
+  return {
+    code:   sel.value,
+    symbol: opt.dataset.symbol || '$',
+    rate:   parseFloat(opt.dataset.rate) || 1,
+  };
+}
+
+function updateCurrencySymbol() {
+  const cur = getSelectedCurrency();
+  document.getElementById('currencySymbolDisplay').textContent = cur.symbol;
+
+  // Actualizar botones de montos rápidos
+  const btns = document.querySelectorAll('#quickAmounts button');
+  btns.forEach(btn => {
+    const usd = parseFloat(btn.dataset.usd);
+    const localAmount = usd * cur.rate;
+    let display;
+    if (localAmount >= 1000000) display = cur.symbol + (localAmount/1000000).toFixed(1) + 'M';
+    else if (localAmount >= 1000) display = cur.symbol + (localAmount/1000).toFixed(0) + 'K';
+    else display = cur.symbol + localAmount.toFixed(localAmount < 1 ? 6 : 0);
+    btn.textContent = display;
+    btn.onclick = () => setAmount(localAmount);
+  });
+
+  updateUSDPreview();
+}
+
 function setAmount(val) {
-  document.querySelector('[name=amount]').value = val;
+  document.getElementById('amountInput').value = parseFloat(val).toFixed(2);
+  updateUSDPreview();
 }
-function toggleBankFields() {
-  const method = document.getElementById('paymentMethod').value;
-  const fields = document.getElementById('bankFields');
-  fields.style.display = method === 'bank_transfer' ? 'block' : 'none';
+
+function updateUSDPreview() {
+  const cur = getSelectedCurrency();
+  const amount = parseFloat(document.getElementById('amountInput').value) || 0;
+  const preview = document.getElementById('usdPreview');
+  const usdEl   = document.getElementById('usdAmount');
+
+  if (cur.code === 'USD' || !amount) {
+    preview.style.display = 'none';
+    return;
+  }
+
+  const usd = amount / cur.rate;
+  usdEl.textContent = '$' + usd.toLocaleString('en', {minimumFractionDigits:2, maximumFractionDigits:2});
+  preview.style.display = 'block';
 }
+
+// Inicializar
+updateCurrencySymbol();
 </script>
 {% endblock %}
