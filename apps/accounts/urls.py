@@ -12,4 +12,9 @@ urlpatterns = [
     path('security/', views.security_view, name='security'),
     path('change-password/', views.change_password_view, name='change_password'),
     path('kyc/upload/', views.upload_kyc_view, name='upload_kyc'),
+    # Recuperación de contraseña
+    path('forgot-password/', views.forgot_password_view, name='forgot_password'),
+    path('reset-password/<str:token>/', views.reset_password_view, name='reset_password'),
+    # Reenviar verificación
+    path('resend-verification/', views.resend_verification_view, name='resend_verification'),
 ]

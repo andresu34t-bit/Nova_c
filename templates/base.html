@@ -77,6 +77,23 @@
       || '';
   }
 
+  // ── THEME (Dark / Light) ──
+  function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    const icon = document.getElementById('themeIcon');
+    if (icon) icon.className = theme === 'dark' ? 'bi bi-moon-fill' : 'bi bi-sun-fill';
+    localStorage.setItem('nova-theme', theme);
+  }
+  function toggleTheme() {
+    const current = document.documentElement.getAttribute('data-theme') || 'dark';
+    applyTheme(current === 'dark' ? 'light' : 'dark');
+  }
+  // Aplicar tema guardado al cargar
+  (function() {
+    const saved = localStorage.getItem('nova-theme') || 'dark';
+    applyTheme(saved);
+  })();
+
   // Sidebar toggle
   function toggleSidebar() {
     const sidebar = document.getElementById('novaSidebar');

@@ -151,7 +151,13 @@
             </span>
           </td>
           <td>
-            <a href="{% url 'trading:trading' %}?symbol={{ pos.asset.symbol }}" class="btn-nova btn-nova-primary" style="padding:4px 10px;font-size:11px;">Operar</a>
+            <div style="display:flex;gap:6px;align-items:center;">
+              <a href="{% url 'trading:trading' %}?symbol={{ pos.asset.symbol }}" class="btn-nova btn-nova-primary" style="padding:4px 10px;font-size:11px;">Operar</a>
+              <button onclick="showCalc('{{ pos.asset.symbol }}','{{ pos.avg_buy_price }}','{{ pos.quantity }}','{{ pos.current_price }}')"
+                      class="btn-nova btn-nova-ghost" style="padding:4px 8px;font-size:11px;" title="Calculadora">
+                <i class="bi bi-calculator-fill"></i>
+              </button>
+            </div>
           </td>
         </tr>
         {% endfor %}
@@ -202,6 +208,47 @@
 
 {% block extra_js %}
 <script>
+// ── Calculadora de ganancias ──
+function showCalc(symbol, entryPrice, qty, currentPrice) {
+  document.getElementById('calcSymbol').textContent = symbol;
+  document.getElementById('calcEntry').value = parseFloat(entryPrice).toFixed(4);
+  document.getElementById('calcQty').value = parseFloat(qty).toFixed(6);
+  document.getElementById('calcTarget').value = parseFloat(currentPrice).toFixed(4);
+  calcResult();
+  document.getElementById('calcModal').style.display = 'flex';
+}
+function closeCalc() {
+  document.getElementById('calcModal').style.display = 'none';
+}
+function calcResult() {
+  const entry  = parseFloat(document.getElementById('calcEntry').value) || 0;
+  const qty    = parseFloat(document.getElementById('calcQty').value) || 0;
+  const target = parseFloat(document.getElementById('calcTarget').value) || 0;
+  if (!entry || !qty || !target) return;
+  const cost   = entry * qty;
+  const value  = target * qty;
+  const pnl    = value - cost;
+  const pct    = cost > 0 ? (pnl / cost * 100) : 0;
+  const color  = pnl >= 0 ? 'var(--nova-success)' : 'var(--nova-danger)';
+  const sign   = pnl >= 0 ? '+' : '';
+  document.getElementById('calcResult').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px;">
+      <div style="background:var(--nova-bg-dark);border-radius:8px;padding:12px;text-align:center;">
+        <div style="font-size:11px;color:var(--nova-text-muted);margin-bottom:4px;">Costo total</div>
+        <div style="font-size:16px;font-weight:700;color:#fff;font-family:var(--nova-font-mono);">$${cost.toFixed(2)}</div>
+      </div>
+      <div style="background:var(--nova-bg-dark);border-radius:8px;padding:12px;text-align:center;">
+        <div style="font-size:11px;color:var(--nova-text-muted);margin-bottom:4px;">Valor objetivo</div>
+        <div style="font-size:16px;font-weight:700;color:#fff;font-family:var(--nova-font-mono);">$${value.toFixed(2)}</div>
+      </div>
+      <div style="background:rgba(${pnl>=0?'0,200,150':'255,59,92'},0.1);border:1px solid rgba(${pnl>=0?'0,200,150':'255,59,92'},0.3);border-radius:8px;padding:12px;text-align:center;grid-column:span 2;">
+        <div style="font-size:11px;color:var(--nova-text-muted);margin-bottom:4px;">Ganancia / Pérdida estimada</div>
+        <div style="font-size:24px;font-weight:800;color:${color};font-family:var(--nova-font-mono);">${sign}$${pnl.toFixed(2)}</div>
+        <div style="font-size:14px;font-weight:600;color:${color};">${sign}${pct.toFixed(2)}%</div>
+      </div>
+    </div>`;
+}
+
 const evolutionCtx = document.getElementById('evolutionChart');
 if (evolutionCtx) {
   const labels = {{ snapshot_labels|safe }};
@@ -257,4 +304,33 @@ if (distCtx) {
   }
 }
 </script>
+
+<!-- Modal Calculadora -->
+<div id="calcModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:9999;align-items:center;justify-content:center;">
+  <div style="background:var(--nova-bg-card);border:1px solid var(--nova-border);border-radius:var(--nova-radius);padding:28px;max-width:420px;width:90%;margin:20px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+      <div style="font-size:16px;font-weight:700;color:#fff;">
+        <i class="bi bi-calculator-fill me-2" style="color:var(--nova-primary-light);"></i>
+        Calculadora · <span id="calcSymbol"></span>
+      </div>
+      <button onclick="closeCalc()" style="background:none;border:none;color:var(--nova-text-muted);cursor:pointer;font-size:20px;">&times;</button>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div class="nova-form-group" style="margin-bottom:0;">
+        <label class="nova-label">Precio de entrada</label>
+        <input type="number" id="calcEntry" class="nova-input" oninput="calcResult()" style="font-family:var(--nova-font-mono);">
+      </div>
+      <div class="nova-form-group" style="margin-bottom:0;">
+        <label class="nova-label">Cantidad</label>
+        <input type="number" id="calcQty" class="nova-input" oninput="calcResult()" style="font-family:var(--nova-font-mono);">
+      </div>
+      <div class="nova-form-group" style="margin-bottom:0;grid-column:span 2;">
+        <label class="nova-label">Precio objetivo</label>
+        <input type="number" id="calcTarget" class="nova-input" oninput="calcResult()" style="font-family:var(--nova-font-mono);">
+      </div>
+    </div>
+    <div id="calcResult"></div>
+    <button onclick="closeCalc()" class="btn-nova btn-nova-ghost w-100" style="padding:10px;margin-top:16px;justify-content:center;">Cerrar</button>
+  </div>
+</div>
 {% endblock %}

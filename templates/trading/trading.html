@@ -176,8 +176,12 @@
 
       <div style="background:var(--nova-bg-dark);border-radius:var(--nova-radius-sm);padding:12px;font-size:12px;">
         <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
-          <span style="color:var(--nova-text-muted);">Comisión (0.1%)</span>
+          <span style="color:var(--nova-text-muted);">Comisión ({{ fee_pct|floatformat:2 }}%)</span>
           <span style="color:var(--nova-text);font-family:var(--nova-font-mono);" id="orderFee">$0.00</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+          <span style="color:var(--nova-text-muted);">Tipo de cuenta</span>
+          <span style="color:var(--nova-primary-light);font-weight:600;">{{ user.get_account_type_display }}</span>
         </div>
         <div style="display:flex;justify-content:space-between;">
           <span style="color:var(--nova-text-muted);">Saldo disponible</span>
@@ -232,6 +236,7 @@
 <script>
 const ASSET_SYMBOL = '{{ asset.symbol|default:"BTC" }}';
 const ASSET_PRICE = {{ asset.current_price|default:0 }};
+const FEE_RATE = {{ fee_rate|default:"0.002" }};
 let currentSide = 'buy';
 
 // TradingView Chart
@@ -278,7 +283,7 @@ function setOrderSide(side) {
 function calcTotal() {
   const qty = parseFloat(document.getElementById('orderQty').value) || 0;
   const total = qty * ASSET_PRICE;
-  const fee = total * 0.001;
+  const fee = total * FEE_RATE;
   document.getElementById('orderTotal').value = '$' + total.toFixed(2);
   document.getElementById('orderFee').textContent = '$' + fee.toFixed(4);
 }

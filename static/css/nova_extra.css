@@ -909,3 +909,62 @@ canvas { max-width: 100%; }
   .nova-sidebar .sidebar-user-text { display: block; }
   .nova-sidebar .sidebar-footer-inner { justify-content: flex-start; }
 }
+
+/* ═══════════════════════════════════════════════════════════
+   MODO CLARO (Light Mode)
+   ═══════════════════════════════════════════════════════════ */
+[data-theme="light"] {
+  --nova-bg-dark:   #F0F4F8;
+  --nova-bg-card:   #FFFFFF;
+  --nova-bg-card2:  #F8FAFC;
+  --nova-bg-hover:  #EEF2F7;
+  --nova-border:    rgba(0,102,255,0.15);
+  --nova-border-light: rgba(0,0,0,0.06);
+  --nova-text:      #1A2332;
+  --nova-text-muted:#5A6A82;
+  --nova-text-dim:  #8A9AB2;
+  --nova-shadow:    0 4px 24px rgba(0,0,0,0.08);
+  --nova-shadow-lg: 0 8px 48px rgba(0,0,0,0.12);
+}
+
+[data-theme="light"] body { background: var(--nova-bg-dark); color: var(--nova-text); }
+[data-theme="light"] .nova-sidebar { background: #fff; border-right-color: rgba(0,102,255,0.1); }
+[data-theme="light"] .nova-topbar  { background: #fff; border-bottom-color: rgba(0,102,255,0.1); }
+[data-theme="light"] .nova-card    { background: #fff; }
+[data-theme="light"] .nova-input, [data-theme="light"] .nova-select {
+  background: #F8FAFC; color: #1A2332; border-color: rgba(0,102,255,0.2);
+}
+[data-theme="light"] .nova-input::placeholder { color: #8A9AB2; }
+[data-theme="light"] .dropdown-menu { background: #fff; }
+[data-theme="light"] .dropdown-item { color: #5A6A82; }
+[data-theme="light"] .dropdown-item:hover { background: #EEF2F7; color: #1A2332; }
+[data-theme="light"] .price-ticker-bar { background: #F8FAFC; }
+[data-theme="light"] .price-ticker-bar::before { background: linear-gradient(90deg,#F8FAFC,transparent); }
+[data-theme="light"] .price-ticker-bar::after  { background: linear-gradient(-90deg,#F8FAFC,transparent); }
+[data-theme="light"] .nav-item { color: #5A6A82; }
+[data-theme="light"] .nav-item:hover { background: #EEF2F7; color: #1A2332; }
+[data-theme="light"] .stat-card { background: #fff; }
+[data-theme="light"] .market-card { background: #fff; }
+[data-theme="light"] .news-card { background: #fff; }
+[data-theme="light"] .topbar-search input { background: #F8FAFC; color: #1A2332; }
+[data-theme="light"] .topbar-btn { background: #F8FAFC; }
+[data-theme="light"] .topbar-user { background: #F8FAFC; }
+[data-theme="light"] .order-panel { background: #fff; }
+[data-theme="light"] .nova-table th { color: #5A6A82; }
+[data-theme="light"] .nova-table td { color: #1A2332; }
+[data-theme="light"] .nova-table tr:hover td { background: #EEF2F7; }
+[data-theme="light"] .feature-card { background: #fff; }
+[data-theme="light"] .landing-nav { background: rgba(255,255,255,0.95); }
+
+/* ── THEME TOGGLE BUTTON ── */
+.theme-toggle {
+  width: 38px; height: 38px;
+  background: var(--nova-bg-dark);
+  border: 1px solid var(--nova-border);
+  border-radius: var(--nova-radius-sm);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--nova-text-muted);
+  cursor: pointer; transition: var(--nova-transition);
+  font-size: 16px;
+}
+.theme-toggle:hover { border-color: var(--nova-primary); color: var(--nova-primary-light); }

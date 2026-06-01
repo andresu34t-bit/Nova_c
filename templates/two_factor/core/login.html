@@ -152,7 +152,7 @@
           <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:var(--nova-text-muted);">
             <input type="checkbox" name="remember" style="accent-color:var(--nova-primary);width:14px;height:14px;"> Recordarme
           </label>
-          <a href="#" style="font-size:13px;color:var(--nova-primary-light);">¿Olvidaste tu contraseña?</a>
+          <a href="{% url 'accounts:forgot_password' %}" style="font-size:13px;color:var(--nova-primary-light);">¿Olvidaste tu contraseña?</a>
         </div>
 
         {% elif wizard.steps.current == 'token' %}

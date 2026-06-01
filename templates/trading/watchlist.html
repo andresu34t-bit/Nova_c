@@ -1,11 +1,12 @@
 {% extends 'base_app.html' %}
+{% load static humanize %}
 {% block title %}Watchlist{% endblock %}
 
 {% block content %}
 <div class="page-header">
   <div>
     <div class="page-title">Mi Watchlist</div>
-    <div class="page-subtitle">Activos que estás siguiendo</div>
+    <div class="page-subtitle">Activos que estás siguiendo · Configura alertas de precio</div>
   </div>
   <a href="{% url 'markets:overview' %}" class="btn-nova btn-nova-primary">
     <i class="bi bi-plus-circle-fill"></i> Explorar Mercados
@@ -13,9 +14,9 @@
 </div>
 
 {% if watchlist %}
-<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;">
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;">
   {% for item in watchlist %}
-  <div class="market-card">
+  <div class="market-card nova-card-hover" id="wl-{{ item.asset.symbol }}">
     <div class="mc-header">
       <div class="mc-icon">
         {% if item.asset.image_url %}
@@ -28,16 +29,20 @@
         <div class="mc-symbol">{{ item.asset.symbol }}</div>
         <div class="mc-name">{{ item.asset.name|truncatechars:14 }}</div>
       </div>
-      <button onclick="removeFromWatchlist('{{ item.asset.symbol }}')" style="margin-left:auto;background:none;border:none;color:var(--nova-text-muted);cursor:pointer;font-size:16px;" title="Eliminar">
+      <button onclick="removeFromWatchlist('{{ item.asset.symbol }}')"
+              style="margin-left:auto;background:none;border:none;color:var(--nova-text-muted);cursor:pointer;font-size:16px;" title="Eliminar">
         <i class="bi bi-star-fill" style="color:var(--nova-accent);"></i>
       </button>
     </div>
+
     <div class="mc-price">${{ item.asset.current_price|floatformat:4 }}</div>
     <div class="mc-change {% if item.asset.price_change_pct_24h >= 0 %}up{% else %}down{% endif %}">
       {% if item.asset.price_change_pct_24h >= 0 %}▲{% else %}▼{% endif %}
       {{ item.asset.price_change_pct_24h|floatformat:2 }}%
       <span style="font-size:10px;color:var(--nova-text-muted);margin-left:4px;">${{ item.asset.price_change_24h|floatformat:4 }}</span>
     </div>
+
+    <!-- Stats -->
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid var(--nova-border-light);">
       <div style="text-align:center;">
         <div style="font-size:10px;color:var(--nova-text-muted);">Vol 24h</div>
@@ -48,13 +53,79 @@
         <div style="font-size:11px;font-weight:600;color:var(--nova-text);">${{ item.asset.market_cap|floatformat:0 }}</div>
       </div>
     </div>
+
+    <!-- Alertas de precio -->
+    <div style="margin-top:12px;padding:10px;background:var(--nova-bg-dark);border-radius:var(--nova-radius-sm);">
+      <div style="font-size:10px;font-weight:700;color:var(--nova-text-muted);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:8px;">
+        <i class="bi bi-bell-fill me-1" style="color:var(--nova-warning);"></i>Alertas de Precio
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+        <div>
+          <div style="font-size:10px;color:var(--nova-success);margin-bottom:3px;">Alerta Alta</div>
+          <input type="number" class="nova-input alert-high-input"
+                 data-symbol="{{ item.asset.symbol }}"
+                 value="{{ item.alert_price_high|default:'' }}"
+                 placeholder="$0.00"
+                 style="padding:5px 8px;font-size:11px;font-family:var(--nova-font-mono);"
+                 onchange="saveAlert('{{ item.asset.symbol }}', this)">
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--nova-danger);margin-bottom:3px;">Alerta Baja</div>
+          <input type="number" class="nova-input alert-low-input"
+                 data-symbol="{{ item.asset.symbol }}"
+                 value="{{ item.alert_price_low|default:'' }}"
+                 placeholder="$0.00"
+                 style="padding:5px 8px;font-size:11px;font-family:var(--nova-font-mono);"
+                 onchange="saveAlert('{{ item.asset.symbol }}', this)">
+        </div>
+      </div>
+      {% if item.alert_price_high or item.alert_price_low %}
+      <div style="font-size:10px;color:var(--nova-success);margin-top:6px;display:flex;align-items:center;gap:4px;">
+        <i class="bi bi-check-circle-fill"></i> Alertas activas
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Calculadora rápida -->
+    <div style="margin-top:10px;padding:10px;background:var(--nova-bg-dark);border-radius:var(--nova-radius-sm);">
+      <div style="font-size:10px;font-weight:700;color:var(--nova-text-muted);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:8px;">
+        <i class="bi bi-calculator-fill me-1" style="color:var(--nova-primary-light);"></i>Calculadora
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px;">
+        <div>
+          <div style="font-size:10px;color:var(--nova-text-muted);margin-bottom:3px;">Cantidad</div>
+          <input type="number" class="nova-input calc-qty"
+                 data-symbol="{{ item.asset.symbol }}"
+                 data-price="{{ item.asset.current_price }}"
+                 placeholder="0.00"
+                 style="padding:5px 8px;font-size:11px;"
+                 oninput="calcProfit(this)">
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--nova-text-muted);margin-bottom:3px;">Precio objetivo</div>
+          <input type="number" class="nova-input calc-target"
+                 data-symbol="{{ item.asset.symbol }}"
+                 placeholder="${{ item.asset.current_price|floatformat:2 }}"
+                 style="padding:5px 8px;font-size:11px;"
+                 oninput="calcProfit(this)">
+        </div>
+      </div>
+      <div class="calc-result-{{ item.asset.symbol }}" style="font-size:11px;color:var(--nova-text-muted);text-align:center;min-height:16px;"></div>
+    </div>
+
+    <!-- Acciones -->
     <div style="display:flex;gap:8px;margin-top:12px;">
-      <a href="{% url 'markets:asset_detail' item.asset.symbol %}" class="btn-nova btn-nova-ghost" style="flex:1;padding:7px;font-size:11px;justify-content:center;"><i class="bi bi-eye"></i> Ver</a>
-      <a href="{% url 'trading:trading' %}?symbol={{ item.asset.symbol }}" class="btn-nova btn-nova-primary" style="flex:1;padding:7px;font-size:11px;justify-content:center;"><i class="bi bi-graph-up-arrow"></i> Operar</a>
+      <a href="{% url 'markets:asset_detail' item.asset.symbol %}" class="btn-nova btn-nova-ghost" style="flex:1;padding:7px;font-size:11px;justify-content:center;">
+        <i class="bi bi-eye"></i> Ver
+      </a>
+      <a href="{% url 'trading:trading' %}?symbol={{ item.asset.symbol }}" class="btn-nova btn-nova-primary" style="flex:1;padding:7px;font-size:11px;justify-content:center;">
+        <i class="bi bi-graph-up-arrow"></i> Operar
+      </a>
     </div>
   </div>
   {% endfor %}
 </div>
+
 {% else %}
 <div class="nova-card" style="text-align:center;padding:80px 40px;">
   <div style="width:80px;height:80px;background:rgba(255,184,0,0.1);border-radius:20px;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;">
@@ -68,6 +139,12 @@
 </div>
 {% endif %}
 
+<!-- Toast -->
+<div id="wlToast" style="display:none;position:fixed;bottom:24px;right:24px;z-index:9999;min-width:280px;"></div>
+
+{% endblock %}
+
+{% block extra_js %}
 <script>
 function removeFromWatchlist(symbol) {
   const formData = new FormData();
@@ -75,7 +152,89 @@ function removeFromWatchlist(symbol) {
   formData.append('csrfmiddlewaretoken', getCSRF());
   fetch('{% url "trading:toggle_watchlist" %}', { method: 'POST', body: formData })
     .then(r => r.json())
-    .then(d => { if (d.status === 'removed') location.reload(); });
+    .then(d => {
+      if (d.status === 'removed') {
+        const card = document.getElementById('wl-' + symbol);
+        if (card) { card.style.opacity = '0'; card.style.transition = 'opacity 0.4s'; setTimeout(() => card.remove(), 400); }
+        showToast('success', symbol + ' eliminado de watchlist');
+      }
+    });
 }
+
+function saveAlert(symbol, input) {
+  const card = input.closest('.market-card');
+  const highInput = card.querySelector('.alert-high-input');
+  const lowInput  = card.querySelector('.alert-low-input');
+
+  const formData = new FormData();
+  formData.append('symbol', symbol);
+  formData.append('alert_high', highInput.value || '');
+  formData.append('alert_low',  lowInput.value  || '');
+  formData.append('csrfmiddlewaretoken', getCSRF());
+
+  fetch('{% url "trading:set_price_alert" %}', { method: 'POST', body: formData })
+    .then(r => r.json())
+    .then(d => {
+      if (d.success) showToast('success', 'Alerta guardada para ' + symbol);
+      else showToast('error', d.error || 'Error al guardar alerta');
+    });
+}
+
+function calcProfit(input) {
+  const card   = input.closest('.market-card');
+  const symbol = input.dataset.symbol || card.querySelector('[data-symbol]').dataset.symbol;
+  const qtyEl  = card.querySelector('.calc-qty');
+  const tgtEl  = card.querySelector('.calc-target');
+  const resEl  = document.querySelector('.calc-result-' + symbol);
+
+  const qty    = parseFloat(qtyEl.value) || 0;
+  const entry  = parseFloat(qtyEl.dataset.price) || 0;
+  const target = parseFloat(tgtEl.value) || 0;
+
+  if (!qty || !entry || !target || !resEl) return;
+
+  const cost    = qty * entry;
+  const value   = qty * target;
+  const pnl     = value - cost;
+  const pnlPct  = cost > 0 ? (pnl / cost * 100) : 0;
+  const color   = pnl >= 0 ? 'var(--nova-success)' : 'var(--nova-danger)';
+  const sign    = pnl >= 0 ? '+' : '';
+
+  resEl.innerHTML = `<span style="color:${color};font-weight:700;">${sign}$${pnl.toFixed(2)} (${sign}${pnlPct.toFixed(2)}%)</span>`;
+}
+
+function showToast(type, msg) {
+  const el = document.getElementById('wlToast');
+  el.className = 'nova-alert ' + (type === 'success' ? 'success' : 'error');
+  el.innerHTML = `<i class="bi bi-${type === 'success' ? 'check-circle-fill' : 'x-circle-fill'}"></i> ${msg}`;
+  el.style.display = 'flex';
+  setTimeout(() => { el.style.display = 'none'; }, 4000);
+}
+
+// Auto-refresh precios cada 30s
+setInterval(() => {
+  fetch('/markets/api/prices/?type=crypto')
+    .then(r => r.json())
+    .then(d => {
+      d.data.forEach(a => {
+        const card = document.getElementById('wl-' + a.symbol);
+        if (!card) return;
+        const priceEl = card.querySelector('.mc-price');
+        if (priceEl) priceEl.textContent = '$' + Number(a.price).toFixed(4);
+        // Actualizar dataset del calculador
+        const qtyEl = card.querySelector('.calc-qty');
+        if (qtyEl) qtyEl.dataset.price = a.price;
+        // Verificar alertas
+        const highInput = card.querySelector('.alert-high-input');
+        const lowInput  = card.querySelector('.alert-low-input');
+        if (highInput && highInput.value && a.price >= parseFloat(highInput.value)) {
+          showToast('success', `🔔 ${a.symbol} alcanzó $${a.price.toFixed(4)} (alerta alta)`);
+        }
+        if (lowInput && lowInput.value && a.price <= parseFloat(lowInput.value)) {
+          showToast('error', `🔔 ${a.symbol} bajó a $${a.price.toFixed(4)} (alerta baja)`);
+        }
+      });
+    }).catch(() => {});
+}, 30000);
 </script>
 {% endblock %}

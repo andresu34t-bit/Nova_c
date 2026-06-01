@@ -167,6 +167,11 @@
           {% if pending_transactions %}<span class="badge">{{ pending_transactions }}</span>{% endif %}
         </div>
 
+        <!-- Theme toggle -->
+        <button class="theme-toggle" onclick="toggleTheme()" id="themeToggle" title="Cambiar tema">
+          <i class="bi bi-moon-fill" id="themeIcon"></i>
+        </button>
+
         <!-- User dropdown -->
         <div class="dropdown">
           <div class="topbar-user dropdown-toggle" data-bs-toggle="dropdown" style="cursor:pointer;">
@@ -243,6 +248,9 @@
 <!-- Mobile overlay -->
 <div id="mobileOverlay" onclick="closeMobileSidebar()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:999;"></div>
 
+<!-- Notification toast container -->
+<div id="wsToastContainer" style="position:fixed;top:80px;right:20px;z-index:9998;display:flex;flex-direction:column;gap:8px;min-width:320px;pointer-events:none;"></div>
+
 <script>
 // ── Sidebar toggle ──
 function toggleSidebar() {
@@ -262,13 +270,132 @@ function closeMobileSidebar() {
   document.getElementById('mobileOverlay').style.display = 'none';
 }
 
+// ── WebSocket Notifications ──
+(function initWebSocket() {
+  const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+  const wsUrl = `${protocol}//${window.location.host}/ws/notifications/`;
+  let ws, reconnectTimer;
+
+  function connect() {
+    try {
+      ws = new WebSocket(wsUrl);
+
+      ws.onopen = () => {
+        console.log('[WS] Conectado a notificaciones');
+        clearTimeout(reconnectTimer);
+        // Ping cada 30s para mantener conexión
+        setInterval(() => { if (ws.readyState === 1) ws.send(JSON.stringify({type:'ping'})); }, 30000);
+      };
+
+      ws.onmessage = (e) => {
+        try {
+          const data = JSON.parse(e.data);
+          handleWsMessage(data);
+        } catch(err) {}
+      };
+
+      ws.onclose = () => {
+        // Reconectar en 5s
+        reconnectTimer = setTimeout(connect, 5000);
+      };
+
+      ws.onerror = () => { ws.close(); };
+    } catch(err) {}
+  }
+
+  function handleWsMessage(data) {
+    switch(data.type) {
+      case 'deposit_approved':
+        showWsToast('success',
+          '<i class="bi bi-check-circle-fill me-2"></i><strong>Depósito Aprobado</strong>',
+          `$${parseFloat(data.amount).toLocaleString('es',{minimumFractionDigits:2})} acreditados a tu cuenta`,
+          8000
+        );
+        // Actualizar balance en topbar
+        updateBalanceDisplay(data.new_balance);
+        break;
+
+      case 'deposit_rejected':
+        showWsToast('error',
+          '<i class="bi bi-x-circle-fill me-2"></i><strong>Depósito Rechazado</strong>',
+          data.reason || 'Tu depósito no pudo ser procesado',
+          8000
+        );
+        break;
+
+      case 'balance_update':
+        updateBalanceDisplay(data.new_balance);
+        showWsToast('info',
+          '<i class="bi bi-wallet2 me-2"></i><strong>Saldo Actualizado</strong>',
+          data.message || 'Tu saldo ha sido actualizado',
+          5000
+        );
+        break;
+
+      case 'notification':
+        const typeMap = { success:'success', error:'error', warning:'warning', info:'info' };
+        showWsToast(typeMap[data.type] || 'info',
+          `<strong>${data.title || 'Notificación'}</strong>`,
+          data.message || '',
+          6000
+        );
+        break;
+    }
+  }
+
+  function updateBalanceDisplay(newBalance) {
+    const bal = parseFloat(newBalance);
+    if (isNaN(bal)) return;
+    const formatted = '$' + bal.toLocaleString('es', {minimumFractionDigits:2, maximumFractionDigits:2});
+    // Actualizar todos los elementos de balance en la página
+    document.querySelectorAll('[data-balance]').forEach(el => el.textContent = formatted);
+    const balChip = document.querySelector('.balance-chip');
+    if (balChip) balChip.innerHTML = `<i class="bi bi-wallet2" style="font-size:12px;"></i> ${formatted}`;
+  }
+
+  connect();
+})();
+
+// ── WS Toast ──
+function showWsToast(type, title, message, duration = 5000) {
+  const container = document.getElementById('wsToastContainer');
+  if (!container) return;
+
+  const colors = {
+    success: { bg: 'rgba(0,200,150,0.1)', border: 'rgba(0,200,150,0.3)', color: 'var(--nova-success)' },
+    error:   { bg: 'rgba(255,59,92,0.1)',  border: 'rgba(255,59,92,0.3)',  color: 'var(--nova-danger)' },
+    warning: { bg: 'rgba(255,184,0,0.1)',  border: 'rgba(255,184,0,0.3)',  color: 'var(--nova-warning)' },
+    info:    { bg: 'rgba(0,102,255,0.1)',  border: 'rgba(0,102,255,0.3)',  color: 'var(--nova-primary-light)' },
+  };
+  const c = colors[type] || colors.info;
+
+  const toast = document.createElement('div');
+  toast.style.cssText = `
+    background:${c.bg};border:1px solid ${c.border};border-radius:10px;
+    padding:14px 16px;pointer-events:auto;cursor:pointer;
+    animation:fadeInUp 0.3s ease;max-width:360px;
+    box-shadow:0 8px 32px rgba(0,0,0,0.4);
+  `;
+  toast.innerHTML = `
+    <div style="font-size:13px;font-weight:600;color:${c.color};margin-bottom:4px;">${title}</div>
+    ${message ? `<div style="font-size:12px;color:var(--nova-text-muted);">${message}</div>` : ''}
+  `;
+  toast.onclick = () => toast.remove();
+  container.appendChild(toast);
+
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transition = 'opacity 0.4s';
+    setTimeout(() => toast.remove(), 400);
+  }, duration);
+}
+
 // ── Price Ticker ──
 function buildTicker(assets) {
   const track = document.getElementById('tickerTrack');
   if (!assets || !assets.length) return;
   let html = '';
   const items = assets.slice(0, 20);
-  // Duplicate for seamless loop
   for (let pass = 0; pass < 2; pass++) {
     items.forEach(a => {
       const up = a.change_pct_24h >= 0;
@@ -282,22 +409,12 @@ function buildTicker(assets) {
     });
   }
   track.innerHTML = html;
-  // Adjust animation duration based on item count
   track.style.animationDuration = (items.length * 3) + 's';
 }
 
-// Fetch prices for ticker
-fetch('/markets/api/prices/?type=crypto')
-  .then(r => r.json())
-  .then(d => buildTicker(d.data))
-  .catch(() => {});
-
-// Auto-refresh ticker every 60s
+fetch('/markets/api/prices/?type=crypto').then(r => r.json()).then(d => buildTicker(d.data)).catch(() => {});
 setInterval(() => {
-  fetch('/markets/api/prices/?type=crypto')
-    .then(r => r.json())
-    .then(d => buildTicker(d.data))
-    .catch(() => {});
+  fetch('/markets/api/prices/?type=crypto').then(r => r.json()).then(d => buildTicker(d.data)).catch(() => {});
 }, 60000);
 
 // ── Global Search ──

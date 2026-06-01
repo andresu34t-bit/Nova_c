@@ -28,6 +28,19 @@
     </div>
   </div>
 
+  <!-- Límite de depósito -->
+  <div style="background:var(--nova-bg-card);border:1px solid var(--nova-border);border-radius:var(--nova-radius-sm);padding:12px 16px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;">
+    <div style="font-size:12px;color:var(--nova-text-muted);">
+      <i class="bi bi-shield-fill me-1" style="color:var(--nova-primary-light);"></i>
+      Límite diario · <strong style="color:#fff;">{{ request.user.get_account_type_display }}</strong>
+    </div>
+    <div style="font-size:13px;font-weight:700;color:var(--nova-primary-light);font-family:var(--nova-font-mono);">
+      {% if request.user.account_type == 'standard' %}$10,000
+      {% elif request.user.account_type == 'premium' %}$100,000
+      {% else %}Sin límite{% endif %}
+    </div>
+  </div>
+
   <!-- Datos bancarios de la empresa -->
   <div class="nova-card" style="margin-bottom:20px;border-color:rgba(0,102,255,0.3);">
     <div class="nova-card-header">

@@ -184,6 +184,13 @@ CACHES = {
     }
 }
 
+# Channel Layers — InMemory para desarrollo, Redis para producción
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer',
+    }
+}
+
 # Logging — usa solo consola en producción (Render no permite escribir archivos)
 import sys
 

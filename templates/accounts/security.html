@@ -105,7 +105,7 @@
       </div>
     </div>
     {% if not user.email_verified %}
-    <button class="btn-nova btn-nova-primary w-100" style="padding:10px;font-size:13px;justify-content:center;">
+    <button onclick="window.location='{% url 'accounts:resend_verification' %}'" class="btn-nova btn-nova-primary w-100" style="padding:10px;font-size:13px;justify-content:center;">
       <i class="bi bi-send-fill"></i> Reenviar Verificación
     </button>
     {% else %}

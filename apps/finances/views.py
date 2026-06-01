@@ -9,6 +9,10 @@ from django.http import JsonResponse
 from django.utils import timezone
 from django.db import transaction as db_transaction
 from .models import Transaction, BankAccount
+from apps.accounts.emails import (
+    send_deposit_approved_email, send_deposit_rejected_email,
+    send_withdrawal_approved_email
+)
 import logging
 
 logger = logging.getLogger('apps')
@@ -69,7 +73,22 @@ def deposit_view(request):
 
             user = request.user
 
-            # Crear transacción en estado PENDING — NO acreditar saldo todavía
+            # Verificar límite diario por tipo de cuenta
+            DEPOSIT_LIMITS = {'standard': 10_000, 'premium': 100_000, 'institutional': 0}
+            daily_limit = DEPOSIT_LIMITS.get(user.account_type, 10_000)
+            if daily_limit > 0:
+                from django.utils import timezone as tz
+                from django.db.models import Sum
+                today_start = tz.now().replace(hour=0, minute=0, second=0, microsecond=0)
+                deposited_today = Transaction.objects.filter(
+                    user=user, transaction_type='deposit',
+                    status__in=['pending', 'completed'],
+                    created_at__gte=today_start
+                ).aggregate(total=Sum('amount'))['total'] or 0
+                if float(deposited_today) + amount > daily_limit:
+                    remaining = max(0, daily_limit - float(deposited_today))
+                    messages.error(request, f'Límite diario de depósito: ${daily_limit:,.0f}. Disponible hoy: ${remaining:,.2f}. Actualiza tu cuenta para límites mayores.')
+                    return redirect('finances:deposit')
             tx = Transaction.objects.create(
                 user=user,
                 transaction_type='deposit',
@@ -228,6 +247,24 @@ def approve_transaction(request, tx_id):
             tx.save()
 
         logger.info(f"Deposit APPROVED: {tx.user.email} ${tx.amount} by {request.user.email}")
+        # Enviar email al usuario
+        send_deposit_approved_email(tx.user, float(tx.amount), tx.id)
+        # Notificación WebSocket en tiempo real
+        try:
+            from channels.layers import get_channel_layer
+            from asgiref.sync import async_to_sync
+            channel_layer = get_channel_layer()
+            async_to_sync(channel_layer.group_send)(
+                f'user_{tx.user.id}',
+                {
+                    'type': 'deposit_approved',
+                    'amount': str(tx.amount),
+                    'new_balance': str(tx.user.balance),
+                    'message': f'Tu depósito de ${float(tx.amount):,.2f} ha sido aprobado.',
+                }
+            )
+        except Exception:
+            pass
         return JsonResponse({
             'success': True,
             'message': f'Depósito de ${float(tx.amount):,.2f} aprobado. Saldo acreditado a {tx.user.email}',
@@ -245,6 +282,8 @@ def approve_transaction(request, tx_id):
             tx.save()
 
         logger.info(f"Withdrawal APPROVED: {tx.user.email} ${tx.amount} by {request.user.email}")
+        # Enviar email al usuario
+        send_withdrawal_approved_email(tx.user, float(tx.amount), tx.id)
         return JsonResponse({
             'success': True,
             'message': f'Retiro de ${float(tx.amount):,.2f} aprobado para {tx.user.email}',
@@ -271,6 +310,24 @@ def reject_transaction(request, tx_id):
         tx.save()
 
         logger.info(f"Deposit REJECTED: {tx.user.email} ${tx.amount} by {request.user.email}")
+        # Enviar email al usuario
+        send_deposit_rejected_email(tx.user, float(tx.amount), reason, tx.id)
+        # Notificación WebSocket
+        try:
+            from channels.layers import get_channel_layer
+            from asgiref.sync import async_to_sync
+            channel_layer = get_channel_layer()
+            async_to_sync(channel_layer.group_send)(
+                f'user_{tx.user.id}',
+                {
+                    'type': 'deposit_rejected',
+                    'amount': str(tx.amount),
+                    'reason': reason,
+                    'message': f'Tu depósito de ${float(tx.amount):,.2f} fue rechazado: {reason}',
+                }
+            )
+        except Exception:
+            pass
         return JsonResponse({
             'success': True,
             'message': f'Depósito de ${float(tx.amount):,.2f} rechazado.',
