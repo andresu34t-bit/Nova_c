@@ -169,7 +169,7 @@ SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
 
 # Two Factor Auth
 LOGIN_URL = 'two_factor:login'
-LOGIN_REDIRECT_URL = 'dashboard:index'
+LOGIN_REDIRECT_URL = '/accounts/redirect/'   # Redirige a admin o dashboard según tipo de cuenta
 LOGOUT_REDIRECT_URL = 'core:home'
 
 # API Keys

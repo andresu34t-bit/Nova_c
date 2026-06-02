@@ -94,16 +94,23 @@
       {% if user.is_staff or user.is_superuser %}
       <!-- ADMINISTRACIÓN -->
       <div class="nav-section-label" style="color:var(--nova-warning);">Administración</div>
+      <a href="{% url 'dashboard:admin_panel' %}" data-label="Panel Admin"
+         class="nav-item {% if request.resolver_match.url_name == 'admin_panel' %}active{% else %}{% endif %}"
+         style="{% if request.resolver_match.url_name != 'admin_panel' %}color:var(--nova-warning);{% endif %}">
+        <span class="nav-icon"><i class="bi bi-shield-lock-fill" style="color:var(--nova-warning);"></i></span>
+        <span>Panel Admin</span>
+        {% if pending_transactions %}<span class="nav-badge" style="background:var(--nova-danger);">{{ pending_transactions }}</span>{% endif %}
+      </a>
       <a href="{% url 'finances:admin_transactions' %}" data-label="Transacciones"
          class="nav-item {% if request.resolver_match.url_name == 'admin_transactions' %}active{% endif %}"
-         style="{% if request.resolver_match.url_name == 'admin_transactions' %}{% else %}color:var(--nova-warning);{% endif %}">
+         style="{% if request.resolver_match.url_name != 'admin_transactions' %}color:var(--nova-warning);{% endif %}">
         <span class="nav-icon"><i class="bi bi-cash-coin" style="color:var(--nova-warning);"></i></span>
         <span>Transacciones</span>
         {% if pending_transactions %}<span class="nav-badge" style="background:var(--nova-warning);">{{ pending_transactions }}</span>{% endif %}
       </a>
-      <a href="/admin/" data-label="Panel Admin" class="nav-item" target="_blank">
+      <a href="/admin/" data-label="Django Admin" class="nav-item" target="_blank">
         <span class="nav-icon"><i class="bi bi-gear-fill" style="color:var(--nova-warning);"></i></span>
-        <span>Panel Admin</span>
+        <span>Django Admin</span>
       </a>
       {% endif %}
     </nav>

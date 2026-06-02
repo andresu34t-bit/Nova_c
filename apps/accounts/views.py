@@ -237,3 +237,16 @@ def resend_verification_view(request):
     send_verification_email(user, verify_url)
     messages.success(request, 'Email de verificación reenviado. Revisa tu bandeja de entrada.')
     return redirect('accounts:security')
+
+
+# ── REDIRECT INTELIGENTE POST-LOGIN ───────────────────────────
+@login_required
+def login_redirect_view(request):
+    """
+    Redirige al usuario al panel correcto según su tipo de cuenta.
+    - Admin / Staff  → Panel de Administración
+    - Usuario normal → Dashboard de usuario
+    """
+    if request.user.is_staff or request.user.is_superuser:
+        return redirect('dashboard:admin_panel')
+    return redirect('dashboard:index')

@@ -1,0 +1,581 @@
+{% extends 'base_app.html' %}
+{% load static humanize %}
+{% block title %}Panel de Administración{% endblock %}
+
+{% block content %}
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <div>
+    <div class="page-title" style="display:flex;align-items:center;gap:10px;">
+      <div style="width:36px;height:36px;background:rgba(255,184,0,0.15);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <i class="bi bi-shield-lock-fill" style="color:var(--nova-warning);font-size:18px;"></i>
+      </div>
+      Panel de Administración
+    </div>
+    <div class="page-subtitle">
+      <span class="pulse-live">EN VIVO</span>
+      &nbsp;·&nbsp; Vista global de la plataforma &nbsp;·&nbsp;
+      <span style="color:var(--nova-warning);font-weight:600;">{{ user.get_full_name }}</span>
+    </div>
+  </div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;">
+    <a href="{% url 'finances:admin_transactions' %}" class="btn-nova btn-nova-outline" style="padding:8px 16px;font-size:12px;border-color:var(--nova-warning);color:var(--nova-warning);">
+      <i class="bi bi-cash-coin"></i> Transacciones
+      {% if pending_count %}<span style="background:var(--nova-danger);color:#fff;border-radius:20px;padding:1px 7px;font-size:10px;font-weight:700;margin-left:4px;">{{ pending_count }}</span>{% endif %}
+    </a>
+    <a href="/admin/" target="_blank" class="btn-nova btn-nova-outline" style="padding:8px 16px;font-size:12px;border-color:var(--nova-warning);color:var(--nova-warning);">
+      <i class="bi bi-gear-fill"></i> Django Admin
+    </a>
+    <a href="{% url 'dashboard:index' %}" class="btn-nova btn-nova-ghost" style="padding:8px 16px;font-size:12px;">
+      <i class="bi bi-grid-1x2-fill"></i> Dashboard Usuario
+    </a>
+  </div>
+</div>
+
+<!-- ALERTA PENDIENTES -->
+{% if pending_count %}
+<div class="nova-alert warning" style="margin-bottom:20px;">
+  <i class="bi bi-exclamation-triangle-fill"></i>
+  <strong>{{ pending_count }} solicitud{{ pending_count|pluralize:"es" }} pendiente{{ pending_count|pluralize:"s" }}</strong> de aprobación —
+  <a href="{% url 'finances:admin_transactions' %}" style="color:var(--nova-warning);font-weight:700;text-decoration:underline;">Revisar ahora</a>
+</div>
+{% endif %}
+
+<!-- STAT CARDS PRINCIPALES -->
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:24px;">
+
+  <div class="stat-card blue nova-card-hover">
+    <div class="stat-icon" style="background:rgba(0,102,255,0.15);">
+      <i class="bi bi-people-fill" style="color:var(--nova-primary-light);font-size:22px;"></i>
+    </div>
+    <div class="stat-label">Total Usuarios</div>
+    <div class="stat-value">{{ total_users }}</div>
+    <div class="stat-change positive"><i class="bi bi-person-plus-fill"></i> +{{ new_today }} hoy · {{ active_users }} activos</div>
+  </div>
+
+  <div class="stat-card green nova-card-hover">
+    <div class="stat-icon" style="background:rgba(0,200,150,0.15);">
+      <i class="bi bi-arrow-down-circle-fill" style="color:var(--nova-success);font-size:22px;"></i>
+    </div>
+    <div class="stat-label">Total Depositado</div>
+    <div class="stat-value">${{ total_deposited|floatformat:0 }}</div>
+    <div class="stat-change positive"><i class="bi bi-calendar-check"></i> ${{ deposits_week|floatformat:0 }} esta semana</div>
+  </div>
+
+  <div class="stat-card gold nova-card-hover">
+    <div class="stat-icon" style="background:rgba(255,184,0,0.15);">
+      <i class="bi bi-graph-up-arrow" style="color:var(--nova-warning);font-size:22px;"></i>
+    </div>
+    <div class="stat-label">Volumen Trading</div>
+    <div class="stat-value">${{ trading_volume_total|floatformat:0 }}</div>
+    <div class="stat-change positive"><i class="bi bi-activity"></i> {{ total_orders }} órdenes totales</div>
+  </div>
+
+  <div class="stat-card purple nova-card-hover">
+    <div class="stat-icon" style="background:rgba(123,97,255,0.15);">
+      <i class="bi bi-wallet2" style="color:#A855F7;font-size:22px;"></i>
+    </div>
+    <div class="stat-label">Saldo en Plataforma</div>
+    <div class="stat-value">${{ platform_balance|floatformat:0 }}</div>
+    <div class="stat-change positive"><i class="bi bi-briefcase-fill"></i> {{ open_positions }} posiciones abiertas</div>
+  </div>
+
+  <div class="stat-card {% if pending_count %}red{% else %}green{% endif %} nova-card-hover">
+    <div class="stat-icon" style="background:rgba({% if pending_count %}255,59,92{% else %}0,200,150{% endif %},0.15);">
+      <i class="bi bi-hourglass-split" style="color:{% if pending_count %}var(--nova-danger){% else %}var(--nova-success){% endif %};font-size:22px;"></i>
+    </div>
+    <div class="stat-label">Pendientes</div>
+    <div class="stat-value" style="color:{% if pending_count %}var(--nova-danger){% else %}var(--nova-success){% endif %};">{{ pending_count }}</div>
+    <div class="stat-change {% if pending_count %}negative{% else %}positive{% endif %}">
+      <i class="bi bi-clock"></i> Requieren acción
+    </div>
+  </div>
+
+  <div class="stat-card blue nova-card-hover">
+    <div class="stat-icon" style="background:rgba(0,102,255,0.15);">
+      <i class="bi bi-bar-chart-fill" style="color:var(--nova-primary-light);font-size:22px;"></i>
+    </div>
+    <div class="stat-label">Activos Activos</div>
+    <div class="stat-value">{{ active_assets }}</div>
+    <div class="stat-change positive"><i class="bi bi-collection-fill"></i> {{ total_assets }} total</div>
+  </div>
+
+</div>
+
+<!-- GRID PRINCIPAL -->
+<div style="display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:20px;" class="dashboard-main-grid">
+
+  <!-- ÚLTIMOS USUARIOS REGISTRADOS -->
+  <div class="nova-card">
+    <div class="nova-card-header">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div class="icon-circle blue"><i class="bi bi-people-fill"></i></div>
+        <span class="nova-card-title">Últimos Usuarios Registrados</span>
+      </div>
+      <a href="/admin/accounts/user/" target="_blank" style="font-size:12px;color:var(--nova-primary-light);">Ver todos →</a>
+    </div>
+    {% if recent_users %}
+    <div style="overflow-x:auto;">
+      <table class="nova-table">
+        <thead>
+          <tr><th>Usuario</th><th>Tipo</th><th>Saldo</th><th>Estado</th><th>Registro</th></tr>
+        </thead>
+        <tbody>
+          {% for u in recent_users %}
+          <tr>
+            <td>
+              <div style="display:flex;align-items:center;gap:10px;">
+                <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--nova-primary),var(--nova-secondary));display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;overflow:hidden;">
+                  {% if u.avatar %}<img src="{{ u.avatar.url }}" style="width:100%;height:100%;object-fit:cover;">
+                  {% else %}{{ u.first_name|first|upper }}{{ u.last_name|first|upper }}{% endif %}
+                </div>
+                <div>
+                  <div style="font-size:13px;font-weight:600;color:#fff;">{{ u.get_full_name|default:u.email|truncatechars:20 }}</div>
+                  <div style="font-size:11px;color:var(--nova-text-muted);">{{ u.email|truncatechars:24 }}</div>
+                </div>
+              </div>
+            </td>
+            <td>
+              <span style="font-size:11px;font-weight:600;padding:3px 8px;border-radius:20px;
+                {% if u.account_type == 'institutional' %}background:rgba(255,184,0,0.15);color:var(--nova-warning);
+                {% elif u.account_type == 'premium' %}background:rgba(0,102,255,0.15);color:var(--nova-primary-light);
+                {% else %}background:rgba(122,139,168,0.15);color:var(--nova-text-muted);{% endif %}">
+                {{ u.get_account_type_display }}
+              </span>
+            </td>
+            <td class="price-mono" style="color:var(--nova-success);">${{ u.balance|floatformat:2 }}</td>
+            <td>
+              {% if u.email_verified %}
+              <span style="font-size:11px;color:var(--nova-success);"><i class="bi bi-check-circle-fill"></i> Verificado</span>
+              {% else %}
+              <span style="font-size:11px;color:var(--nova-warning);"><i class="bi bi-clock-fill"></i> Pendiente</span>
+              {% endif %}
+            </td>
+            <td style="font-size:11px;color:var(--nova-text-muted);">{{ u.created_at|date:"d/m/Y H:i" }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="empty-state" style="padding:40px 24px;">
+      <div class="empty-icon" style="background:rgba(0,102,255,0.1);"><i class="bi bi-people" style="color:var(--nova-primary-light);"></i></div>
+      <h4>Sin usuarios registrados</h4>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- SIDEBAR DERECHO -->
+  <div style="display:flex;flex-direction:column;gap:16px;">
+
+    <!-- Distribución por tipo -->
+    <div class="nova-card">
+      <div class="nova-card-header">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div class="icon-circle gold"><i class="bi bi-pie-chart-fill"></i></div>
+          <span class="nova-card-title">Usuarios por Tipo</span>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        {% with total=total_users|add:"0" %}
+        <div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+            <span style="font-size:12px;color:var(--nova-text-muted);">Estándar</span>
+            <span style="font-size:12px;font-weight:700;color:#fff;">{{ users_by_type.standard }}</span>
+          </div>
+          <div style="height:6px;background:var(--nova-bg-hover);border-radius:3px;overflow:hidden;">
+            <div style="width:{% if total_users %}{% widthratio users_by_type.standard total_users 100 %}%{% else %}0%{% endif %};height:100%;background:var(--nova-text-muted);border-radius:3px;"></div>
+          </div>
+        </div>
+        <div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+            <span style="font-size:12px;color:var(--nova-primary-light);">Premium</span>
+            <span style="font-size:12px;font-weight:700;color:#fff;">{{ users_by_type.premium }}</span>
+          </div>
+          <div style="height:6px;background:var(--nova-bg-hover);border-radius:3px;overflow:hidden;">
+            <div style="width:{% if total_users %}{% widthratio users_by_type.premium total_users 100 %}%{% else %}0%{% endif %};height:100%;background:var(--nova-primary-light);border-radius:3px;"></div>
+          </div>
+        </div>
+        <div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+            <span style="font-size:12px;color:var(--nova-warning);">Institucional</span>
+            <span style="font-size:12px;font-weight:700;color:#fff;">{{ users_by_type.institutional }}</span>
+          </div>
+          <div style="height:6px;background:var(--nova-bg-hover);border-radius:3px;overflow:hidden;">
+            <div style="width:{% if total_users %}{% widthratio users_by_type.institutional total_users 100 %}%{% else %}0%{% endif %};height:100%;background:var(--nova-warning);border-radius:3px;"></div>
+          </div>
+        </div>
+        {% endwith %}
+      </div>
+    </div>
+
+    <!-- Stats de hoy -->
+    <div class="nova-card">
+      <div class="nova-card-header">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div class="icon-circle green"><i class="bi bi-calendar-check-fill"></i></div>
+          <span class="nova-card-title">Actividad de Hoy</span>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div style="display:flex;justify-content:space-between;padding:10px;background:var(--nova-bg-dark);border-radius:var(--nova-radius-sm);">
+          <span style="font-size:12px;color:var(--nova-text-muted);"><i class="bi bi-person-plus-fill me-2" style="color:var(--nova-primary-light);"></i>Nuevos usuarios</span>
+          <span style="font-size:14px;font-weight:700;color:#fff;">{{ new_today }}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:10px;background:var(--nova-bg-dark);border-radius:var(--nova-radius-sm);">
+          <span style="font-size:12px;color:var(--nova-text-muted);"><i class="bi bi-box-arrow-in-right me-2" style="color:var(--nova-success);"></i>Logins</span>
+          <span style="font-size:14px;font-weight:700;color:#fff;">{{ logins_today }}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:10px;background:var(--nova-bg-dark);border-radius:var(--nova-radius-sm);">
+          <span style="font-size:12px;color:var(--nova-text-muted);"><i class="bi bi-arrow-down-circle-fill me-2" style="color:var(--nova-success);"></i>Depósitos</span>
+          <span style="font-size:14px;font-weight:700;color:var(--nova-success);">${{ deposits_today|floatformat:2 }}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:10px;background:var(--nova-bg-dark);border-radius:var(--nova-radius-sm);">
+          <span style="font-size:12px;color:var(--nova-text-muted);"><i class="bi bi-graph-up-arrow me-2" style="color:var(--nova-warning);"></i>Órdenes</span>
+          <span style="font-size:14px;font-weight:700;color:#fff;">{{ orders_today }}</span>
+        </div>
+        {% if failed_logins %}
+        <div style="display:flex;justify-content:space-between;padding:10px;background:rgba(255,59,92,0.08);border:1px solid rgba(255,59,92,0.2);border-radius:var(--nova-radius-sm);">
+          <span style="font-size:12px;color:var(--nova-danger);"><i class="bi bi-exclamation-triangle-fill me-2"></i>Logins fallidos (7d)</span>
+          <span style="font-size:14px;font-weight:700;color:var(--nova-danger);">{{ failed_logins }}</span>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+  </div>
+</div><!-- /grid principal -->
+
+<!-- PENDIENTES DE APROBACIÓN (si hay) -->
+{% if pending_deposits or pending_withdrawals %}
+<div class="nova-card" style="margin-bottom:20px;border-color:rgba(255,59,92,0.35);">
+  <div class="nova-card-header">
+    <div style="display:flex;align-items:center;gap:8px;">
+      <div class="icon-circle red"><i class="bi bi-hourglass-split"></i></div>
+      <span class="nova-card-title" style="color:var(--nova-danger);">Solicitudes Pendientes</span>
+      <span style="background:var(--nova-danger);color:#fff;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700;">{{ pending_count }}</span>
+    </div>
+    <a href="{% url 'finances:admin_transactions' %}" class="btn-nova btn-nova-danger" style="padding:6px 14px;font-size:12px;">
+      <i class="bi bi-check2-circle"></i> Gestionar todo
+    </a>
+  </div>
+  <div style="overflow-x:auto;">
+    <table class="nova-table">
+      <thead>
+        <tr><th>Usuario</th><th>Tipo</th><th>Monto</th><th>Método</th><th>Fecha</th><th>Acción</th></tr>
+      </thead>
+      <tbody>
+        {% for tx in pending_deposits %}
+        <tr id="ptx-{{ tx.id }}">
+          <td>
+            <div style="font-size:13px;font-weight:600;color:#fff;">{{ tx.user.get_full_name|truncatechars:20 }}</div>
+            <div style="font-size:11px;color:var(--nova-text-muted);">{{ tx.user.email }}</div>
+          </td>
+          <td><span class="badge-positive"><i class="bi bi-arrow-down-circle-fill"></i> Depósito</span></td>
+          <td class="price-mono" style="color:var(--nova-success);font-weight:700;">${{ tx.amount|floatformat:2 }}</td>
+          <td style="font-size:12px;color:var(--nova-text-muted);">{{ tx.get_payment_method_display }}</td>
+          <td style="font-size:11px;color:var(--nova-text-muted);">{{ tx.created_at|date:"d/m H:i" }}</td>
+          <td>
+            <div style="display:flex;gap:6px;">
+              <button onclick="quickApprove('{{ tx.id }}')" class="btn-nova btn-nova-success" style="padding:4px 12px;font-size:11px;">
+                <i class="bi bi-check-circle-fill"></i> Aprobar
+              </button>
+              <a href="{% url 'finances:admin_transactions' %}" class="btn-nova btn-nova-ghost" style="padding:4px 10px;font-size:11px;">
+                <i class="bi bi-eye"></i>
+              </a>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+        {% for tx in pending_withdrawals %}
+        <tr id="ptx-{{ tx.id }}">
+          <td>
+            <div style="font-size:13px;font-weight:600;color:#fff;">{{ tx.user.get_full_name|truncatechars:20 }}</div>
+            <div style="font-size:11px;color:var(--nova-text-muted);">{{ tx.user.email }}</div>
+          </td>
+          <td><span class="badge-negative"><i class="bi bi-arrow-up-circle-fill"></i> Retiro</span></td>
+          <td class="price-mono" style="color:var(--nova-warning);font-weight:700;">${{ tx.amount|floatformat:2 }}</td>
+          <td style="font-size:12px;color:var(--nova-text-muted);">{{ tx.get_payment_method_display }}</td>
+          <td style="font-size:11px;color:var(--nova-text-muted);">{{ tx.created_at|date:"d/m H:i" }}</td>
+          <td>
+            <div style="display:flex;gap:6px;">
+              <button onclick="quickApprove('{{ tx.id }}')" class="btn-nova btn-nova-success" style="padding:4px 12px;font-size:11px;">
+                <i class="bi bi-check-circle-fill"></i> Aprobar
+              </button>
+              <a href="{% url 'finances:admin_transactions' %}" class="btn-nova btn-nova-ghost" style="padding:4px 10px;font-size:11px;">
+                <i class="bi bi-eye"></i>
+              </a>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+<!-- GRID: ÓRDENES + ACTIVIDAD -->
+<div style="display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:20px;" class="dashboard-main-grid">
+
+  <!-- ÓRDENES RECIENTES DE TODA LA PLATAFORMA -->
+  <div class="nova-card">
+    <div class="nova-card-header">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div class="icon-circle green"><i class="bi bi-graph-up-arrow"></i></div>
+        <span class="nova-card-title">Órdenes Recientes (Plataforma)</span>
+      </div>
+      <div style="font-size:11px;color:var(--nova-text-muted);">{{ orders_this_week }} esta semana</div>
+    </div>
+    {% if recent_orders %}
+    <div style="overflow-x:auto;">
+      <table class="nova-table">
+        <thead>
+          <tr><th>Usuario</th><th>Activo</th><th>Lado</th><th>Monto</th><th>Fecha</th></tr>
+        </thead>
+        <tbody>
+          {% for order in recent_orders %}
+          <tr>
+            <td style="font-size:12px;color:var(--nova-text-muted);">{{ order.user.email|truncatechars:22 }}</td>
+            <td><span style="font-weight:700;color:#fff;">{{ order.asset.symbol }}</span></td>
+            <td>
+              <span class="badge-{% if order.side == 'buy' %}positive{% else %}negative{% endif %}">
+                {% if order.side == 'buy' %}▲ COMPRA{% else %}▼ VENTA{% endif %}
+              </span>
+            </td>
+            <td class="price-mono" style="font-weight:700;">${{ order.total_value|floatformat:2 }}</td>
+            <td style="font-size:11px;color:var(--nova-text-muted);">{{ order.created_at|date:"d/m H:i" }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="empty-state" style="padding:32px;">
+      <div class="empty-icon" style="background:rgba(0,102,255,0.1);"><i class="bi bi-graph-up-arrow" style="color:var(--nova-primary-light);"></i></div>
+      <h4>Sin órdenes todavía</h4>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- ACTIVIDAD RECIENTE DE SEGURIDAD -->
+  <div class="nova-card">
+    <div class="nova-card-header">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div class="icon-circle red"><i class="bi bi-shield-exclamation"></i></div>
+        <span class="nova-card-title">Actividad de Seguridad</span>
+      </div>
+    </div>
+    {% if recent_activity %}
+    <div style="display:flex;flex-direction:column;gap:6px;max-height:360px;overflow-y:auto;">
+      {% for log in recent_activity %}
+      <div style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--nova-bg-dark);border-radius:var(--nova-radius-sm);
+        {% if log.action == 'login_failed' or log.action == 'suspicious' %}border-left:2px solid var(--nova-danger);{% elif log.action == 'login' %}border-left:2px solid var(--nova-success);{% else %}border-left:2px solid var(--nova-border);{% endif %}">
+        <div style="width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;
+          {% if log.action == 'login_failed' or log.action == 'suspicious' %}background:rgba(255,59,92,0.15);
+          {% elif log.action == 'login' %}background:rgba(0,200,150,0.15);
+          {% elif log.action == 'deposit' %}background:rgba(0,102,255,0.15);
+          {% else %}background:rgba(122,139,168,0.1);{% endif %}">
+          <i class="bi bi-
+            {% if log.action == 'login' %}box-arrow-in-right
+            {% elif log.action == 'logout' %}box-arrow-left
+            {% elif log.action == 'login_failed' %}exclamation-triangle-fill
+            {% elif log.action == 'password_change' %}key-fill
+            {% elif log.action == 'deposit' %}arrow-down-circle-fill
+            {% else %}clock-history{% endif %}"
+            style="font-size:12px;color:
+              {% if log.action == 'login_failed' or log.action == 'suspicious' %}var(--nova-danger)
+              {% elif log.action == 'login' %}var(--nova-success)
+              {% elif log.action == 'deposit' %}var(--nova-primary-light)
+              {% else %}var(--nova-text-muted){% endif %};">
+          </i>
+        </div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:11px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ log.user.email|truncatechars:22 }}</div>
+          <div style="font-size:10px;color:var(--nova-text-muted);">{{ log.get_action_display }}</div>
+        </div>
+        <div style="font-size:10px;color:var(--nova-text-dim);white-space:nowrap;">{{ log.created_at|date:"d/m H:i" }}</div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state" style="padding:32px;">
+      <div class="empty-icon" style="background:rgba(0,102,255,0.1);"><i class="bi bi-shield-check" style="color:var(--nova-primary-light);"></i></div>
+      <p style="font-size:12px;">Sin actividad registrada</p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- ACTIVOS DEL MERCADO -->
+<div class="nova-card" style="margin-bottom:20px;">
+  <div class="nova-card-header">
+    <div style="display:flex;align-items:center;gap:8px;">
+      <div class="icon-circle gold"><i class="bi bi-bar-chart-line-fill"></i></div>
+      <span class="nova-card-title">Activos del Mercado</span>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button onclick="fetchMarketData()" id="fetchBtn" class="btn-nova btn-nova-outline" style="padding:5px 12px;font-size:11px;">
+        <i class="bi bi-arrow-clockwise"></i> Actualizar precios
+      </button>
+      <a href="/admin/trading/asset/" target="_blank" class="btn-nova btn-nova-ghost" style="padding:5px 12px;font-size:11px;">
+        <i class="bi bi-gear"></i> Gestionar
+      </a>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;">
+    {% for asset in top_assets %}
+    <a href="{% url 'trading:trading' %}?symbol={{ asset.symbol }}"
+       style="display:block;padding:14px;background:var(--nova-bg-dark);border-radius:var(--nova-radius-sm);border:1px solid var(--nova-border);text-decoration:none;transition:var(--nova-transition);"
+       onmouseover="this.style.borderColor='var(--nova-primary)'" onmouseout="this.style.borderColor='var(--nova-border)'">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+        {% if asset.image_url %}
+        <img src="{{ asset.image_url }}" style="width:22px;height:22px;border-radius:50%;" onerror="this.style.display='none'">
+        {% else %}
+        <div style="width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,var(--nova-primary),var(--nova-secondary));display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;">{{ asset.symbol|first }}</div>
+        {% endif %}
+        <span style="font-size:13px;font-weight:700;color:#fff;">{{ asset.symbol }}</span>
+        <span style="font-size:10px;color:var(--nova-text-dim);margin-left:auto;">#{{ asset.rank }}</span>
+      </div>
+      <div style="font-size:14px;font-weight:700;color:#fff;font-family:var(--nova-font-mono);">${{ asset.current_price|floatformat:2 }}</div>
+      <div style="font-size:11px;font-weight:600;margin-top:2px;{% if asset.price_change_pct_24h >= 0 %}color:var(--nova-success){% else %}color:var(--nova-danger){% endif %};">
+        {% if asset.price_change_pct_24h >= 0 %}▲{% else %}▼{% endif %} {{ asset.price_change_pct_24h|floatformat:2 }}%
+      </div>
+    </a>
+    {% empty %}
+    <div style="grid-column:1/-1;text-align:center;padding:24px;color:var(--nova-text-muted);font-size:13px;">
+      <i class="bi bi-bar-chart me-2"></i>Sin activos registrados
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- ACCESOS RÁPIDOS ADMIN -->
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:20px;">
+  <a href="{% url 'finances:admin_transactions' %}" style="text-decoration:none;">
+    <div class="nova-card nova-card-hover" style="text-align:center;padding:24px 16px;border-color:rgba(255,59,92,0.2);">
+      <div style="width:52px;height:52px;background:rgba(255,59,92,0.15);border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">
+        <i class="bi bi-cash-coin" style="font-size:24px;color:var(--nova-danger);"></i>
+      </div>
+      <div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:4px;">Transacciones</div>
+      <div style="font-size:11px;color:var(--nova-text-muted);">Aprobar depósitos y retiros</div>
+      {% if pending_count %}<div style="margin-top:8px;background:var(--nova-danger);color:#fff;border-radius:20px;padding:2px 10px;font-size:11px;font-weight:700;display:inline-block;">{{ pending_count }} pendientes</div>{% endif %}
+    </div>
+  </a>
+  <a href="/admin/accounts/user/" target="_blank" style="text-decoration:none;">
+    <div class="nova-card nova-card-hover" style="text-align:center;padding:24px 16px;border-color:rgba(0,102,255,0.2);">
+      <div style="width:52px;height:52px;background:rgba(0,102,255,0.15);border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">
+        <i class="bi bi-people-fill" style="font-size:24px;color:var(--nova-primary-light);"></i>
+      </div>
+      <div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:4px;">Gestionar Usuarios</div>
+      <div style="font-size:11px;color:var(--nova-text-muted);">{{ total_users }} registrados</div>
+    </div>
+  </a>
+  <a href="/admin/trading/asset/" target="_blank" style="text-decoration:none;">
+    <div class="nova-card nova-card-hover" style="text-align:center;padding:24px 16px;border-color:rgba(255,184,0,0.2);">
+      <div style="width:52px;height:52px;background:rgba(255,184,0,0.15);border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">
+        <i class="bi bi-bar-chart-fill" style="font-size:24px;color:var(--nova-warning);"></i>
+      </div>
+      <div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:4px;">Gestionar Activos</div>
+      <div style="font-size:11px;color:var(--nova-text-muted);">{{ active_assets }} activos habilitados</div>
+    </div>
+  </a>
+  <a href="/admin/news/newsarticle/" target="_blank" style="text-decoration:none;">
+    <div class="nova-card nova-card-hover" style="text-align:center;padding:24px 16px;border-color:rgba(0,200,150,0.2);">
+      <div style="width:52px;height:52px;background:rgba(0,200,150,0.15);border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">
+        <i class="bi bi-newspaper" style="font-size:24px;color:var(--nova-success);"></i>
+      </div>
+      <div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:4px;">Gestionar Noticias</div>
+      <div style="font-size:11px;color:var(--nova-text-muted);">Publicar y editar artículos</div>
+    </div>
+  </a>
+  <a href="/admin/markets/economicevent/" target="_blank" style="text-decoration:none;">
+    <div class="nova-card nova-card-hover" style="text-align:center;padding:24px 16px;">
+      <div style="width:52px;height:52px;background:rgba(123,97,255,0.15);border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">
+        <i class="bi bi-calendar-event-fill" style="font-size:24px;color:#A855F7;"></i>
+      </div>
+      <div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:4px;">Calendario Económico</div>
+      <div style="font-size:11px;color:var(--nova-text-muted);">Eventos y publicaciones</div>
+    </div>
+  </a>
+  <a href="/admin/" target="_blank" style="text-decoration:none;">
+    <div class="nova-card nova-card-hover" style="text-align:center;padding:24px 16px;border-color:rgba(255,184,0,0.15);">
+      <div style="width:52px;height:52px;background:rgba(255,184,0,0.15);border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">
+        <i class="bi bi-gear-wide-connected" style="font-size:24px;color:var(--nova-warning);"></i>
+      </div>
+      <div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:4px;">Django Admin</div>
+      <div style="font-size:11px;color:var(--nova-text-muted);">Panel de administración completo</div>
+    </div>
+  </a>
+</div>
+
+<!-- Toast -->
+<div id="adminPanelToast" style="display:none;position:fixed;bottom:24px;right:24px;z-index:9999;min-width:280px;"></div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Aprobar transacción directamente desde el panel admin
+function quickApprove(txId) {
+  if (!confirm('¿Aprobar esta transacción?')) return;
+  fetch(`/finances/admin/transactions/${txId}/approve/`, {
+    method: 'POST',
+    headers: { 'X-CSRFToken': getCSRF() }
+  })
+  .then(r => r.json())
+  .then(d => {
+    if (d.success) {
+      showAdminToast('success', d.message);
+      const row = document.getElementById('ptx-' + txId);
+      if (row) { row.style.opacity='0'; row.style.transition='opacity 0.4s'; setTimeout(() => row.remove(), 400); }
+    } else {
+      showAdminToast('error', d.error || 'Error al aprobar');
+    }
+  })
+  .catch(() => showAdminToast('error', 'Error de conexión'));
+}
+
+// Actualizar precios desde CoinGecko
+function fetchMarketData() {
+  const btn = document.getElementById('fetchBtn');
+  if (btn) { btn.disabled = true; btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Actualizando...'; }
+  fetch('{% url "markets:fetch_data" %}', { headers: { 'X-CSRFToken': getCSRF() } })
+    .then(r => r.json())
+    .then(d => {
+      if (d.status === 'ok') {
+        showAdminToast('success', `Precios actualizados: ${d.updated} activos`);
+        setTimeout(() => location.reload(), 1500);
+      } else {
+        showAdminToast('error', 'Error al actualizar precios');
+      }
+    })
+    .catch(() => showAdminToast('error', 'Error de conexión'))
+    .finally(() => {
+      if (btn) { btn.disabled = false; btn.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Actualizar precios'; }
+    });
+}
+
+function showAdminToast(type, msg) {
+  const el = document.getElementById('adminPanelToast');
+  if (!el) return;
+  el.className = 'nova-alert ' + (type === 'success' ? 'success' : 'error');
+  el.innerHTML = `<i class="bi bi-${type === 'success' ? 'check-circle-fill' : 'x-circle-fill'}"></i> ${msg}`;
+  el.style.display = 'flex';
+  setTimeout(() => { el.style.display = 'none'; }, 6000);
+}
+
+// Auto-refresh del contador de pendientes cada 60s
+setInterval(() => {
+  fetch(window.location.href)
+    .then(r => r.text())
+    .then(html => {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+      const newBadge = doc.querySelector('[data-pending-badge]');
+      const curBadge = document.querySelector('[data-pending-badge]');
+      if (newBadge && curBadge) curBadge.textContent = newBadge.textContent;
+    }).catch(() => {});
+}, 60000);
+</script>
+{% endblock %}

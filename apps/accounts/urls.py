@@ -17,4 +17,6 @@ urlpatterns = [
     path('reset-password/<str:token>/', views.reset_password_view, name='reset_password'),
     # Reenviar verificación
     path('resend-verification/', views.resend_verification_view, name='resend_verification'),
+    # Redirect inteligente post-login
+    path('redirect/', views.login_redirect_view, name='login_redirect'),
 ]
