@@ -327,8 +327,13 @@ const portfolioCtx = document.getElementById('portfolioChart');
 if (portfolioCtx) {
   const labels = {{ snapshot_labels|safe }};
   const values = {{ snapshot_values|safe }};
-  const l = labels.length ? labels : ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
-  const v = values.length ? values : [0,0,0,0,0,0,0];
+  const l = labels.length ? labels : [];
+  const v = values.length ? values : [];
+  // Solo renderizar si hay datos reales
+  if (!l.length || !v.length) {
+    // Sin datos: no renderizar gráfico, mantener el estado vacío del template
+    return;
+  }
   const isPositive = v[v.length-1] >= v[0];
   new Chart(portfolioCtx, {
     type: 'line',
