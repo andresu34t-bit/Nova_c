@@ -151,38 +151,70 @@ def withdrawal_view(request):
     if request.method == 'POST':
         amount_str     = request.POST.get('amount', '0')
         payment_method = request.POST.get('payment_method', 'bank_transfer')
+        reference      = request.POST.get('reference', '').strip()
 
         try:
             amount = float(amount_str)
             user   = request.user
 
-            if amount <= 0:
-                messages.error(request, 'El monto debe ser mayor a 0.')
+            if amount < 1:
+                messages.error(request, 'El monto mínimo de retiro es $1.00 USD.')
                 return redirect('finances:withdrawal')
             if amount > float(user.balance):
                 messages.error(request, f'Saldo insuficiente. Disponible: ${float(user.balance):,.2f}')
                 return redirect('finances:withdrawal')
 
+            # Construir metadata con los datos bancarios / cripto / paypal
+            metadata = {'payment_method': payment_method}
+            if payment_method == 'bank_transfer':
+                metadata['bank_name']       = request.POST.get('bank_name', '').strip()
+                metadata['account_holder']  = request.POST.get('account_holder', '').strip()
+                metadata['account_number']  = request.POST.get('account_number', '').strip()
+            elif payment_method == 'crypto':
+                metadata['crypto_network']  = request.POST.get('crypto_network', '').strip()
+                metadata['wallet_address']  = request.POST.get('wallet_address', '').strip()
+            elif payment_method == 'paypal':
+                metadata['paypal_email']    = request.POST.get('paypal_email', '').strip()
+            elif payment_method == 'debit_card':
+                metadata['card_last4']      = request.POST.get('card_last4', '').strip()
+
+            if reference:
+                metadata['user_reference'] = reference
+
             with db_transaction.atomic():
                 balance_before = float(user.balance)
-                user.balance   = balance_before - amount
+                user.balance   = round(balance_before - amount, 2)
                 user.save(update_fields=['balance'])
+
+                method_label = {
+                    'bank_transfer': 'Transferencia Bancaria',
+                    'crypto':        'Criptomoneda',
+                    'paypal':        'PayPal',
+                    'debit_card':    'Tarjeta de Débito',
+                }.get(payment_method, payment_method)
 
                 Transaction.objects.create(
                     user=user,
                     transaction_type='withdrawal',
                     amount=amount,
+                    currency='USD',
                     status='processing',
                     payment_method=payment_method,
-                    description=f'Retiro via {payment_method}',
+                    description=f'Retiro via {method_label}{" — " + reference if reference else ""}',
                     balance_before=balance_before,
                     balance_after=float(user.balance),
+                    metadata=metadata,
                 )
 
-            messages.success(request, f'Solicitud de retiro de ${amount:,.2f} USD enviada. Procesamiento en 1-3 días hábiles.')
+            logger.info(f"Withdrawal request: user={user.email} amount={amount} method={payment_method}")
+            messages.success(
+                request,
+                f'✓ Solicitud de retiro de ${amount:,.2f} USD enviada correctamente. '
+                f'Procesamiento en 1-3 días hábiles. Tu nuevo saldo es ${float(user.balance):,.2f} USD.'
+            )
 
         except ValueError:
-            messages.error(request, 'Monto inválido.')
+            messages.error(request, 'Monto inválido. Ingresa un número válido.')
 
         return redirect('finances:finances')
 

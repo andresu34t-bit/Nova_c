@@ -1,35 +1,294 @@
 {% extends 'base_app.html' %}
-{% block title %}Retiros{% endblock %}
+{% load static humanize %}
+{% block title %}Retirar Fondos{% endblock %}
 
 {% block content %}
 <div class="page-header">
   <div>
-    <div class="page-title">Retiros</div>
-    <div class="page-subtitle">Gestión de fondos</div>
+    <div class="page-title">Retirar Fondos</div>
+    <div class="page-subtitle">Solicita un retiro de tu cuenta de simulación</div>
   </div>
   <a href="{% url 'finances:finances' %}" class="btn-nova btn-nova-ghost">
     <i class="bi bi-arrow-left"></i> Volver
   </a>
 </div>
 
-<div style="max-width:520px;">
-  <div class="nova-card" style="text-align:center;padding:60px 40px;">
-    <div style="width:80px;height:80px;background:rgba(255,184,0,0.1);border-radius:20px;display:flex;align-items:center;justify-content:center;margin:0 auto 24px;">
-      <i class="bi bi-lock-fill" style="font-size:36px;color:var(--nova-warning);"></i>
+<div style="max-width:540px;">
+
+  <!-- Saldo disponible -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;">
+    <div class="stat-card green nova-card-hover">
+      <div class="stat-icon" style="background:rgba(0,200,150,0.15);">
+        <i class="bi bi-wallet2" style="color:var(--nova-success);"></i>
+      </div>
+      <div class="stat-label">Saldo Disponible</div>
+      <div class="stat-value" style="color:var(--nova-success);" id="currentBalance">
+        ${{ request.user.balance|floatformat:2 }}
+      </div>
+      <div class="stat-change positive"><i class="bi bi-currency-dollar"></i> USD</div>
     </div>
-    <h2 style="font-size:22px;font-weight:700;color:#fff;margin-bottom:12px;">Retiros no disponibles</h2>
-    <p style="font-size:14px;color:var(--nova-text-muted);line-height:1.7;margin-bottom:28px;">
-      Esta es una plataforma de simulación financiera.<br>
-      Los retiros de fondos no están habilitados en este modo.
-    </p>
-    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
-      <a href="{% url 'trading:trading' %}" class="btn-nova btn-nova-primary" style="padding:12px 24px;">
-        <i class="bi bi-graph-up-arrow"></i> Ir a Trading
-      </a>
-      <a href="{% url 'finances:deposit' %}" class="btn-nova btn-nova-success" style="padding:12px 24px;">
-        <i class="bi bi-plus-circle-fill"></i> Depositar
-      </a>
+    <div class="stat-card red nova-card-hover">
+      <div class="stat-icon" style="background:rgba(255,59,92,0.15);">
+        <i class="bi bi-arrow-up-circle-fill" style="color:var(--nova-danger);"></i>
+      </div>
+      <div class="stat-label">Total Retirado</div>
+      <div class="stat-value">${{ request.user.total_withdrawn|floatformat:2 }}</div>
+      <div class="stat-change negative"><i class="bi bi-clock-history"></i> Histórico</div>
     </div>
   </div>
+
+  <!-- Info retiro -->
+  <div class="nova-alert info" style="margin-bottom:20px;">
+    <i class="bi bi-info-circle-fill"></i>
+    <div>
+      <strong>Retiro en simulación:</strong> El saldo se descuenta inmediatamente.
+      La solicitud queda en estado <em>Procesando</em> hasta que el administrador la apruebe (1-3 días hábiles).
+    </div>
+  </div>
+
+  <!-- Formulario de retiro -->
+  <div class="nova-card">
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:24px;padding-bottom:20px;border-bottom:1px solid var(--nova-border);">
+      <div style="width:52px;height:52px;background:rgba(255,59,92,0.15);border-radius:var(--nova-radius);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <i class="bi bi-arrow-up-circle-fill" style="font-size:24px;color:var(--nova-danger);"></i>
+      </div>
+      <div>
+        <div style="font-size:16px;font-weight:700;color:#fff;">Solicitar Retiro</div>
+        <div style="font-size:12px;color:var(--nova-text-muted);">El saldo se deduce al enviar la solicitud</div>
+      </div>
+    </div>
+
+    <form method="post" action="{% url 'finances:withdrawal' %}" id="withdrawalForm">
+      {% csrf_token %}
+
+      <!-- Monto -->
+      <div class="nova-form-group">
+        <label class="nova-label">Monto a Retirar (USD)</label>
+        <div style="position:relative;">
+          <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--nova-text-muted);font-weight:700;font-size:16px;pointer-events:none;">$</span>
+          <input type="number" name="amount" id="amountInput" class="nova-input"
+                 placeholder="0.00" min="1" step="0.01"
+                 max="{{ request.user.balance|floatformat:2 }}"
+                 style="padding-left:32px;font-size:18px;font-family:var(--nova-font-mono);"
+                 oninput="updatePreview()" required>
+        </div>
+        <!-- Saldo restante preview -->
+        <div id="balancePreview" style="font-size:12px;color:var(--nova-text-muted);margin-top:6px;display:none;">
+          <i class="bi bi-arrow-right me-1"></i>
+          Saldo restante: <span id="remainingBalance" style="font-weight:600;font-family:var(--nova-font-mono);"></span>
+        </div>
+        <div id="balanceError" style="font-size:11px;color:var(--nova-danger);margin-top:4px;display:none;">
+          <i class="bi bi-exclamation-triangle-fill me-1"></i>
+          El monto supera tu saldo disponible
+        </div>
+      </div>
+
+      <!-- Montos rápidos -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px;">
+        <button type="button" onclick="setAmount(100)"   class="btn-nova btn-nova-ghost" style="padding:8px;font-size:12px;justify-content:center;">$100</button>
+        <button type="button" onclick="setAmount(500)"   class="btn-nova btn-nova-ghost" style="padding:8px;font-size:12px;justify-content:center;">$500</button>
+        <button type="button" onclick="setAmount(1000)"  class="btn-nova btn-nova-ghost" style="padding:8px;font-size:12px;justify-content:center;">$1,000</button>
+        <button type="button" onclick="setAmountMax()"   class="btn-nova btn-nova-ghost" style="padding:8px;font-size:12px;justify-content:center;color:var(--nova-warning);">Máximo</button>
+      </div>
+
+      <!-- Método de retiro -->
+      <div class="nova-form-group">
+        <label class="nova-label">Método de Retiro</label>
+        <select name="payment_method" class="nova-select" id="methodSelect" onchange="updateMethodDetails()">
+          <option value="bank_transfer">🏦 Transferencia Bancaria</option>
+          <option value="crypto">₿ Criptomoneda</option>
+          <option value="paypal">💳 PayPal</option>
+          <option value="debit_card">💳 Tarjeta de Débito</option>
+        </select>
+      </div>
+
+      <!-- Detalles del método -->
+      <div id="methodDetails" style="margin-bottom:16px;"></div>
+
+      <!-- Nota del usuario -->
+      <div class="nova-form-group">
+        <label class="nova-label">Referencia / Nota <span style="color:var(--nova-text-dim);font-weight:400;">(opcional)</span></label>
+        <input type="text" name="reference" class="nova-input" placeholder="Ej: Cuenta 0012345 Banco XYZ" maxlength="100">
+      </div>
+
+      <!-- Resumen -->
+      <div style="background:var(--nova-bg-dark);border-radius:var(--nova-radius-sm);padding:14px;margin-bottom:16px;font-size:12px;" id="summaryBox" style="display:none;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+          <span style="color:var(--nova-text-muted);">Monto solicitado</span>
+          <span style="color:#fff;font-family:var(--nova-font-mono);font-weight:700;" id="summaryAmount">—</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+          <span style="color:var(--nova-text-muted);">Comisión</span>
+          <span style="color:var(--nova-success);font-family:var(--nova-font-mono);">$0.00 (sin cargo)</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding-top:8px;border-top:1px solid var(--nova-border);">
+          <span style="color:var(--nova-text-muted);">Saldo después del retiro</span>
+          <span style="font-family:var(--nova-font-mono);font-weight:700;" id="summaryBalance">—</span>
+        </div>
+      </div>
+
+      <div class="nova-alert warning" style="margin-bottom:16px;">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+        El saldo se deduce al confirmar. La acreditación depende de la aprobación del administrador.
+      </div>
+
+      <button type="submit" id="submitBtn"
+              class="btn-nova btn-nova-danger w-100"
+              style="padding:13px;font-size:14px;justify-content:center;">
+        <i class="bi bi-arrow-up-circle-fill"></i> Confirmar Retiro
+      </button>
+    </form>
+  </div>
+
+  <!-- Retiros recientes -->
+  {% with withdrawals=request.user.transactions.all %}
+  {% if withdrawals %}
+  <div class="nova-card" style="margin-top:20px;">
+    <div class="nova-card-header">
+      <span class="nova-card-title"><i class="bi bi-clock-history me-2"></i>Retiros Recientes</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      {% for tx in withdrawals %}
+      {% if tx.transaction_type == 'withdrawal' %}
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--nova-bg-dark);border-radius:var(--nova-radius-sm);">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:32px;height:32px;border-radius:8px;background:rgba(255,59,92,0.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <i class="bi bi-arrow-up-circle-fill" style="color:var(--nova-danger);font-size:14px;"></i>
+          </div>
+          <div>
+            <div style="font-size:12px;font-weight:600;color:#fff;">{{ tx.get_payment_method_display }}</div>
+            <div style="font-size:11px;color:var(--nova-text-muted);">{{ tx.created_at|date:"d/m/Y H:i" }}</div>
+          </div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:13px;font-weight:700;color:var(--nova-danger);font-family:var(--nova-font-mono);">-${{ tx.amount|floatformat:2 }}</div>
+          <span class="status-badge {{ tx.status }}" style="font-size:10px;">{{ tx.get_status_display }}</span>
+        </div>
+      </div>
+      {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+  {% endwith %}
+
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const USER_BALANCE = parseFloat('{{ request.user.balance|floatformat:2 }}') || 0;
+
+const METHOD_DETAILS = {
+  bank_transfer: `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;" class="form-two-col">
+      <div class="nova-form-group" style="margin-bottom:0;">
+        <label class="nova-label">Nombre del Banco</label>
+        <input type="text" name="bank_name" class="nova-input" placeholder="Ej: Bancolombia" style="font-size:13px;">
+      </div>
+      <div class="nova-form-group" style="margin-bottom:0;">
+        <label class="nova-label">Titular de la Cuenta</label>
+        <input type="text" name="account_holder" class="nova-input" placeholder="Nombre completo" style="font-size:13px;">
+      </div>
+      <div class="nova-form-group" style="margin-bottom:0;grid-column:span 2;">
+        <label class="nova-label">Número de Cuenta / IBAN</label>
+        <input type="text" name="account_number" class="nova-input" placeholder="Ej: CO12 3456 7890 1234" style="font-size:13px;font-family:var(--nova-font-mono);">
+      </div>
+    </div>`,
+  crypto: `
+    <div class="nova-form-group" style="margin-bottom:0;">
+      <label class="nova-label">Red y Dirección de Wallet</label>
+      <select name="crypto_network" class="nova-select" style="margin-bottom:8px;font-size:13px;">
+        <option value="bitcoin">Bitcoin (BTC)</option>
+        <option value="ethereum">Ethereum (ETH) — ERC-20</option>
+        <option value="tron">USDT — TRC-20</option>
+        <option value="bsc">BNB Smart Chain (BSC)</option>
+        <option value="solana">Solana (SOL)</option>
+      </select>
+      <input type="text" name="wallet_address" class="nova-input" placeholder="Dirección de wallet (0x...)" style="font-size:12px;font-family:var(--nova-font-mono);">
+    </div>`,
+  paypal: `
+    <div class="nova-form-group" style="margin-bottom:0;">
+      <label class="nova-label">Email de PayPal</label>
+      <input type="email" name="paypal_email" class="nova-input" placeholder="tu@paypal.com" style="font-size:13px;">
+    </div>`,
+  debit_card: `
+    <div class="nova-form-group" style="margin-bottom:0;">
+      <label class="nova-label">Últimos 4 dígitos de la tarjeta</label>
+      <input type="text" name="card_last4" class="nova-input" placeholder="1234" maxlength="4" pattern="[0-9]{4}" style="font-size:18px;font-family:var(--nova-font-mono);letter-spacing:6px;text-align:center;">
+    </div>`,
+};
+
+function updateMethodDetails() {
+  const method = document.getElementById('methodSelect').value;
+  document.getElementById('methodDetails').innerHTML = METHOD_DETAILS[method] || '';
+}
+
+function setAmount(val) {
+  document.getElementById('amountInput').value = val.toFixed(2);
+  updatePreview();
+}
+
+function setAmountMax() {
+  document.getElementById('amountInput').value = USER_BALANCE.toFixed(2);
+  updatePreview();
+}
+
+function updatePreview() {
+  const input   = document.getElementById('amountInput');
+  const amount  = parseFloat(input.value) || 0;
+  const preview = document.getElementById('balancePreview');
+  const errEl   = document.getElementById('balanceError');
+  const btn     = document.getElementById('submitBtn');
+  const summary = document.getElementById('summaryBox');
+
+  if (!amount || amount <= 0) {
+    preview.style.display = 'none';
+    errEl.style.display = 'none';
+    summary.style.display = 'none';
+    return;
+  }
+
+  if (amount > USER_BALANCE) {
+    errEl.style.display = 'block';
+    preview.style.display = 'none';
+    summary.style.display = 'none';
+    btn.disabled = true;
+    btn.style.opacity = '0.5';
+    return;
+  }
+
+  errEl.style.display = 'none';
+  btn.disabled = false;
+  btn.style.opacity = '1';
+
+  const remaining = USER_BALANCE - amount;
+  const remEl = document.getElementById('remainingBalance');
+  remEl.textContent = '$' + remaining.toLocaleString('es', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  remEl.style.color = remaining < USER_BALANCE * 0.1 ? 'var(--nova-warning)' : 'var(--nova-success)';
+  preview.style.display = 'block';
+
+  document.getElementById('summaryAmount').textContent = '$' + amount.toLocaleString('es', { minimumFractionDigits: 2 });
+  document.getElementById('summaryBalance').textContent = '$' + remaining.toLocaleString('es', { minimumFractionDigits: 2 });
+  document.getElementById('summaryBalance').style.color = remaining > 0 ? 'var(--nova-success)' : 'var(--nova-danger)';
+  summary.style.display = 'block';
+}
+
+// Confirmación antes de enviar
+document.getElementById('withdrawalForm').addEventListener('submit', function(e) {
+  const amount = parseFloat(document.getElementById('amountInput').value) || 0;
+  if (!amount || amount <= 0) { e.preventDefault(); return; }
+  if (amount > USER_BALANCE) { e.preventDefault(); return; }
+  if (!confirm(`¿Confirmas el retiro de $${amount.toLocaleString('es', { minimumFractionDigits: 2 })} USD?\n\nEl saldo se descontará inmediatamente.`)) {
+    e.preventDefault();
+    return;
+  }
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Procesando...';
+});
+
+// Inicializar detalles del método
+updateMethodDetails();
+</script>
 {% endblock %}
