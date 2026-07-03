@@ -32,8 +32,8 @@ SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 CSRF_COOKIE_HTTPONLY = False  # Necesario para fetch() con CSRF en JS
 
-# Hosts permitidos — incluye todos los subdominios de onrender.com
-_allowed = config('ALLOWED_HOSTS', default='.onrender.com')
+# Hosts permitidos — acepta onrender.com, railway.app y cualquier host configurado
+_allowed = config('ALLOWED_HOSTS', default='.onrender.com,.railway.app,.up.railway.app')
 ALLOWED_HOSTS = [h.strip() for h in _allowed.split(',')]
 # Siempre incluir localhost para health checks
 if 'localhost' not in ALLOWED_HOSTS:
