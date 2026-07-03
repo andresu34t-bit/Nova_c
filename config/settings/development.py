@@ -7,17 +7,9 @@ SESSION_COOKIE_SECURE = False
 CSRF_COOKIE_SECURE = False
 
 _db_password = env_config('DB_PASSWORD', default='')
-_use_sqlite = env_config('USE_SQLITE', default='False', cast=bool)
 
-if _use_sqlite or not _db_password:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db_dev.sqlite3',
-        }
-    }
-    print("[WARNING] Usando SQLite para desarrollo. Para usar PostgreSQL, configura DB_PASSWORD en .env\n")
-else:
+if _db_password:
+    # PostgreSQL — activo cuando DB_PASSWORD está configurado en .env
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
@@ -26,6 +18,14 @@ else:
             'PASSWORD': _db_password,
             'HOST': env_config('DB_HOST', default='localhost'),
             'PORT': env_config('DB_PORT', default='5432'),
+        }
+    }
+else:
+    # SQLite — fallback cuando no hay PostgreSQL configurado
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db_dev.sqlite3',
         }
     }
 
