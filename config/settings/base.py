@@ -3,6 +3,7 @@ Nova Capital Group - Base Settings
 """
 import os
 from pathlib import Path
+from datetime import timedelta
 from decouple import config, Csv
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
@@ -134,7 +135,7 @@ CRISPY_TEMPLATE_PACK = 'bootstrap5'
 
 # Django Axes (Brute Force Protection)
 AXES_FAILURE_LIMIT = 5
-AXES_COOLOFF_TIME = 1  # hours
+AXES_COOLOFF_TIME = timedelta(seconds=5)  # 5 segundos
 AXES_LOCKOUT_TEMPLATE = 'accounts/lockout.html'
 AXES_RESET_ON_SUCCESS = True
 AXES_ENABLE_ADMIN = True

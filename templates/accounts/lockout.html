@@ -1,58 +1,75 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block title %}Cuenta Bloqueada{% endblock %}
+{% block title %}Acceso Bloqueado{% endblock %}
 {% block body %}
 <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--nova-bg-dark);position:relative;overflow:hidden;">
   <div style="position:absolute;inset:0;background:radial-gradient(ellipse at center,rgba(255,184,0,0.06) 0%,transparent 70%);"></div>
 
-  <div style="text-align:center;max-width:480px;padding:40px 24px;position:relative;z-index:1;">
+  <div style="text-align:center;max-width:440px;padding:40px 24px;position:relative;z-index:1;">
+
     <!-- Icon -->
-    <div style="width:96px;height:96px;background:rgba(255,184,0,0.1);border:1px solid rgba(255,184,0,0.25);border-radius:24px;display:flex;align-items:center;justify-content:center;margin:0 auto 28px;animation:glow-pulse 3s infinite;">
-      <i class="bi bi-shield-lock-fill" style="font-size:44px;color:var(--nova-warning);"></i>
+    <div style="width:88px;height:88px;background:rgba(255,184,0,0.1);border:1px solid rgba(255,184,0,0.25);border-radius:22px;display:flex;align-items:center;justify-content:center;margin:0 auto 24px;animation:glow-pulse 2s infinite;">
+      <i class="bi bi-shield-lock-fill" style="font-size:40px;color:var(--nova-warning);"></i>
     </div>
 
-    <div style="font-size:24px;font-weight:700;color:#fff;margin-bottom:12px;">Acceso Temporalmente Bloqueado</div>
-    <div style="font-size:14px;color:var(--nova-text-muted);margin-bottom:28px;line-height:1.7;">
-      Tu cuenta ha sido bloqueada temporalmente debido a múltiples intentos fallidos de inicio de sesión. Por seguridad, espera <strong style="color:#fff;">1 hora</strong> antes de intentarlo nuevamente.
-    </div>
-
-    <div class="nova-alert warning" style="margin-bottom:20px;text-align:left;">
-      <i class="bi bi-exclamation-triangle-fill"></i>
-      Si no fuiste tú, cambia tu contraseña inmediatamente al recuperar el acceso.
-    </div>
-
-    <div class="nova-alert info" style="margin-bottom:28px;text-align:left;">
-      <i class="bi bi-clock-fill"></i>
-      El bloqueo se levantará automáticamente después de 60 minutos.
-    </div>
-
-    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
-      <a href="/" class="btn-nova btn-nova-primary" style="padding:12px 24px;font-size:14px;">
-        <i class="bi bi-house-fill"></i> Ir al Inicio
-      </a>
-      <a href="{% url 'core:contact' %}" class="btn-nova btn-nova-ghost" style="padding:12px 24px;font-size:14px;">
-        <i class="bi bi-chat-dots-fill"></i> Contactar Soporte
-      </a>
+    <div style="font-size:22px;font-weight:700;color:#fff;margin-bottom:10px;">Demasiados intentos fallidos</div>
+    <div style="font-size:13px;color:var(--nova-text-muted);margin-bottom:24px;line-height:1.7;">
+      Por seguridad, el acceso se bloqueó temporalmente.<br>
+      Se desbloqueará automáticamente en unos segundos.
     </div>
 
     <!-- Countdown -->
-    <div style="margin-top:32px;padding:16px;background:var(--nova-bg-card);border:1px solid var(--nova-border);border-radius:var(--nova-radius-sm);">
-      <div style="font-size:11px;color:var(--nova-text-muted);margin-bottom:8px;">Tiempo restante estimado</div>
-      <div id="countdown" style="font-size:28px;font-weight:700;color:var(--nova-warning);font-family:var(--nova-font-mono);">60:00</div>
+    <div style="padding:20px 24px;background:var(--nova-bg-card);border:1px solid rgba(255,184,0,0.2);border-radius:14px;margin-bottom:24px;">
+      <div style="font-size:11px;color:var(--nova-text-muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;">Desbloqueando en</div>
+      <div id="countdown" style="font-size:52px;font-weight:800;color:var(--nova-warning);font-family:var(--nova-font-mono);line-height:1;">5</div>
+      <div style="font-size:12px;color:var(--nova-text-muted);margin-top:6px;">segundos</div>
+
+      <!-- Progress bar -->
+      <div style="margin-top:16px;height:4px;background:var(--nova-bg-dark);border-radius:2px;overflow:hidden;">
+        <div id="progressBar" style="height:100%;background:var(--nova-warning);width:100%;transition:width 1s linear;border-radius:2px;"></div>
+      </div>
     </div>
+
+    <div style="font-size:12px;color:var(--nova-text-muted);margin-bottom:24px;">
+      <i class="bi bi-info-circle me-1"></i>
+      La página se redirigirá automáticamente al login.
+    </div>
+
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+      <a href="/" class="btn-nova btn-nova-ghost" style="padding:10px 20px;font-size:13px;">
+        <i class="bi bi-house-fill"></i> Inicio
+      </a>
+      <a href="{% url 'two_factor:login' %}" id="loginBtn" class="btn-nova btn-nova-primary" style="padding:10px 20px;font-size:13px;opacity:.4;pointer-events:none;">
+        <i class="bi bi-box-arrow-in-right"></i> Intentar de nuevo
+      </a>
+    </div>
+
   </div>
 </div>
 
 <script>
-// Countdown timer (visual only)
-let seconds = 3600;
-const el = document.getElementById('countdown');
+const UNLOCK_SECONDS = 5;
+const countEl    = document.getElementById('countdown');
+const progressEl = document.getElementById('progressBar');
+const loginBtn   = document.getElementById('loginBtn');
+let remaining = UNLOCK_SECONDS;
+
 const timer = setInterval(() => {
-  seconds--;
-  if (seconds <= 0) { clearInterval(timer); el.textContent = '00:00'; return; }
-  const m = Math.floor(seconds / 60).toString().padStart(2, '0');
-  const s = (seconds % 60).toString().padStart(2, '0');
-  el.textContent = m + ':' + s;
+  remaining--;
+  countEl.textContent = remaining;
+  progressEl.style.width = ((remaining / UNLOCK_SECONDS) * 100) + '%';
+
+  if (remaining <= 0) {
+    clearInterval(timer);
+    countEl.textContent = '✓';
+    countEl.style.color = 'var(--nova-success)';
+    progressEl.style.background = 'var(--nova-success)';
+    progressEl.style.width = '0%';
+    // Habilitar botón y redirigir automáticamente
+    loginBtn.style.opacity = '1';
+    loginBtn.style.pointerEvents = 'auto';
+    setTimeout(() => { window.location.href = loginBtn.href; }, 300);
+  }
 }, 1000);
 </script>
 {% endblock %}
